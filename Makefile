@@ -6,7 +6,7 @@ release_folder = ./build/release
 include_folder = ./external/include
 
 lib_folder = ./external/lib
-libs = -lglfw3
+libs = -lglfw3 -lGL
 
 src_folder = ./src
 
@@ -17,9 +17,6 @@ options_compile_global = -I${include_folder}
 options_linker_debug = ${options_linker_global}
 options_linker_release = ${options_linker_global}
 options_linker_global = -L${lib_folder} ${libs}
-
-libraries = -L./external/lib/ -lglfw3
-include = -I
 
 .PHONY: debug
 debug: ${debug_folder}/${executable_name}
