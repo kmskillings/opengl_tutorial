@@ -32,7 +32,7 @@ ${debug_folder}/main.o: ${src_folder}/main.c ${shaders_folder}/vertex.xxd ${shad
 ${shaders_folder}/vertex.xxd: ${shaders_folder}/vertex.glsl
 	xxd -i < $< > $@
 
-${shaders_folder}/fragment.xxd: ${shaders_folder}/vertex.glsl
+${shaders_folder}/fragment.xxd: ${shaders_folder}/fragment.glsl
 	xxd -i < $< > $@
 
 
