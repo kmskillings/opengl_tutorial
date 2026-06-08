@@ -71,6 +71,9 @@ int main(void)
     glEnableVertexAttribArray(posAttrib);
     glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
+    GLuint colorUni = glGetUniformLocation(shaderProgram, "triangleColor");
+    glUniform3f(colorUni, 1.0f, 0.0f, 0.0f);
+
     while(glfwWindowShouldClose(window) == GL_FALSE)
     {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
