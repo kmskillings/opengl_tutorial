@@ -6,3 +6,5 @@ external/*
 
 .vscode/
 .vscode/*
+
+src/shaders/*.xxd
