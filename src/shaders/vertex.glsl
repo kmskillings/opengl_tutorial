@@ -1,12 +1,12 @@
 #version 150 core
 
 in vec2 position;
-in vec3 colorVert;
+in vec2 texCoordVert;
 
-out vec3 colorFrag;
+out vec2 texCoordFrag;
 
 void main()
 {
     gl_Position = vec4(position, 0.0, 1.0);
-    colorFrag = colorVert;
+    texCoordFrag = texCoordVert;
 }

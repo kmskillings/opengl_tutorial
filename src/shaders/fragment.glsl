@@ -1,10 +1,13 @@
 #version 150 core
 
-in vec3 colorFrag;
+uniform sampler2D textureCami;
+
+in vec2 texCoordFrag;
 
 out vec4 outColor;
 
 void main()
 {
-    outColor = vec4(colorFrag, 1.0);
+    vec4 colorCami = texture(textureCami, texCoordFrag);
+    outColor = colorCami;
 }
