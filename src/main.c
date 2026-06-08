@@ -22,6 +22,13 @@ int main(void)
 
     glfwMakeContextCurrent(window);
 
+    glewExperimental = GL_TRUE;
+    glewInit();
+
+    GLuint vertexBuffer;
+    glGenBuffers(1, &vertexBuffer);
+    printf("%u\n", vertexBuffer);
+
     while(glfwWindowShouldClose(window) == GL_FALSE)
     {
         glfwSwapBuffers(window);
