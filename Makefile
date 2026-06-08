@@ -6,7 +6,7 @@ release_folder = ./build/release
 include_folder = ./external/include
 
 lib_folder = ./external/lib
-libs = -lglfw3 -lGL -lm
+libs = -lglfw3 -lGLEW -lGL -lm
 
 src_folder = ./src
 
