@@ -7,6 +7,8 @@
 
 #include <glfw3.h>
 
+#include "textures/textures.h"
+
 int main(void)
 {
     
@@ -88,21 +90,19 @@ int main(void)
     glEnableVertexAttribArray(texCoordAttrib);
     glVertexAttribPointer(texCoordAttrib, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)(2*sizeof(float)));
 
-    const char camiTextureData[] = {
-        #include "textures/cami.xxd"
-    };
-
     GLuint camiTexture;
     glGenTextures(1, &camiTexture);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, camiTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA, 1200, 800, 0, GL_BGRA, GL_UNSIGNED_BYTE, camiTextureData);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA, 1200, 800, 0, GL_BGRA, GL_UNSIGNED_BYTE, camiTextureBytes);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     GLuint camiTextureUniform = glGetUniformLocation(shaderProgram, "textureCami");
     glUniform1i(camiTextureUniform, 0);
+
+    printf("Ready\n");
 
     while(glfwWindowShouldClose(window) == GL_FALSE)
     {

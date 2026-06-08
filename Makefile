@@ -24,10 +24,10 @@ options_lib = -L${lib_folder} ${libs}
 .PHONY: debug
 debug: ${debug_folder}/${executable_name}
 
-${debug_folder}/${executable_name}: ${debug_folder}/main.o
+${debug_folder}/${executable_name}: ${debug_folder}/main.o ${debug_folder}/tex_cami.o
 	gcc ${options_linker_debug} -o $@ $^ ${options_lib}
 
-${debug_folder}/main.o: ${src_folder}/main.c ${shaders_folder}/vertex.xxd ${shaders_folder}/fragment.xxd ${textures_folder}/cami.xxd
+${debug_folder}/main.o: ${src_folder}/main.c ${shaders_folder}/vertex.xxd ${shaders_folder}/fragment.xxd ${textures_folder}/textures.h
 	gcc ${options_compile_debug} -o $@ $<
 
 ${shaders_folder}/vertex.xxd: ${shaders_folder}/vertex.glsl
@@ -35,6 +35,9 @@ ${shaders_folder}/vertex.xxd: ${shaders_folder}/vertex.glsl
 
 ${shaders_folder}/fragment.xxd: ${shaders_folder}/fragment.glsl
 	xxd -i < $< > $@
+
+${debug_folder}/tex_cami.o: ${textures_folder}/tex_cami.c ${textures_folder}/cami.xxd
+	gcc ${options_compile_debug} -o $@ $<
 
 ${textures_folder}/cami.xxd: ${textures_folder}/cami.bmp
 	xxd -s 122 -i < $< > $@
@@ -53,3 +56,4 @@ clean_release:
 	rm -f ${release_folder}/*.o
 	rm -f ${release_folder}/${executable_name}
 	rm -f ${shaders_folder}/*.xxd
+	rm -f ${textures_folder}/*.xxd
