@@ -8,3 +8,5 @@ external/*
 .vscode/*
 
 src/shaders/*.xxd
+
+src/textures/*.xxd
