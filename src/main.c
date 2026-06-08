@@ -30,11 +30,11 @@ int main(void)
     glBindVertexArray(vao);
 
     float vertices[] = {
-        // Clipping Position    RGB
-        -0.5f, -0.5f,           1.0f, 0.0f, 0.0f,   // 0
-        -0.5f,  0.5f,           0.0f, 1.0f, 0.0f,   // 1
-         0.5f, -0.5f,           1.0f, 1.0f, 0.0f,   // 2
-         0.5f,  0.5f,           0.0f, 0.0f, 1.0f    // 3
+        // Clipping Position    Texture Coords
+        -0.5f, -0.5f,           0.0f, 0.0f, 
+        -0.5f,  0.5f,           0.0f, 1.0f,
+         0.5f, -0.5f,           1.0f, 0.0f,
+         0.5f,  0.5f,           1.0f, 1.0f
 
     };
 
@@ -52,7 +52,7 @@ int main(void)
     glGenBuffers(1, &ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
-    
+
     const char vertexShaderText[] = {
         #include "shaders/vertex.xxd"
         , 0x00
@@ -82,11 +82,27 @@ int main(void)
 
     GLuint posAttrib = glGetAttribLocation(shaderProgram, "position");
     glEnableVertexAttribArray(posAttrib);
-    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), 0);
+    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), 0);
 
-    GLuint colorAttrib = glGetAttribLocation(shaderProgram, "colorVert");
-    glEnableVertexAttribArray(colorAttrib);
-    glVertexAttribPointer(colorAttrib, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(2*sizeof(float)));
+    GLuint texCoordAttrib = glGetAttribLocation(shaderProgram, "texCoordVert");
+    glEnableVertexAttribArray(texCoordAttrib);
+    glVertexAttribPointer(texCoordAttrib, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)(2*sizeof(float)));
+
+    const char camiTextureData[] = {
+        #include "textures/cami.xxd"
+    };
+
+    GLuint camiTexture;
+    glGenTextures(1, &camiTexture);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, camiTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA, 1200, 800, 0, GL_BGRA, GL_UNSIGNED_BYTE, camiTextureData);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    GLuint camiTextureUniform = glGetUniformLocation(shaderProgram, "textureCami");
+    glUniform1i(camiTextureUniform, 0);
 
     while(glfwWindowShouldClose(window) == GL_FALSE)
     {
