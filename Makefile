@@ -6,7 +6,7 @@ release_folder = ./build/release
 include_folder = ./external/include
 
 lib_folder = ./external/lib
-libs = -lglfw3 -lGL
+libs = -lglfw3 -lGL -lm
 
 src_folder = ./src
 
@@ -16,13 +16,14 @@ options_compile_global = -I${include_folder}
 
 options_linker_debug = ${options_linker_global}
 options_linker_release = ${options_linker_global}
-options_linker_global = -L${lib_folder} ${libs}
+options_linker_global =
+options_lib = -L${lib_folder} ${libs}
 
 .PHONY: debug
 debug: ${debug_folder}/${executable_name}
 
 ${debug_folder}/${executable_name}: ${debug_folder}/main.o
-	gcc ${options_linker_debug} -o $@ $^
+	gcc ${options_linker_debug} -o $@ $^ ${options_lib}
 
 ${debug_folder}/main.o: ${src_folder}/main.c
 	gcc ${options_compile_debug} -o $@ $<
