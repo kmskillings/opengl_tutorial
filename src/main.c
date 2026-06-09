@@ -20,10 +20,7 @@ void setupGlew(void);
 int main(void)
 {
     GLFWwindow* window = setupGlfw();
-    
-
-    glewExperimental = GL_TRUE;
-    glewInit();
+    setupGlew();
 
     GLuint vao;
     glGenVertexArrays(1, &vao);
@@ -143,4 +140,9 @@ GLFWwindow* setupGlfw(void) {
     glfwMakeContextCurrent(window);
 
     return window;
+}
+
+void setupGlew(void) {
+    glewExperimental = GL_TRUE;
+    glewInit();
 }
