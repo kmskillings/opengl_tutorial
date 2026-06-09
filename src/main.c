@@ -9,20 +9,18 @@
 
 #include "textures/textures.h"
 
+#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 600
+#define WINDOW_TITLE "OpenGL Tutorial"
+
+GLFWwindow* setupGlfw(void);
+
+void setupGlew(void);
+
 int main(void)
 {
+    GLFWwindow* window = setupGlfw();
     
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-
-    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-
-    GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL Tutorial", NULL, NULL);
-
-    glfwMakeContextCurrent(window);
 
     glewExperimental = GL_TRUE;
     glewInit();
@@ -128,4 +126,21 @@ int main(void)
     glfwTerminate();
 
     return EXIT_SUCCESS;
+}
+
+GLFWwindow* setupGlfw(void) {
+
+    glfwInit();
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+
+    GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, NULL, NULL);
+
+    glfwMakeContextCurrent(window);
+
+    return window;
 }
