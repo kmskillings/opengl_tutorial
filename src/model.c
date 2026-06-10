@@ -31,14 +31,14 @@ bool createModelSquareXY(Model* model, float sideLength)
     model->vertices[0].texCoord[0] = 0.0f;
     model->vertices[0].texCoord[1] = 0.0f;
 
-    model->vertices[0].texCoord[0] = 1.0f;
-    model->vertices[0].texCoord[1] = 0.0f;
+    model->vertices[1].texCoord[0] = 1.0f;
+    model->vertices[1].texCoord[1] = 0.0f;
 
-    model->vertices[0].texCoord[0] = 0.0f;
-    model->vertices[0].texCoord[1] = 1.0f;
+    model->vertices[2].texCoord[0] = 0.0f;
+    model->vertices[2].texCoord[1] = 1.0f;
 
-    model->vertices[0].texCoord[0] = 1.0f;
-    model->vertices[0].texCoord[1] = 1.0f;
+    model->vertices[3].texCoord[0] = 1.0f;
+    model->vertices[3].texCoord[1] = 1.0f;
 
     model->verticesCount = 4;
 
