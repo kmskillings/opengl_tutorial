@@ -33,7 +33,7 @@ ${debug_folder}/main.o: ${src_folder}/main.c ${shaders_folder}/vertex.xxd ${shad
 ${debug_folder}/model.o: ${src_folder}/model.c ${src_folder}/model.h
 	gcc ${options_compile_debug} -o $@ $<
 
-${shaders_folder}/shaders.o: ${shaders_folder}/shaders.c ${shaders_folder}/shaders.h
+${debug_folder}/shaders.o: ${shaders_folder}/shaders.c ${shaders_folder}/shaders.h
 	gcc ${options_compile_debug} -o $@ $<
 
 ${shaders_folder}/vertex.xxd: ${shaders_folder}/vertex.glsl
@@ -47,7 +47,6 @@ ${debug_folder}/tex_cami.o: ${textures_folder}/tex_cami.c ${textures_folder}/cam
 
 ${textures_folder}/cami.xxd: ${textures_folder}/cami.bmp
 	xxd -s 122 -i < $< > $@
-
 
 .PHONY: clean
 clean: clean_debug clean_release
