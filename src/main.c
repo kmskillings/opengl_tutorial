@@ -8,6 +8,7 @@
 #include <glfw3.h>
 
 #include "textures/textures.h"
+#include "shaders/shaders.h"
 
 #include "model.h"
 
@@ -17,6 +18,7 @@
 
 GLFWwindow* setupGlfw(void);
 void        setupGlew(void);
+void        checkShaderCompilation(GLuint shader);
 
 int main(void)
 {
@@ -27,51 +29,18 @@ int main(void)
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    float vertices[] = {
-        // Clipping Position    Texture Coords
-        -0.5f, -0.5f,           0.0f, 0.0f, 
-        -0.5f,  0.5f,           0.0f, 1.0f,
-         0.5f, -0.5f,           1.0f, 0.0f,
-         0.5f,  0.5f,           1.0f, 1.0f
-
-    };
-
-    GLuint elements[] = {
-        0, 1, 2,
-        1, 2, 3
-    };
-
     Model modelCami;
     createModelSquareXY(&modelCami, 1.0f);
-
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    GLuint ebo;
-    glGenBuffers(1, &ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
-
-    const char vertexShaderText[] = {
-        #include "shaders/vertex.xxd"
-        , 0x00
-    };
-    const char* vertexShaderTextPtr = vertexShaderText;
-
-    char fragmentShaderText[] = {
-        #include "shaders/fragment.xxd"
-        , 0x00
-    };
-    const char* fragmentShaderTextPtr = fragmentShaderText;
+    GLuint vboCami;
+    GLuint eboCami;
+    setupModelBuffers(&modelCami, &vboCami, &eboCami);
 
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderTextPtr, NULL);
+    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
     glCompileShader(vertexShader);
 
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderTextPtr, NULL);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
     glCompileShader(fragmentShader);
 
     GLuint shaderProgram = glCreateProgram();
@@ -118,12 +87,6 @@ int main(void)
         }
     }
 
-    glDeleteProgram(shaderProgram);
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-    glDeleteBuffers(1, &vbo);
-    glDeleteVertexArrays(1, &vao);
-
     glfwTerminate();
 
     deleteModel(&modelCami);
@@ -151,4 +114,12 @@ GLFWwindow* setupGlfw(void) {
 void setupGlew(void) {
     glewExperimental = GL_TRUE;
     glewInit();
+}
+
+void checkShaderCompilation(GLuint shader) {
+    GLuint status;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+    char message[512];
+    glGetShaderInfoLog(shader, 512, NULL, message);
+    printf("Shader message: %s\n", message);
 }
