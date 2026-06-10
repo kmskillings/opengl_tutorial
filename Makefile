@@ -24,10 +24,13 @@ options_lib = -L${lib_folder} ${libs}
 .PHONY: debug
 debug: ${debug_folder}/${executable_name}
 
-${debug_folder}/${executable_name}: ${debug_folder}/main.o ${debug_folder}/tex_cami.o
+${debug_folder}/${executable_name}: ${debug_folder}/main.o ${debug_folder}/tex_cami.o ${debug_folder}/model.o
 	gcc ${options_linker_debug} -o $@ $^ ${options_lib}
 
 ${debug_folder}/main.o: ${src_folder}/main.c ${shaders_folder}/vertex.xxd ${shaders_folder}/fragment.xxd ${textures_folder}/textures.h
+	gcc ${options_compile_debug} -o $@ $<
+
+${debug_folder}/model.o: ${src_folder}/model.c ${src_folder}/model.h
 	gcc ${options_compile_debug} -o $@ $<
 
 ${shaders_folder}/vertex.xxd: ${shaders_folder}/vertex.glsl
