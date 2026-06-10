@@ -7,64 +7,55 @@
 
 #include "model.h"
 
-bool createModelSquareXY(Model* model, float sideLength)
+void createModelSquareXY(Model* model, float sideLength)
 {
     
+    model->verticesAllocated = false;
+    model->trianglesAllocated = false;
+
     // Try to allocate memory for four vertices.
     model->vertices = malloc(4 * sizeof(Vertex));
-    if (model->vertices == NULL) {
-        return false;
+    if (model->vertices != NULL) {
+        createVertex(&(model->vertices[0]), -sideLength, -sideLength, 0.0f, 0.0f);
+        createVertex(&(model->vertices[1]),  sideLength, -sideLength, 1.0f, 0.0f);
+        createVertex(&(model->vertices[2]), -sideLength,  sideLength, 0.0f, 1.0f);
+        createVertex(&(model->vertices[3]),  sideLength,  sideLength, 1.0f, 1.0f);
+        model->verticesCount = 4;
+        model->verticesAllocated = true;
     }
-
-    model->vertices[0].position[0] = -sideLength;
-    model->vertices[0].position[1] = -sideLength;
-
-    model->vertices[1].position[0] =  sideLength;
-    model->vertices[1].position[1] = -sideLength;
-
-    model->vertices[2].position[0] = -sideLength;
-    model->vertices[2].position[1] =  sideLength;
-
-    model->vertices[3].position[0] =  sideLength;
-    model->vertices[3].position[1] =  sideLength;
-
-    model->vertices[0].texCoord[0] = 0.0f;
-    model->vertices[0].texCoord[1] = 0.0f;
-
-    model->vertices[1].texCoord[0] = 1.0f;
-    model->vertices[1].texCoord[1] = 0.0f;
-
-    model->vertices[2].texCoord[0] = 0.0f;
-    model->vertices[2].texCoord[1] = 1.0f;
-
-    model->vertices[3].texCoord[0] = 1.0f;
-    model->vertices[3].texCoord[1] = 1.0f;
-
-    model->verticesCount = 4;
 
     // Try to allocate memory for two elements.
-    model->elements = malloc(2 * sizeof(Triangle));
-    if (model->elements == NULL) {
-        free (model->elements);
-        return false;
+    model->triangles = malloc(2 * sizeof(Triangle));
+    if (model->triangles != NULL) {
+        createTriangle(&(model->triangles[0]), 0, 1, 2);
+        createTriangle(&(model->triangles[1]), 3, 2, 1);
+        model->trianglesCount = 2;
+        model->trianglesAllocated = true;
     }
-
-    model->elements[0].indices[0] = 0;
-    model->elements[0].indices[1] = 1;
-    model->elements[0].indices[2] = 2;
-
-    model->elements[1].indices[0] = 3;
-    model->elements[1].indices[1] = 2;
-    model->elements[1].indices[2] = 1;
-
-    model->elementsCount = 2;
-
-    return true;
 
 }
 
 void deleteModel(Model* model)
 {
-    free (model->vertices);
-    free (model->vertices);
+    if (model->verticesAllocated) {
+        free (model->vertices);
+    }
+    if (model->trianglesAllocated) {
+        free (model->triangles);
+    }
+}
+
+void createVertex(Vertex* vertex, float positionX, float positionY, float texCoordX, float texCoordY)
+{
+    vertex->position[0] = positionX;
+    vertex->position[1] = positionY;
+    vertex->texCoord[0] = texCoordX;
+    vertex->texCoord[1] = texCoordY;
+}
+
+void createTriangle(Triangle* triangle, GLuint indexA, GLuint indexB, GLuint indexC)
+{
+    triangle->indices[0] = indexA;
+    triangle->indices[1] = indexB;
+    triangle->indices[2] = indexC;
 }

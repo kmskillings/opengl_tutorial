@@ -21,11 +21,17 @@ typedef struct {
 typedef struct {
     Vertex*     vertices;
     GLuint      verticesCount;
-    Triangle*   elements;
-    GLuint      elementsCount;
+    bool        verticesAllocated;
+    Triangle*   triangles;
+    GLuint      trianglesCount;
+    bool        trianglesAllocated;
 } Model;
 
-bool createModelSquareXY(Model* model, float sideLength);
+void createModelSquareXY(Model* model, float sideLength);
 void deleteModel(Model* model);
+
+void createVertex(Vertex* vertex, float positionX, float positionY, float texCoordX, float texCoordY);
+
+void createTriangle(Triangle* triangle, GLuint vertexA, GLuint vertexB, GLuint vertexC);
 
 #endif
