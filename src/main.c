@@ -9,6 +9,8 @@
 
 #include "textures/textures.h"
 
+#include "model.h"
+
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 #define WINDOW_TITLE "OpenGL Tutorial"
@@ -38,6 +40,9 @@ int main(void)
         0, 1, 2,
         1, 2, 3
     };
+
+    Model modelCami;
+    createModelSquareXY(&modelCami, 1.0f);
 
     GLuint vbo;
     glGenBuffers(1, &vbo);
@@ -120,6 +125,8 @@ int main(void)
     glDeleteVertexArrays(1, &vao);
 
     glfwTerminate();
+
+    deleteModel(&modelCami);
 
     return EXIT_SUCCESS;
 }
