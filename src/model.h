@@ -28,6 +28,7 @@ typedef struct {
 } Model;
 
 void createModelSquareXY(Model* model, float sideLength);
+void setupModelBuffers(Model* model, GLuint* vbo, GLuint* ebo);
 void deleteModel(Model* model);
 
 void createVertex(Vertex* vertex, float positionX, float positionY, float texCoordX, float texCoordY);
