@@ -16,10 +16,11 @@ void createModelSquareXY(Model* model, float sideLength)
     // Try to allocate memory for four vertices.
     model->vertices = malloc(4 * sizeof(Vertex));
     if (model->vertices != NULL) {
-        createVertex(&(model->vertices[0]), -sideLength, -sideLength, 0.0f, 0.0f);
-        createVertex(&(model->vertices[1]),  sideLength, -sideLength, 1.0f, 0.0f);
-        createVertex(&(model->vertices[2]), -sideLength,  sideLength, 0.0f, 1.0f);
-        createVertex(&(model->vertices[3]),  sideLength,  sideLength, 1.0f, 1.0f);
+        float s = sideLength / 2.0f;
+        createVertex(&(model->vertices[0]), -s, -s, 0.0f, 0.0f);
+        createVertex(&(model->vertices[1]),  s, -s, 1.0f, 0.0f);
+        createVertex(&(model->vertices[2]), -s,  s, 0.0f, 1.0f);
+        createVertex(&(model->vertices[3]),  s,  s, 1.0f, 1.0f);
         model->verticesCount = 4;
         model->verticesAllocated = true;
     }

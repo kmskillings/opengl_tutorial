@@ -30,7 +30,7 @@ int main(void)
     glBindVertexArray(vao);
 
     Model modelCami;
-    createModelSquareXY(&modelCami, 1.0f);
+    createModelSquareXY(&modelCami, 2.0f);
     GLuint vboCami;
     GLuint eboCami;
     setupModelBuffers(&modelCami, &vboCami, &eboCami);
