@@ -39,11 +39,11 @@ void setupModelBuffers(Model* model, GLuint* vbo, GLuint* ebo)
 {
     glGenBuffers(1, vbo);
     glBindBuffer(GL_ARRAY_BUFFER, *vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(model->vertices), model->vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, model->verticesCount * sizeof(Vertex), model->vertices, GL_STATIC_DRAW);
 
     glGenBuffers(1, ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(model->triangles), model->triangles, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, model->trianglesCount * sizeof(Triangle), model->triangles, GL_STATIC_DRAW);
 }
 
 void deleteModel(Model* model)
