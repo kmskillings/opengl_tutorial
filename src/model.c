@@ -5,69 +5,77 @@
 #define GLEW_STATIC
 #include <glew.h>
 
+#include <glfw3.h>
+
 #include "model.h"
 
-void createModelSquareXY(Model* model, float sideLength)
+Model* createModelSquareXY(
+    float sideLength,
+    Texture* texture
+)
 {
-    
-    model->verticesAllocated = false;
-    model->trianglesAllocated = false;
-
-    // Try to allocate memory for four vertices.
-    model->vertices = malloc(4 * sizeof(Vertex));
-    if (model->vertices != NULL) {
-        float s = sideLength / 2.0f;
-        createVertex(&(model->vertices[0]), -s, -s, 0.0f, 0.0f);
-        createVertex(&(model->vertices[1]),  s, -s, 1.0f, 0.0f);
-        createVertex(&(model->vertices[2]), -s,  s, 0.0f, 1.0f);
-        createVertex(&(model->vertices[3]),  s,  s, 1.0f, 1.0f);
-        model->verticesCount = 4;
-        model->verticesAllocated = true;
+    Model* model = malloc(sizeof(Model));
+    if (model == NULL)
+    {
+        goto fail_model;
     }
 
-    // Try to allocate memory for two elements.
-    model->triangles = malloc(2 * sizeof(Triangle));
-    if (model->triangles != NULL) {
-        createTriangle(&(model->triangles[0]), 0, 1, 2);
-        createTriangle(&(model->triangles[1]), 3, 2, 1);
-        model->trianglesCount = 2;
-        model->trianglesAllocated = true;
+    model->vertexAttributes = malloc(6 * 4 * sizeof(float));
+    if (model->vertexAttributes == NULL)
+    {
+        goto fail_vertexAttributes;
     }
+    model->vertexAttributesLength = 4;
+    float s = sideLength / 2.0f;
+    ((float*)model->vertexAttributes)[0]  = -s   ;  // Lower-left corner
+    ((float*)model->vertexAttributes)[1]  = -s   ;
+    ((float*)model->vertexAttributes)[2]  =  0.0f;
+    ((float*)model->vertexAttributes)[3]  =  1.0f;
+    ((float*)model->vertexAttributes)[4]  =  0.0f;
+    ((float*)model->vertexAttributes)[5]  =  0.0f;
+    ((float*)model->vertexAttributes)[6]  =  s   ;  // Lower-right corner
+    ((float*)model->vertexAttributes)[7]  = -s   ;
+    ((float*)model->vertexAttributes)[8]  =  0.0f;
+    ((float*)model->vertexAttributes)[9]  =  1.0f;
+    ((float*)model->vertexAttributes)[10] =  1.0f;
+    ((float*)model->vertexAttributes)[11] =  0.0f;
+    ((float*)model->vertexAttributes)[12] = -s   ;  // Upper-left corner
+    ((float*)model->vertexAttributes)[13] =  s   ;
+    ((float*)model->vertexAttributes)[14] =  0.0f;
+    ((float*)model->vertexAttributes)[15] =  1.0f;
+    ((float*)model->vertexAttributes)[16] =  0.0f;
+    ((float*)model->vertexAttributes)[17] =  1.0f;
+    ((float*)model->vertexAttributes)[18] =  s   ;  // Upper-right corner
+    ((float*)model->vertexAttributes)[19] =  s   ;
+    ((float*)model->vertexAttributes)[20] =  0.0f;
+    ((float*)model->vertexAttributes)[21] =  1.0f;
+    ((float*)model->vertexAttributes)[22] =  1.0f;
+    ((float*)model->vertexAttributes)[23] =  1.0f;
 
-}
-
-void setupModelBuffers(Model* model, GLuint* vbo, GLuint* ebo)
-{
-    glGenBuffers(1, vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, *vbo);
-    glBufferData(GL_ARRAY_BUFFER, model->verticesCount * sizeof(Vertex), model->vertices, GL_STATIC_DRAW);
-
-    glGenBuffers(1, ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, model->trianglesCount * sizeof(Triangle), model->triangles, GL_STATIC_DRAW);
-}
-
-void deleteModel(Model* model)
-{
-    if (model->verticesAllocated) {
-        free (model->vertices);
+    model->elements = malloc(6 * sizeof(GLuint));
+    if (model->elements == NULL)
+    {
+        goto fail_elements;
     }
-    if (model->trianglesAllocated) {
-        free (model->triangles);
-    }
+    model->elementsLength = 6;
+    ((GLuint*)model->elements)[0] = 0;  // Lower left triangle
+    ((GLuint*)model->elements)[1] = 1;
+    ((GLuint*)model->elements)[2] = 2;
+    ((GLuint*)model->elements)[3] = 3;  // Upper right triangle
+    ((GLuint*)model->elements)[4] = 2;
+    ((GLuint*)model->elements)[5] = 1;
+
+    // now that all the buffers are populated, create the vao.
+    glGenVertexArrays(1, &(model->vao));
+    glBindVertexArray(model->vao);
+
+    return model;
+
+fail_elements:
+    free(model->vertexAttributes);
+fail_vertexAttributes:
+    free(model);
+fail_model:
+    return NULL;
 }
 
-void createVertex(Vertex* vertex, float positionX, float positionY, float texCoordX, float texCoordY)
-{
-    vertex->position[0] = positionX;
-    vertex->position[1] = positionY;
-    vertex->texCoord[0] = texCoordX;
-    vertex->texCoord[1] = texCoordY;
-}
-
-void createTriangle(Triangle* triangle, GLuint indexA, GLuint indexB, GLuint indexC)
-{
-    triangle->indices[0] = indexA;
-    triangle->indices[1] = indexB;
-    triangle->indices[2] = indexC;
-}

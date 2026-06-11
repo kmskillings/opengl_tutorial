@@ -1,38 +1,25 @@
 #ifndef _MODEL_H
 #define _MODEL_H
 
-#include <stdbool.h>
+#include "textures.h"
 
-#define GLEW_NO_GLU
-#define GLEW_STATIC
-#include <glew.h>
-
-#include <cglm/cglm.h>
+// A Model stores all the information necessary to render a single "thing."
 
 typedef struct {
-    vec2 position;
-    vec2 texCoord;
-} Vertex;
-
-typedef struct {
-    GLuint indices[3];
-} Triangle;
-
-typedef struct {
-    Vertex*     vertices;
-    GLuint      verticesCount;
-    bool        verticesAllocated;
-    Triangle*   triangles;
-    GLuint      trianglesCount;
-    bool        trianglesAllocated;
+    void* vertexAttributes;
+    GLuint vertexAttributesLength;
+    GLuint elements;
+    GLuint elementsLength;
+    GLuint vao;
+    GLuint vbo;
+    GLuint ebo;
 } Model;
 
-void createModelSquareXY(Model* model, float sideLength);
-void setupModelBuffers(Model* model, GLuint* vbo, GLuint* ebo);
-void deleteModel(Model* model);
+Model* createModelSquareXY(
+    float sideLength,   // The length of each side of the square
+    Texture* texture    // The texture to apply to the square
+);
 
-void createVertex(Vertex* vertex, float positionX, float positionY, float texCoordX, float texCoordY);
-
-void createTriangle(Triangle* triangle, GLuint vertexA, GLuint vertexB, GLuint vertexC);
+void drawModel(Model* model);
 
 #endif

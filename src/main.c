@@ -25,71 +25,9 @@ int main(void)
     GLFWwindow* window = setupGlfw();
     setupGlew();
 
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    Model modelCami;
-    createModelSquareXY(&modelCami, 2.0f);
-    GLuint vboCami;
-    GLuint eboCami;
-    setupModelBuffers(&modelCami, &vboCami, &eboCami);
-
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-
-    GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glBindFragDataLocation(shaderProgram, 0, "outColor");
-    glLinkProgram(shaderProgram);
-    glUseProgram(shaderProgram);
-
-    GLuint posAttrib = glGetAttribLocation(shaderProgram, "position");
-    glEnableVertexAttribArray(posAttrib);
-    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), 0);
-
-    GLuint texCoordAttrib = glGetAttribLocation(shaderProgram, "texCoordVert");
-    glEnableVertexAttribArray(texCoordAttrib);
-    glVertexAttribPointer(texCoordAttrib, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)(2*sizeof(float)));
-
-    GLuint camiTexture;
-    glGenTextures(1, &camiTexture);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, camiTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA, CAMI_TEXTURE_WIDTH, CAMI_TEXTURE_HEIGHT, 0, GL_BGRA, GL_UNSIGNED_BYTE, camiTextureBytes);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    GLuint camiTextureUniform = glGetUniformLocation(shaderProgram, "textureCami");
-    glUniform1i(camiTextureUniform, 0);
-
-    printf("Ready\n");
-
-    while(glfwWindowShouldClose(window) == GL_FALSE)
-    {
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        {
-            glfwSetWindowShouldClose(window, GL_TRUE);
-        }
-    }
+    initializeTextures();
 
     glfwTerminate();
-
-    deleteModel(&modelCami);
 
     return EXIT_SUCCESS;
 }
