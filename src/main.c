@@ -10,8 +10,6 @@
 #include "textures/textures.h"
 #include "shaders/shaders.h"
 
-#include "model.h"
-
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 #define WINDOW_TITLE "OpenGL Tutorial"
@@ -29,11 +27,26 @@ int main(void)
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    Model modelCami;
-    createModelSquareXY(&modelCami, 2.0f);
-    GLuint vboCami;
-    GLuint eboCami;
-    setupModelBuffers(&modelCami, &vboCami, &eboCami);
+    float vertexArray[] = {
+        // XYZW coords                  Texture coords
+        -1.0f, -1.0f,  0.0f,  1.0f,     0.0f,  0.0f,        // Lower-left corner
+         1.0f, -1.0f,  0.0f,  1.0f,     1.0f,  0.0f,        // Lower-right corner
+        -1.0f,  1.0f,  0.0f,  1.0f,     0.0f,  1.0f,        // Upper-left corner
+         1.0f,  1.0f,  0.0f,  1.0f,     1.0f,  1.0f         // Upper-right corner
+    };
+    GLuint vbo;
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexArray), vertexArray, GL_STATIC_DRAW);
+
+    GLuint elementArray[] = {
+        0, 1, 2,                // Lower-left triangle
+        3, 2, 1                 // Upper-right triangle
+    };
+    GLuint ebo;
+    glGenBuffers(1, &ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elementArray), elementArray, GL_STATIC_DRAW);
 
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
@@ -52,11 +65,11 @@ int main(void)
 
     GLuint posAttrib = glGetAttribLocation(shaderProgram, "position");
     glEnableVertexAttribArray(posAttrib);
-    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), 0);
+    glVertexAttribPointer(posAttrib, 4, GL_FLOAT, GL_FALSE, 6*sizeof(float), 0);
 
     GLuint texCoordAttrib = glGetAttribLocation(shaderProgram, "texCoordVert");
     glEnableVertexAttribArray(texCoordAttrib);
-    glVertexAttribPointer(texCoordAttrib, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)(2*sizeof(float)));
+    glVertexAttribPointer(texCoordAttrib, 2, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(4*sizeof(float)));
 
     GLuint camiTexture;
     glGenTextures(1, &camiTexture);
@@ -88,8 +101,6 @@ int main(void)
     }
 
     glfwTerminate();
-
-    deleteModel(&modelCami);
 
     return EXIT_SUCCESS;
 }
