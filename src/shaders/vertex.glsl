@@ -5,8 +5,10 @@ in vec2 texCoordVert;
 
 out vec2 texCoordFrag;
 
+uniform mat4 transform;
+
 void main()
 {
-    gl_Position = position;
+    gl_Position = transform * position;
     texCoordFrag = texCoordVert;
 }

@@ -31,7 +31,7 @@ ${debug_folder}/main.o: ${src_folder}/main.c ${shaders_folder}/vertex.xxd ${shad
 	gcc ${options_compile_debug} -o $@ $<
 
 
-${debug_folder}/shaders.o: ${shaders_folder}/shaders.c ${shaders_folder}/shaders.h
+${debug_folder}/shaders.o: ${shaders_folder}/shaders.c ${shaders_folder}/shaders.h ${shaders_folder}/fragment.xxd ${shaders_folder}/vertex.xxd
 	gcc ${options_compile_debug} -o $@ $<
 
 ${shaders_folder}/vertex.xxd: ${shaders_folder}/vertex.glsl

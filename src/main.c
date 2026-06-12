@@ -1,11 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 
 #define GLEW_NO_GLU
 #define GLEW_STATIC
 #include <glew.h>
-
 #include <glfw3.h>
+#include <cglm/cglm.h>
 
 #include "textures/textures.h"
 #include "shaders/shaders.h"
@@ -13,6 +14,10 @@
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 #define WINDOW_TITLE "OpenGL Tutorial"
+
+#define ROTATIONS_PER_SECOND 0.2f
+
+#define MY_PI_F 3.1415927
 
 GLFWwindow* setupGlfw(void);
 void        setupGlew(void);
@@ -29,10 +34,42 @@ int main(void)
 
     float vertexArray[] = {
         // XYZW coords                  Texture coords
-        -1.0f, -1.0f,  0.0f,  1.0f,     0.0f,  0.0f,        // Lower-left corner
-         1.0f, -1.0f,  0.0f,  1.0f,     1.0f,  0.0f,        // Lower-right corner
-        -1.0f,  1.0f,  0.0f,  1.0f,     0.0f,  1.0f,        // Upper-left corner
-         1.0f,  1.0f,  0.0f,  1.0f,     1.0f,  1.0f         // Upper-right corner
+
+        // +Z facing face
+        -1.0f, -1.0f,  1.0f,  1.0f,     0.0f,  0.0f,        // Lower-left corner (as viewed head-on)
+         1.0f, -1.0f,  1.0f,  1.0f,     1.0f,  0.0f,        // Lower-right corner
+        -1.0f,  1.0f,  1.0f,  1.0f,     0.0f,  1.0f,        // Upper-left corner
+         1.0f,  1.0f,  1.0f,  1.0f,     1.0f,  1.0f,         // Upper-right corner
+
+        // -Z facing face
+         1.0f, -1.0f, -1.0f,  1.0f,     0.0f,  0.0f,        // Lower-left corner (as viewed head-on)
+        -1.0f, -1.0f, -1.0f,  1.0f,     1.0f,  0.0f,        // Lower-right corner
+         1.0f,  1.0f, -1.0f,  1.0f,     0.0f,  1.0f,        // Upper-left corner
+        -1.0f,  1.0f, -1.0f,  1.0f,     1.0f,  1.0f,        // Upper-right corner
+
+        // +X facing face
+         1.0f, -1.0f,  1.0f,  1.0f,     0.0f,  0.0f,        // Lower-left corner (as viewed head-on)
+         1.0f, -1.0f, -1.0f,  1.0f,     1.0f,  0.0f,        // Lower-right corner
+         1.0f,  1.0f,  1.0f,  1.0f,     0.0f,  1.0f,        // Upper-left corner
+         1.0f,  1.0f, -1.0f,  1.0f,     1.0f,  1.0f,        // Upper-right corner
+
+        // -X facing face
+        -1.0f, -1.0f, -1.0f,  1.0f,     0.0f,  0.0f,        // Lower-left corner (as viewed head-on)
+        -1.0f, -1.0f,  1.0f,  1.0f,     1.0f,  0.0f,        // Lower-right corner
+        -1.0f,  1.0f, -1.0f,  1.0f,     0.0f,  1.0f,        // Upper-left corner
+        -1.0f,  1.0f,  1.0f,  1.0f,     1.0f,  1.0f,        // Upper-right corner
+
+        // +Y facing face
+        -1.0f,  1.0f,  1.0f,  1.0f,     0.0f,  0.0f,        // Lower-left corner (as viewed head-on)
+         1.0f,  1.0f,  1.0f,  1.0f,     1.0f,  0.0f,        // Lower-right corner
+        -1.0f,  1.0f, -1.0f,  1.0f,     0.0f,  1.0f,        // Upper-left corner
+         1.0f,  1.0f, -1.0f,  1.0f,     1.0f,  1.0f,        // Upper-right corner
+
+        // +Y facing face
+        -1.0f, -1.0f, -1.0f,  1.0f,     0.0f,  0.0f,        // Lower-left corner (as viewed head-on)
+         1.0f, -1.0f, -1.0f,  1.0f,     1.0f,  0.0f,        // Lower-right corner
+        -1.0f, -1.0f,  1.0f,  1.0f,     0.0f,  1.0f,        // Upper-left corner
+         1.0f, -1.0f,  1.0f,  1.0f,     1.0f,  1.0f,        // Upper-right corner
     };
     GLuint vbo;
     glGenBuffers(1, &vbo);
@@ -41,7 +78,17 @@ int main(void)
 
     GLuint elementArray[] = {
         0, 1, 2,                // Lower-left triangle
-        3, 2, 1                 // Upper-right triangle
+        3, 2, 1,                // Upper-right triangle
+        4, 5, 6,
+        7, 6, 5,
+        8, 9, 10,
+        11, 10, 9,
+        12, 13, 14,
+        15, 14, 13,
+        16, 17, 18,
+        19, 18, 17,
+        20, 21, 22,
+        23, 22, 21
     };
     GLuint ebo;
     glGenBuffers(1, &ebo);
@@ -71,6 +118,25 @@ int main(void)
     glEnableVertexAttribArray(texCoordAttrib);
     glVertexAttribPointer(texCoordAttrib, 2, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(4*sizeof(float)));
 
+    mat4 transformModel;
+
+    mat4 transformView;
+    vec3 positionCamera = {0.0f, 2.0f, 5.0f};
+    vec3 positionLookAt = {0.0f, 0.0f, 0.0f};
+    vec3 directionUp = {0.0f, 1.0f, 0.0f};
+    glm_lookat(positionCamera, positionLookAt, directionUp, transformView);
+
+    mat4 transformProjection;
+    glm_perspective(
+        MY_PI_F / 4.0,
+        (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT,
+        0.1f, 10.0f,
+        transformProjection
+    );
+
+    mat4 transformTotal;
+    GLuint uniformTransform = glGetUniformLocation(shaderProgram, "transform");
+
     GLuint camiTexture;
     glGenTextures(1, &camiTexture);
     glActiveTexture(GL_TEXTURE0);
@@ -83,14 +149,31 @@ int main(void)
     GLuint camiTextureUniform = glGetUniformLocation(shaderProgram, "textureCami");
     glUniform1i(camiTextureUniform, 0);
 
-    printf("Ready\n");
+    struct timespec ts;
+    timespec_get(&ts, TIME_UTC);
+    int64_t timeStart = ts.tv_sec * 1000 + (ts.tv_nsec / 1000000);
+
+    float radiansPerMillisecond = MY_PI_F * ROTATIONS_PER_SECOND / 1000;
+
+    glEnable(GL_DEPTH_TEST);
 
     while(glfwWindowShouldClose(window) == GL_FALSE)
     {
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        timespec_get(&ts, TIME_UTC);
+        int64_t timeNow = ts.tv_sec * 1000 + (ts.tv_nsec / 1000000);
+        int timeSinceStart = timeStart - timeNow;
 
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        float rotationAngle = radiansPerMillisecond * timeSinceStart;
+        vec3 rotationAxis = {0.7f, 0.5f, 0.2f};
+        glm_rotate_make(transformModel, rotationAngle, rotationAxis);
+        glm_mat4_mul(transformProjection, transformView, transformTotal);
+        glm_mat4_mul(transformTotal, transformModel, transformTotal);
+        glUniformMatrix4fv(uniformTransform, 1, GL_FALSE, &transformTotal[0][0]);
+
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
