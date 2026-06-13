@@ -7,6 +7,9 @@ srcs_cpp := ${src_cpp_names:%=${src_dir}/%}
 src_c_names := shaders.c
 srcs_c := ${src_c_names:%=${src_dir}/%}
 
+header_names := material.hpp mesh.hpp
+headers := ${header_names:%=${src_dir}/%}
+
 shader_dir := ./src/shaders
 shader_names := vertex.glsl fragment.glsl
 shaders := ${shader_names:%=${shader_dir}/%}
@@ -32,7 +35,7 @@ ${dir_build}/${program_name}: ${objects}
 	g++ -o ${dir_build}/${program_name} ${objects} ${lib_options}
 
 # Compile .cpp sources
-${filter %.cpp.o,${objects}}: ${dir_build}/%.cpp.o: ${src_dir}/%.cpp
+${filter %.cpp.o,${objects}}: ${dir_build}/%.cpp.o: ${src_dir}/%.cpp ${headers}
 	g++ ${compile_options} -o $@ $<
 
 # Compile .c sources
