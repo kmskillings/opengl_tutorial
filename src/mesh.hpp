@@ -1,23 +1,23 @@
 #ifndef _MESH_HPP
 #define _MESH_HPP
 
+#include <vector>
+
 namespace GlWorld {
 
 class Mesh {
     public:
-        Mesh(void);
+        Mesh(const std::vector<float> &vertexArray);
+        ~Mesh(void);
         void bindVertexPositionScreenSpace(GLuint index);
         void activate(void);
         void deactivate(void);
         void draw(void);
+        static Mesh* Triangle(float width, float height);
     private:
         GLuint vao;
         GLuint vbo;
-        float vertexArray[6] = {
-            -0.5f, -0.5f,
-             0.5f, -0.5f,
-             0.0f,  0.5
-        };
+        std::vector<float> vertexArray;
         GLuint vertexPositionScreenSpaceIndex;
 };
 

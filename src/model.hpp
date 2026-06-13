@@ -12,7 +12,7 @@ public:
     Model(glm::vec4 color){
         // Bind any vertex attributes used by the Material
         this->material = new Material(color);
-        this->mesh = new Mesh();
+        this->mesh = Mesh::Triangle(1.0f, 1.0f);
         this->material->bindVertexAttributes(this->mesh);
     }
     void drawRgb(void) {

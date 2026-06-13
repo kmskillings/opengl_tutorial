@@ -3,13 +3,19 @@
 
 namespace GlWorld {
 
-Mesh::Mesh(void)
+Mesh::Mesh(const std::vector<float> &vertexArray)
 {
+    this->vertexArray = std::vector(vertexArray);
     glGenVertexArrays(1, &this->vao);
     glBindVertexArray(this->vao);
     glGenBuffers(1, &this->vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(this->vertexArray), this->vertexArray, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, this->vertexArray.size() * sizeof(float), this->vertexArray.data(), GL_STATIC_DRAW);
+}
+
+Mesh::~Mesh(void)
+{
+
 }
 
 void Mesh::bindVertexPositionScreenSpace(GLuint index)
@@ -30,7 +36,19 @@ void Mesh::deactivate(void)
 
 void Mesh::draw(void)
 {
-    glDrawArrays(GL_TRIANGLES, 0, sizeof(this->vertexArray) / sizeof(this->vertexArray[0]));
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+}
+
+Mesh* Mesh::Triangle(float width, float height)
+{
+    std::vector<float> vertexArray = {
+        -width/2,   -height/2,
+         width/2,   -height/2,
+         0.0f,       height/2
+    };
+    Mesh* mesh = new Mesh(vertexArray);
+
+    return mesh;
 }
 
 }
