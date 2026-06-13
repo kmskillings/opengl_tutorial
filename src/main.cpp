@@ -4,6 +4,7 @@
 #include <glfw3.h>
 
 #include "material.hpp"
+#include "mesh.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -20,14 +21,16 @@ int main(void)
     glewInit();
 
     GlWorld::Material* material = new GlWorld::Material();
-
-
+    GlWorld::Mesh* mesh = new GlWorld::Mesh();
+    material->bindVertexAttributes(mesh);
 
     // Game loop
     while(glfwWindowShouldClose(window) == GL_FALSE) {
 
         // Draw the scene
-        // scene->draw();
+        material->activate();
+        mesh->activate();
+        mesh->draw();
         glfwSwapBuffers(window);
 
         // Handle input
