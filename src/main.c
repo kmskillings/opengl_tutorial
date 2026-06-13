@@ -34,42 +34,20 @@ int main(void)
 
     float vertexArray[] = {
         // XYZW coords                  Texture coords
-
-        // +Z facing face
-        -1.0f, -1.0f,  1.0f,  1.0f,     0.0f,  0.0f,        // Lower-left corner (as viewed head-on)
-         1.0f, -1.0f,  1.0f,  1.0f,     1.0f,  0.0f,        // Lower-right corner
-        -1.0f,  1.0f,  1.0f,  1.0f,     0.0f,  1.0f,        // Upper-left corner
-         1.0f,  1.0f,  1.0f,  1.0f,     1.0f,  1.0f,         // Upper-right corner
-
-        // -Z facing face
-         1.0f, -1.0f, -1.0f,  1.0f,     0.0f,  0.0f,        // Lower-left corner (as viewed head-on)
-        -1.0f, -1.0f, -1.0f,  1.0f,     1.0f,  0.0f,        // Lower-right corner
-         1.0f,  1.0f, -1.0f,  1.0f,     0.0f,  1.0f,        // Upper-left corner
-        -1.0f,  1.0f, -1.0f,  1.0f,     1.0f,  1.0f,        // Upper-right corner
-
-        // +X facing face
-         1.0f, -1.0f,  1.0f,  1.0f,     0.0f,  0.0f,        // Lower-left corner (as viewed head-on)
-         1.0f, -1.0f, -1.0f,  1.0f,     1.0f,  0.0f,        // Lower-right corner
-         1.0f,  1.0f,  1.0f,  1.0f,     0.0f,  1.0f,        // Upper-left corner
-         1.0f,  1.0f, -1.0f,  1.0f,     1.0f,  1.0f,        // Upper-right corner
-
-        // -X facing face
-        -1.0f, -1.0f, -1.0f,  1.0f,     0.0f,  0.0f,        // Lower-left corner (as viewed head-on)
-        -1.0f, -1.0f,  1.0f,  1.0f,     1.0f,  0.0f,        // Lower-right corner
-        -1.0f,  1.0f, -1.0f,  1.0f,     0.0f,  1.0f,        // Upper-left corner
-        -1.0f,  1.0f,  1.0f,  1.0f,     1.0f,  1.0f,        // Upper-right corner
-
-        // +Y facing face
-        -1.0f,  1.0f,  1.0f,  1.0f,     0.0f,  0.0f,        // Lower-left corner (as viewed head-on)
-         1.0f,  1.0f,  1.0f,  1.0f,     1.0f,  0.0f,        // Lower-right corner
-        -1.0f,  1.0f, -1.0f,  1.0f,     0.0f,  1.0f,        // Upper-left corner
-         1.0f,  1.0f, -1.0f,  1.0f,     1.0f,  1.0f,        // Upper-right corner
-
-        // +Y facing face
-        -1.0f, -1.0f, -1.0f,  1.0f,     0.0f,  0.0f,        // Lower-left corner (as viewed head-on)
-         1.0f, -1.0f, -1.0f,  1.0f,     1.0f,  0.0f,        // Lower-right corner
-        -1.0f, -1.0f,  1.0f,  1.0f,     0.0f,  1.0f,        // Upper-left corner
-         1.0f, -1.0f,  1.0f,  1.0f,     1.0f,  1.0f,        // Upper-right corner
+        -1.0f, -1.0f, -1.0f,  1.0f,      0.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,  1.0f,      1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,  1.0f,     -1.0f,  0.0f,
+        -1.0f, -1.0f,  1.0f,  1.0f,      0.0f,  0.0f,
+         1.0f, -1.0f,  1.0f,  1.0f,      1.0f,  0.0f,
+         1.0f, -1.0f, -1.0f,  1.0f,      2.0f,  0.0f,
+        -1.0f, -1.0f, -1.0f,  1.0f,      3.0f,  0.0f,
+        -1.0f,  1.0f, -1.0f,  1.0f,     -1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,  1.0f,      0.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,  1.0f,      1.0f,  1.0f,
+         1.0f,  1.0f, -1.0f,  1.0f,      2.0f,  1.0f,
+        -1.0f,  1.0f, -1.0f,  1.0f,      3.0f,  1.0f,
+        -1.0f,  1.0f, -1.0f,  1.0f,      0.0f,  2.0f,
+         1.0f,  1.0f, -1.0f,  1.0f,      1.0f,  2.0f
     };
     GLuint vbo;
     glGenBuffers(1, &vbo);
@@ -77,18 +55,18 @@ int main(void)
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexArray), vertexArray, GL_STATIC_DRAW);
 
     GLuint elementArray[] = {
-        0, 1, 2,                // Lower-left triangle
-        3, 2, 1,                // Upper-right triangle
-        4, 5, 6,
-        7, 6, 5,
-        8, 9, 10,
-        11, 10, 9,
-        12, 13, 14,
-        15, 14, 13,
-        16, 17, 18,
-        19, 18, 17,
-        20, 21, 22,
-        23, 22, 21
+        0, 1, 4,
+        4, 3, 0,
+        2, 3, 8,
+        8, 7, 2,
+        3, 4, 9,
+        9, 8, 3,
+        4, 5, 10,
+        10, 9, 4,
+        5, 6, 11,
+        11, 10, 5,
+        8, 9, 13,
+        13, 12, 8
     };
     GLuint ebo;
     glGenBuffers(1, &ebo);
@@ -142,8 +120,8 @@ int main(void)
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, camiTexture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA, CAMI_TEXTURE_WIDTH, CAMI_TEXTURE_HEIGHT, 0, GL_BGRA, GL_UNSIGNED_BYTE, camiTextureBytes);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     GLuint camiTextureUniform = glGetUniformLocation(shaderProgram, "textureCami");
@@ -173,7 +151,7 @@ int main(void)
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, sizeof(elementArray) / sizeof(elementArray[0]), GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
