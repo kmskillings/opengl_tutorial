@@ -1,14 +1,8 @@
 #version 150 core
 
-in vec4 position;
-in vec2 texCoordVert;
-
-out vec2 texCoordFrag;
-
-uniform mat4 transform;
+in vec2 position;
 
 void main()
 {
-    gl_Position = transform * position;
-    texCoordFrag = texCoordVert;
+    gl_Position = vec4(position, 0.0, 1.0);
 }
