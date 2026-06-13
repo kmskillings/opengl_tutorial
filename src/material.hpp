@@ -2,7 +2,7 @@
 #define _MATERIAL_HPP
 
 #include "mesh.hpp"
-#include "shaders/shaders.h"
+#include "shaders.h"
 
 namespace GlWorld {
 
