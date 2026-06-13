@@ -1,6 +1,8 @@
 #ifndef _MATERIAL_HPP
 #define _MATERIAL_HPP
 
+#include "gl_includes.h"
+
 #include "mesh.hpp"
 #include "shaders.h"
 
@@ -8,7 +10,7 @@ namespace GlWorld {
 
 class Material {
 public:
-    Material(void) {
+    Material(glm::vec4 color) {
         GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
         glCompileShader(vertexShader);
@@ -22,9 +24,13 @@ public:
         glAttachShader(shaderProgram, fragmentShader);
         glBindFragDataLocation(this->shaderProgram, 0, "outColor");
         glLinkProgram(this->shaderProgram);
+
+        this->color = color;
+        this->uniformColor = glGetUniformLocation(this->shaderProgram, "color");
     }
     void activate(void) {
         glUseProgram(this->shaderProgram);
+        glUniform4fv(this->uniformColor, 1, glm::value_ptr(this->color));
     }
     void deactivate(void) {
 
@@ -33,8 +39,13 @@ public:
         GLuint indexVertexPositionScreenSpace = glGetAttribLocation(this->shaderProgram, "position");
         mesh->bindVertexPositionScreenSpace(indexVertexPositionScreenSpace);
     }
+    void setColor(glm::vec4 color) {
+        this->color = color;
+    }
 private:
     GLuint shaderProgram;
+    GLuint uniformColor;
+    glm::vec4 color;
 };
 
 }
