@@ -5,19 +5,28 @@
 
 #include "scene.hpp"
 
+#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 600
+#define WINDOW_TITLE "Cami Cube"
+
+GLFWwindow* setupGl(void);
+
 int main(void)
 {
 
     // Setup code
-    GLFWwindow* window;
+    GLFWwindow* window = setupGl();
+    glfwMakeContextCurrent(window);
 
-    Scene* scene;
+    glm::vec4 skyColor = glm::vec4(0.5f, 0.9f, 1.0f, 1.0f);
+    GlWorld::Scene* scene = new GlWorld::Scene(skyColor);
 
     // Game loop
     while(glfwWindowShouldClose(window) == GL_FALSE) {
 
         // Draw the scene
         scene->draw();
+        glfwSwapBuffers(window);
 
         // Handle input
         glfwPollEvents();
@@ -27,5 +36,18 @@ int main(void)
         }
 
     }
+
+}
+
+GLFWwindow* setupGl(void) {
+
+    glewInit();
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+    return glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, NULL, NULL);
 
 }
