@@ -1,42 +1,53 @@
-executable_name = program
-objects = main.o scene.o
+dir_build := ./build
+program_name := program
 
-build_folder = ./build
+src_dir := ./src
+src_cpp_names := main.cpp
+srcs_cpp := ${src_cpp_names:%=${src_dir}/%}
+src_c_names := shaders.c
+srcs_c := ${src_c_names:%=${src_dir}/%}
 
-include_folder = ./external/include
+shader_dir := ./src/shaders
+shader_names := vertex.glsl fragment.glsl
+shaders := ${shader_names:%=${shader_dir}/%}
 
-lib_folder = ./external/lib
-libs = -lglfw3 -lGLEW -lGL -lm
+shader_dumps := ${shaders:%.glsl=%.xxd}
 
-src_folder = ./src
-shaders_folder = ${src_folder}/shaders
-textures_folder = ${src_folder}/textures
+object_names := ${src_cpp_names:%.cpp=%.cpp.o} ${src_c_names:%.c=%.c.o}
+objects := ${object_names:%=${dir_build}/%}
 
-options_compile = -g -c -I${include_folder}
+include_dir := ./external/include
+include_options := -I${include_dir}
 
-options_linker =
-options_lib = -L${lib_folder} ${libs}
+compile_options := -c -g ${include_options}
 
-.PHONY: build
-build: ${build_folder}/${executable_name}
+lib_dir := ./external/lib
+lib_names := glfw3 GLEW GL m
+libs := ${lib_names:%=-l%}
+lib_options := -L${lib_dir} ${libs}
 
-${build_folder}/${executable_name}: ${build_folder}/main.o ${build_folder}/shaders.o
-	g++ ${options_linker} -o $@ $^ ${options_lib}
 
-${build_folder}/main.o: ${src_folder}/main.cpp
-	g++ ${options_compile} -o $@ $< -I${include_folder}
 
-${build_folder}/shaders.o: ${shaders_folder}/shaders.c ${shaders_folder}/vertex.xxd ${shaders_folder}/fragment.xxd
-	gcc ${options_compile} -o $@ $<
+${dir_build}/${program_name}: ${objects}
+	g++ -o ${dir_build}/${program_name} ${objects} ${lib_options}
 
-${shaders_folder}/vertex.xxd: ${shaders_folder}/vertex.glsl
-	xxd -i < $< > $@
+# Compile .cpp sources
+${filter %.cpp.o,${objects}}: ${dir_build}/%.cpp.o: ${src_dir}/%.cpp
+	g++ ${compile_options} -o $@ $<
 
-${shaders_folder}/fragment.xxd: ${shaders_folder}/fragment.glsl
+# Compile .c sources
+${filter %.c.o,${objects}}: ${dir_build}/%.c.o: ${src_dir}/%.c
+	gcc ${compile_options} -o $@ $<
+
+# Compile shaders.c depends on shader dumps
+${dir_build}/shaders.c.o: ${src_dir}/shaders.c ${shader_dumps}
+
+# Create shader dumps
+${shader_dumps}: %.xxd: %.glsl
 	xxd -i < $< > $@
 
 .PHONY: clean
 clean:
-	rm -f ${shaders_folder}/*.xxd
-	rm -f ${build_folder}/*.o
-	rm -f ${build_folder}/${executable_name}
+	rm -f ${dir_build}/*.o
+	rm -f ${dir_build}/${program_name}
+	rm -f ${shader_dir}/*.xxd
