@@ -5,6 +5,7 @@
 
 #include "material.hpp"
 #include "mesh.hpp"
+#include "model.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -20,17 +21,13 @@ int main(void)
     glfwMakeContextCurrent(window);
     glewInit();
 
-    GlWorld::Material* material = new GlWorld::Material();
-    GlWorld::Mesh* mesh = new GlWorld::Mesh();
-    material->bindVertexAttributes(mesh);
+    GlWorld::Model* model = new GlWorld::Model();
 
     // Game loop
     while(glfwWindowShouldClose(window) == GL_FALSE) {
 
         // Draw the scene
-        material->activate();
-        mesh->activate();
-        mesh->draw();
+        model->drawRgb();
         glfwSwapBuffers(window);
 
         // Handle input
