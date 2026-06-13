@@ -9,9 +9,9 @@ namespace GlWorld {
 
 class Model {
 public:
-    Model(){
+    Model(glm::vec4 color){
         // Bind any vertex attributes used by the Material
-        this->material = new Material();
+        this->material = new Material(color);
         this->mesh = new Mesh();
         this->material->bindVertexAttributes(this->mesh);
     }
@@ -21,6 +21,9 @@ public:
         this->mesh->draw();             // Make the appropriate draw calls on the mesh
         this->mesh->deactivate();       // Un-use any shader programs
         this->material->deactivate();   // Unbind any vaos of the mesh.
+    }
+    void setColor(glm::vec4 color) {
+        this->material->setColor(color);
     }
 private:
     Material* material;

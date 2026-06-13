@@ -21,13 +21,21 @@ int main(void)
     glfwMakeContextCurrent(window);
     glewInit();
 
-    GlWorld::Model* model = new GlWorld::Model();
+    glm::vec4 color;
+    color.r = 1.0f;
+    color.g = 0.0f;
+    color.b = 0.0f;
+    color.a = 1.0f;
+
+    GlWorld::Model* model = new GlWorld::Model(color);
+    GLuint error = glGetError();
 
     // Game loop
     while(glfwWindowShouldClose(window) == GL_FALSE) {
 
         // Draw the scene
         model->drawRgb();
+        GLuint error = glGetError();
         glfwSwapBuffers(window);
 
         // Handle input
