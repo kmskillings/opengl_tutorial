@@ -2,7 +2,7 @@ dir_build := ./build
 program_name := program
 
 src_dir := ./src
-src_cpp_names := main.cpp
+src_cpp_names := main.cpp mesh.cpp
 srcs_cpp := ${src_cpp_names:%=${src_dir}/%}
 src_c_names := shaders.c
 srcs_c := ${src_c_names:%=${src_dir}/%}
