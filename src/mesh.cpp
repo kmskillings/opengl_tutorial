@@ -65,4 +65,20 @@ Mesh* Mesh::Triangle(float width, float height)
     return mesh;
 }
 
+Mesh* Mesh::Rectangle(float width, float height)
+{
+    std::vector<float> vertexArray = {
+        -width/2,   -height/2,
+         width/2,   -height/2,
+        -width/2,    height/2,
+         width/2,    height/2
+    };
+    std::vector<GLuint> elementArray = {
+        0, 1, 2,
+        3, 2, 1
+    };
+    Mesh* mesh = new Mesh(vertexArray, elementArray);
+    return mesh;
+}
+
 }
