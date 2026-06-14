@@ -1,6 +1,8 @@
 #ifndef _MODEL_HPP
 #define _MODEL_HPP
 
+#include <memory>
+
 #include "gl_includes.h"
 #include "material.hpp"
 #include "mesh.hpp"
@@ -9,25 +11,12 @@ namespace GlWorld {
 
 class Model {
 public:
-    Model(glm::vec4 color){
-        // Bind any vertex attributes used by the Material
-        this->material = new Material(color);
-        this->mesh = Mesh::Rectangle(1.0f, 1.0f);
-        this->material->bindVertexAttributes(this->mesh);
-    }
-    void drawRgb(void) {
-        this->material->activate();     // Call useShaderProgram on any shader programs connected to the material and send any material-stored uniforms.
-        this->mesh->activate();         // Bind any vaos of the mesh
-        this->mesh->draw();             // Make the appropriate draw calls on the mesh
-        this->mesh->deactivate();       // Un-use any shader programs
-        this->material->deactivate();   // Unbind any vaos of the mesh.
-    }
-    void setColor(glm::vec4 color) {
-        this->material->setColor(color);
-    }
+    virtual void draw(
+        const glm::mat4 &matrixModel,
+        const glm::mat4 &matrixView,
+        const glm::mat4 &matrixProject 
+    ) const = 0;
 private:
-    Material* material;
-    Mesh* mesh;
 };
 
 }
