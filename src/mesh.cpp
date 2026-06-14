@@ -3,14 +3,25 @@
 
 namespace GlWorld {
 
-Mesh::Mesh(const std::vector<float> &vertexArray)
+Mesh::Mesh(
+    const std::vector<float> &vertexArray, 
+    const std::vector<GLuint> &elementArray
+)
 {
     this->vertexArray = std::vector(vertexArray);
+    this->elementArray = std::vector(elementArray);
+
     glGenVertexArrays(1, &this->vao);
     glBindVertexArray(this->vao);
+
     glGenBuffers(1, &this->vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, this->vertexArray.size() * sizeof(float), this->vertexArray.data(), GL_STATIC_DRAW);
+
+    glGenBuffers(1, &this->ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->elementArray.size() * sizeof(GLuint), this->elementArray.data(), GL_STATIC_DRAW);
+
 }
 
 Mesh::~Mesh(void)
@@ -36,7 +47,7 @@ void Mesh::deactivate(void)
 
 void Mesh::draw(void)
 {
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawElements(GL_TRIANGLES, this->elementArray.size(), GL_UNSIGNED_INT, 0);
 }
 
 Mesh* Mesh::Triangle(float width, float height)
@@ -46,7 +57,10 @@ Mesh* Mesh::Triangle(float width, float height)
          width/2,   -height/2,
          0.0f,       height/2
     };
-    Mesh* mesh = new Mesh(vertexArray);
+    std::vector<GLuint> elementArray = {
+        0, 1, 2
+    };
+    Mesh* mesh = new Mesh(vertexArray, elementArray);
 
     return mesh;
 }
