@@ -7,7 +7,7 @@ namespace GlWorld {
 Transform::Transform(void)
 {
     this->position = glm::vec3(0.0f, 0.0f, 0.0f);
-    this->rotation = glm::zero<glm::quat>();
+    this->rotation = glm::angleAxis(0.0f, this->position);
     this->scale = glm::vec3(1.0f, 1.0f, 1.0f);
 }
 
