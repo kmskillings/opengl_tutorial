@@ -2,12 +2,12 @@ dir_build := ./build
 program_name := program
 
 src_dir := ./src
-src_cpp_names := main.cpp mesh.cpp transform.cpp
+src_cpp_names := main.cpp mesh.cpp transform.cpp camera.cpp
 srcs_cpp := ${src_cpp_names:%=${src_dir}/%}
 src_c_names := shaders.c
 srcs_c := ${src_c_names:%=${src_dir}/%}
 
-header_names := material.hpp mesh.hpp model.hpp transform.hpp
+header_names := material.hpp mesh.hpp model.hpp transform.hpp camera.hpp
 headers := ${header_names:%=${src_dir}/%}
 
 shader_dir := ./src/shaders
