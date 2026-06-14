@@ -4,19 +4,26 @@
 #include "gl_includes.h"
 
 #include <vector>
+#include <memory>
 
-#include "gameObject.hpp"
+#include "camera.hpp"
+#include "worldObject.hpp"
 
 namespace GlWorld {
 
 class Scene {
-    public:
-        Scene(glm::vec4 skyColor);
-        void draw(void);
-    private:
-        glm::vec4 skyColor;
-        std::vector<GlWorld::GameObject> gameObjects;
-        
+public:
+    Scene(
+        std::shared_ptr<Camera> camera,
+        glm::vec4 skyColor
+    );
+    std::shared_ptr<Camera> getCamera(void) const;
+    void addWorldObject(std::shared_ptr<WorldObject> worldObject);
+    void draw(void);
+private:
+    glm::vec4 skyColor;
+    std::shared_ptr<Camera> camera;
+    std::vector<std::shared_ptr<WorldObject>> worldObjects;
 };
 
 }
