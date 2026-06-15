@@ -40,15 +40,13 @@ int main(void)
     // Set up scene
 
     // Create camera
-    glm::vec3 cameraPosition = {0.0f, 0.0f, 2.0f};
     std::shared_ptr<GlWorld::Transform> cameraTransform = std::make_shared<GlWorld::Transform>();
-    cameraTransform.get()->setPosition(cameraPosition);
     std::shared_ptr<GlWorld::Camera> camera = std::make_shared<GlWorld::Camera>(
         cameraTransform,
         PI_F / 4,
         (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT,
         0.1f,
-        100.0f
+        10.0f
     );
 
     // Create Cami Cube
@@ -94,7 +92,7 @@ int main(void)
     material.get()->setTexture(textureCami);
 
     // Create the mesh
-    std::shared_ptr<GlWorld::MeshTextured> meshCube = GlWorld::MeshTextured::cube(1.0f);
+    std::shared_ptr<GlWorld::MeshTextured> meshCube = GlWorld::MeshTextured::cube(2.0f);
 
     // Create the model
     std::shared_ptr<GlWorld::ModelTexturedSimple> modelCami = std::make_shared<GlWorld::ModelTexturedSimple>(meshCube, material);
@@ -107,8 +105,26 @@ int main(void)
     std::unique_ptr<GlWorld::Scene> scene = std::make_unique<GlWorld::Scene>(camera, skyColor);
     scene.get()->addWorldObject(woCami);
 
+    // Position the camera
+    glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 5.0f);
+    glm::vec3 cameraAxis = glm::vec3(1.0f, 0.0f, 0.0f);
+    float angle = atan2(-cameraPos.y, cameraPos.z);
+    cameraTransform.get()->setPosition(cameraPos);
+    cameraTransform.get()->setRotation(angle, cameraAxis);
+
+    glm::vec3 axisWoCami = glm::normalize(glm::vec3(0.7f, 0.5f, 0.2f));
+    float rotationsPerSecond = 0.2f;
+    float radiansPerMilli = 2.0f * PI_F * rotationsPerSecond / 1000.0f;
+
+    uint64_t millisStart = millisSinceEpoch();
+
     // Game loop
     while(glfwWindowShouldClose(window) == GL_FALSE) {
+
+        uint64_t millisFrame = millisSinceEpoch();
+        int millisElapsed = millisFrame - millisStart;
+        float angle = radiansPerMilli * millisElapsed;
+        woCami.get()->getTransform().get()->setRotation(angle, axisWoCami);
 
         // Draw the scene
         scene.get()->draw();

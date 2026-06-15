@@ -100,7 +100,7 @@ std::shared_ptr<MeshTextured> MeshTextured::cube(float sideLength)
     float s = sideLength / 2;
     std::vector<float> vertices = {
         // XYZW coords                  Texture coords
-        -s, -s, -s,  1.0f,  1.0f, -1.0f,
+        -s, -s, -s,  1.0f,  0.0f, -1.0f,
          s, -s, -s,  1.0f,  1.0f, -1.0f,
         -s, -s, -s,  1.0f, -1.0f,  0.0f,
         -s, -s,  s,  1.0f,  0.0f,  0.0f,
