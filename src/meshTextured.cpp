@@ -22,7 +22,7 @@ MeshTextured::MeshTextured(
         this->vertices.data(),
         GL_STATIC_DRAW
     );
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    // glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glGenBuffers(1, &this->ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->ebo);
@@ -32,7 +32,7 @@ MeshTextured::MeshTextured(
         this->elements.data(),
         GL_STATIC_DRAW
     );
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     glBindVertexArray(0);
 }
@@ -50,7 +50,7 @@ void MeshTextured::bindPosition(GLuint location)
         6*sizeof(float), 
         0
     );
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    // glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
 
@@ -67,7 +67,7 @@ void MeshTextured::bindTextureCoords(GLuint location)
         6*sizeof(float), 
         (void*)(4*sizeof(float))
     );
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    // glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
 
@@ -87,6 +87,7 @@ void MeshTextured::deactivate(void)
 
 void MeshTextured::draw(void)
 {
+    GLuint error = glGetError();
     glDrawElements(
         GL_TRIANGLES, 
         this->elements.size(), 

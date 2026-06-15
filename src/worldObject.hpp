@@ -5,12 +5,14 @@
 
 #include "transform.hpp"
 #include "hasTransform.hpp"
+#include "model.hpp"
 
 namespace GlWorld {
 
-class WorldObject : HasTransform
+class WorldObject : public HasTransform
 {
 public:
+    WorldObject(std::shared_ptr<Model> model);
     std::shared_ptr<Transform> getTransform(void) const;
     void draw(
         const glm::mat4 &matrixView,

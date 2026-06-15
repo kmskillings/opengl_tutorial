@@ -4,8 +4,6 @@
 #include <memory>
 
 #include "gl_includes.h"
-#include "material.hpp"
-#include "mesh.hpp"
 
 namespace GlWorld {
 

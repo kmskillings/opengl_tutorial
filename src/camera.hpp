@@ -8,7 +8,7 @@
 namespace GlWorld
 {
 
-class Camera : HasTransform
+class Camera : public HasTransform
 {
 public:
     Camera(

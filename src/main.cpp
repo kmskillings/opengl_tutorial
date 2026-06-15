@@ -5,10 +5,18 @@
 
 #include <chrono>
 #include <cmath>
+#include <memory>
 
-#include "material.hpp"
-#include "mesh.hpp"
-#include "model.hpp"
+#include "textures.h"
+#include "shaders.h"
+
+#include "scene.hpp"
+#include "camera.hpp"
+#include "transform.hpp"
+#include "modelTexturedSimple.hpp"
+#include "materialTexturedSimple.hpp"
+#include "meshTextured.hpp"
+#include "meshTextured.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -29,31 +37,81 @@ int main(void)
     glfwMakeContextCurrent(window);
     glewInit();
 
-    glm::vec4 color;
-    color.r = 1.0f;
-    color.g = 0.0f;
-    color.b = 0.0f;
-    color.a = 1.0f;
+    // Set up scene
 
-    GlWorld::Model* model = new GlWorld::Model(color);
-    GLuint error = glGetError();
+    // Create camera
+    glm::vec3 cameraPosition = {0.0f, 0.0f, 2.0f};
+    std::shared_ptr<GlWorld::Transform> cameraTransform = std::make_shared<GlWorld::Transform>();
+    cameraTransform.get()->setPosition(cameraPosition);
+    std::shared_ptr<GlWorld::Camera> camera = std::make_shared<GlWorld::Camera>(
+        cameraTransform,
+        PI_F / 4,
+        (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT,
+        0.1f,
+        100.0f
+    );
 
-    uint64_t millisStart = millisSinceEpoch();
+    // Create Cami Cube
+    // First load the Cami texture
+    GLuint textureCami;
+    glGenTextures(1, &textureCami);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureCami);
+    glTexImage2D(
+        GL_TEXTURE_2D, 
+        0, 
+        GL_BGRA, 
+        CAMI_TEXTURE_WIDTH, 
+        CAMI_TEXTURE_HEIGHT, 
+        0, 
+        GL_BGRA, 
+        GL_UNSIGNED_BYTE, 
+        camiTextureBytes
+    );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    // Then create the shader program
+    GLint shaderStatus;
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    glCompileShader(vertexShader);
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &shaderStatus);
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+    glCompileShader(fragmentShader);
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &shaderStatus);
+    GLuint shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+    glGetShaderiv(fragmentShader, GL_LINK_STATUS, &shaderStatus);
+
+    // Create the material
+    std::shared_ptr<GlWorld::MaterialTexturedSimple> material = std::make_shared<GlWorld::MaterialTexturedSimple>(shaderProgram);
+    material.get()->setTexture(textureCami);
+
+    // Create the mesh
+    std::shared_ptr<GlWorld::MeshTextured> meshCube = GlWorld::MeshTextured::cube(1.0f);
+
+    // Create the model
+    std::shared_ptr<GlWorld::ModelTexturedSimple> modelCami = std::make_shared<GlWorld::ModelTexturedSimple>(meshCube, material);
+
+    // Create the WorldObject
+    std::shared_ptr<GlWorld::WorldObject> woCami = std::make_shared<GlWorld::WorldObject>(modelCami);
+
+    // Create and populate the scene
+    glm::vec4 skyColor = glm::vec4(0.5f, 0.8f, 1.0f, 1.0f);
+    std::unique_ptr<GlWorld::Scene> scene = std::make_unique<GlWorld::Scene>(camera, skyColor);
+    scene.get()->addWorldObject(woCami);
 
     // Game loop
     while(glfwWindowShouldClose(window) == GL_FALSE) {
 
-        uint64_t millisNow = millisSinceEpoch();
-        uint32_t millisElapsed = millisNow - millisStart;
-
-        glm::vec4 colorThrob;
-        float throbAngle = 2 * PI_F * millisElapsed / THROB_PERIOD_MILLIS;
-        colorThrob = color * (0.5f * (1.0f + sinf(throbAngle)));
-        model->setColor(colorThrob);
-
         // Draw the scene
-        model->drawRgb();
-        GLuint error = glGetError();
+        scene.get()->draw();
         glfwSwapBuffers(window);
 
         // Handle input

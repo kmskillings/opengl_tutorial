@@ -25,6 +25,10 @@ void Scene::draw(void)
 {
     glm::mat4 matrixView = this->camera.get()->getMatrixView();
     glm::mat4 matrixProject = this->camera.get()->getMatrixProject();
+
+    glEnable(GL_DEPTH_TEST);
+    glClearColor(this->skyColor.r, this->skyColor.g, this->skyColor.b, this->skyColor.a);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     for (std::shared_ptr<WorldObject> worldObject : this->worldObjects)
     {
         worldObject.get()->draw(matrixView, matrixProject);

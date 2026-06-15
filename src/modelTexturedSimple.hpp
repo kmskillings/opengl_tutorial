@@ -3,11 +3,12 @@
 
 #include "model.hpp"
 #include "meshTextured.hpp"
+#include "materialTexturedSimple.hpp"
 
 namespace GlWorld 
 {
 
-class ModelTexturedSimple : Model 
+class ModelTexturedSimple : public Model 
 {
 public:
     ModelTexturedSimple(
@@ -18,7 +19,7 @@ public:
         const glm::mat4 &matrixModel,
         const glm::mat4 &matrixView,
         const glm::mat4 &matrixProject 
-    );
+    ) const override;
 private:
     std::shared_ptr<MeshTextured> mesh;
     std::shared_ptr<MaterialTexturedSimple> material;

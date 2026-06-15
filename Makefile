@@ -2,12 +2,32 @@ dir_build := ./build
 program_name := program
 
 src_dir := ./src
-src_cpp_names := main.cpp mesh.cpp transform.cpp camera.cpp
+
+src_cpp_names := \
+main.cpp \
+scene.cpp \
+camera.cpp \
+worldObject.cpp \
+transform.cpp \
+modelTexturedSimple.cpp \
+meshTextured.cpp \
+materialTexturedSimple.cpp
+
 srcs_cpp := ${src_cpp_names:%=${src_dir}/%}
-src_c_names := shaders.c
+src_c_names := shaders.c tex_cami.c
 srcs_c := ${src_c_names:%=${src_dir}/%}
 
-header_names := material.hpp mesh.hpp model.hpp transform.hpp camera.hpp
+header_names := \
+scene.hpp \
+camera.hpp \
+worldObject.hpp \
+transform.hpp \
+hasTransform.hpp \
+model.hpp \
+modelTexturedSimple.hpp \
+meshTextured.hpp \
+materialTexturedSimple.hpp \
+
 headers := ${header_names:%=${src_dir}/%}
 
 shader_dir := ./src/shaders
