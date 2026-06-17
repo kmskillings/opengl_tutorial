@@ -92,7 +92,7 @@ int main(void)
     material.get()->setTexture(textureCami);
 
     // Create the mesh
-    std::shared_ptr<GlWorld::MeshTextured> meshCube = GlWorld::MeshTextured::cube(2.0f);
+    std::shared_ptr<GlWorld::MeshTextured> meshCube = GlWorld::MeshTextured::sphere(1.0f, 16, 32);
 
     // Create the model
     std::shared_ptr<GlWorld::ModelTexturedSimple> modelCami = std::make_shared<GlWorld::ModelTexturedSimple>(meshCube, material);
@@ -112,7 +112,7 @@ int main(void)
     cameraTransform.get()->setPosition(cameraPos);
     cameraTransform.get()->setRotation(angle, cameraAxis);
 
-    glm::vec3 axisWoCami = glm::normalize(glm::vec3(0.7f, 0.5f, 0.2f));
+    glm::vec3 axisWoCami = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
     float rotationsPerSecond = 0.2f;
     float radiansPerMilli = 2.0f * PI_F * rotationsPerSecond / 1000.0f;
 

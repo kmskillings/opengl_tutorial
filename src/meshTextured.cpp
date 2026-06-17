@@ -132,4 +132,57 @@ std::shared_ptr<MeshTextured> MeshTextured::cube(float sideLength)
     return std::make_unique<MeshTextured>(vertices, elements);
 }
 
+std::shared_ptr<MeshTextured> MeshTextured::sphere(
+    float radius, 
+    unsigned int segmentsVertical, 
+    unsigned int segmentsHorizontal
+)
+{
+    std::vector<float> vertices;
+    std::vector<GLuint> elements;
+
+    // i is the vertical iterator. j is the horizontal iterator.
+    for (int i = 0; i < segmentsVertical + 1; i++)
+    {
+        float elevation = M_PI / segmentsVertical * i;
+        float r = radius * sin(elevation);
+        float y = radius * cos(elevation);
+        float v = 1.0f - ((float)i / (float)segmentsVertical);
+        for (int j = 0; j < segmentsHorizontal + 1; j++)
+        {
+            float azimuth = 2 * M_PI / segmentsHorizontal * j;
+            float x = r * sin(azimuth);
+            float z = r * cos(azimuth);
+            float u = (float)j / (float)segmentsHorizontal;
+
+            vertices.push_back(x);
+            vertices.push_back(y);
+            vertices.push_back(z);
+            vertices.push_back(1.0f);
+            vertices.push_back(u);
+            vertices.push_back(v);
+        }
+    }
+
+    for (int i = 0; i < segmentsVertical; i++)
+    {
+        for (int j = 0; j < segmentsHorizontal; j++)
+        {
+            GLuint lowerLeft =  (segmentsHorizontal + 1) * (i + 1) + j    ;
+            GLuint lowerRight = (segmentsHorizontal + 1) * (i + 1) + j + 1;
+            GLuint upperLeft =  (segmentsHorizontal + 1) *  i      + j    ;
+            GLuint upperRight = (segmentsHorizontal + 1) *  i      + j + 1;
+
+            elements.push_back(lowerLeft);
+            elements.push_back(upperRight);
+            elements.push_back(upperLeft);
+            elements.push_back(upperRight);
+            elements.push_back(lowerLeft);
+            elements.push_back(lowerRight);
+        }
+    }
+
+    return std::make_shared<MeshTextured>(vertices, elements);
+}
+
 }

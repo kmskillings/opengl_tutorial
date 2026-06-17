@@ -22,6 +22,11 @@ public:
     void deactivate(void);
     void draw(void);
     static std::shared_ptr<MeshTextured> cube(float sideLength);
+    static std::shared_ptr<MeshTextured> sphere(
+        float radius, 
+        unsigned int segmentsVertical, 
+        unsigned int segmentsHorizontal
+    );
 private:
     std::vector<float> vertices;
     std::vector<GLuint> elements;
