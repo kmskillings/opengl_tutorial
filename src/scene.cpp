@@ -4,16 +4,30 @@ namespace GlWorld {
 
 Scene::Scene(
     std::shared_ptr<Camera> camera,
-    glm::vec4 skyColor
+    glm::vec4 skyColor,
+    std::shared_ptr<LightAmbient> lightAmbient,
+    std::shared_ptr<LightDirectional> lightDirectional
 )
 {
     this->camera = camera;
     this->skyColor = skyColor;
+    this->lightAmbient = lightAmbient;
+    this->lightDirectional = lightDirectional;
 }
 
 std::shared_ptr<Camera> Scene::getCamera(void) const
 {
     return this->camera;
+}
+
+std::shared_ptr<LightAmbient> Scene::getLightAmbient(void) const
+{
+    return this->lightAmbient;
+}
+
+std::shared_ptr<LightDirectional> Scene::getLightDirectional(void) const
+{
+    return this->lightDirectional;
 }
 
 void Scene::addWorldObject(std::shared_ptr<WorldObject> worldObject)
