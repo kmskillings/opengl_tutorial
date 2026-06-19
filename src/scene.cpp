@@ -1,5 +1,9 @@
 #include "scene.hpp"
 
+#include "camera.hpp"
+#include "light.hpp"
+#include "worldObject.hpp"
+
 namespace GlWorld {
 
 Scene::Scene(
@@ -45,7 +49,7 @@ void Scene::draw(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     for (std::shared_ptr<WorldObject> worldObject : this->worldObjects)
     {
-        worldObject.get()->draw(matrixView, matrixProject);
+        worldObject->draw(*this);
     }
 }
 

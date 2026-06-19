@@ -6,11 +6,12 @@
 #include <vector>
 #include <memory>
 
-#include "camera.hpp"
-#include "worldObject.hpp"
-#include "light.hpp"
-
 namespace GlWorld {
+
+class Camera;
+class LightAmbient;
+class LightDirectional;
+class WorldObject;
 
 class Scene {
 public:

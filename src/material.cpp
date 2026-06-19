@@ -1,14 +1,78 @@
-#include <variant>
-#include <memory>
-
 #include "gl_includes.h"
-#include "worldObject.hpp"
-#include "light.hpp"
+#include "material.hpp"
+
 #include "scene.hpp"
-#include "materialPhongFaceted.hpp"
+#include "worldObject.hpp"
+#include "transform.hpp"
+#include "camera.hpp"
+#include "light.hpp"
 
 namespace GlWorld
 {
+
+GLuint assignTexture(std::variant<GLuint, glm::vec3> v);
+GLuint assignTexture(std::variant<GLuint, float> v);
+GLuint create1x1Texture(
+    GLuint internalFormat,
+    GLuint format,
+    GLuint type,
+    void* data
+);
+
+MaterialTexturedSimple::MaterialTexturedSimple(
+    GLuint shaderProgram,
+    GLuint texture
+)
+{
+    this->shaderProgram = shaderProgram;
+    this->texture = texture;
+    glBindFragDataLocation(this->shaderProgram, 0, "outColor");
+
+    this->uniformMatrix = glGetUniformLocation(this->shaderProgram, "transform");
+    this->uniformTexture = glGetUniformLocation(this->shaderProgram, "textureMain");
+}
+
+GLuint MaterialTexturedSimple::getLocationPosition(void) const
+{
+    return glGetAttribLocation(this->shaderProgram, "position");
+}
+
+GLuint MaterialTexturedSimple::getLocationTextureCoords(void) const
+{
+    return glGetAttribLocation(this->shaderProgram, "textureCoords");
+}
+
+void MaterialTexturedSimple::activate(
+    const Scene &scene,
+    const WorldObject &worldObject
+)
+{
+    glUseProgram(this->shaderProgram);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, this->texture);
+
+    
+    glUniform1i(this->uniformTexture, 0);
+
+    glm::mat4 matrixModel = worldObject.getTransform()->getMatrixModel();
+    glm::mat4 matrixView = scene.getCamera()->getMatrixView();
+    glm::mat4 matrixProject = scene.getCamera()->getMatrixProject();
+    glm::mat4 matrix = matrixProject * matrixView * matrixModel;
+    glUniformMatrix4fv(
+        this->uniformMatrix, 
+        1, 
+        GL_FALSE, 
+        glm::value_ptr(matrix)
+    );
+}
+
+void MaterialTexturedSimple::deactivate(void)
+{
+    glUseProgram(0);
+}
+
+
 
 MaterialPhongFaceted::MaterialPhongFaceted(
     GLuint shaderProgram,

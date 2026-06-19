@@ -13,10 +13,10 @@
 #include "scene.hpp"
 #include "camera.hpp"
 #include "transform.hpp"
-#include "modelTexturedSimple.hpp"
-#include "materialTexturedSimple.hpp"
+#include "model.hpp"
+#include "material.hpp"
 #include "meshTextured.hpp"
-#include "meshTextured.hpp"
+#include "worldObject.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -88,11 +88,10 @@ int main(void)
     glGetShaderiv(fragmentShader, GL_LINK_STATUS, &shaderStatus);
 
     // Create the material
-    std::shared_ptr<GlWorld::MaterialTexturedSimple> material = std::make_shared<GlWorld::MaterialTexturedSimple>(shaderProgram);
-    material.get()->setTexture(textureCami);
+    std::shared_ptr<GlWorld::MaterialTexturedSimple> material = std::make_shared<GlWorld::MaterialTexturedSimple>(shaderProgram, textureCami);
 
     // Create the mesh
-    std::shared_ptr<GlWorld::MeshTextured> meshCube = GlWorld::MeshTextured::sphere(1.0f, 16, 32);
+    std::shared_ptr<GlWorld::MeshTextured> meshCube = GlWorld::MeshTextured::sphere(1.0f, 2, 4);
 
     // Create the model
     std::shared_ptr<GlWorld::ModelTexturedSimple> modelCami = std::make_shared<GlWorld::ModelTexturedSimple>(meshCube, material);
@@ -102,8 +101,8 @@ int main(void)
 
     // Create and populate the scene
     glm::vec4 skyColor = glm::vec4(0.5f, 0.8f, 1.0f, 1.0f);
-    std::unique_ptr<GlWorld::Scene> scene = std::make_unique<GlWorld::Scene>(camera, skyColor);
-    scene.get()->addWorldObject(woCami);
+    // std::unique_ptr<GlWorld::Scene> scene = std::make_unique<GlWorld::Scene>(camera, skyColor);
+    // scene.get()->addWorldObject(woCami);
 
     // Position the camera
     glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 5.0f);
@@ -127,7 +126,7 @@ int main(void)
         woCami.get()->getTransform().get()->setRotation(angle, axisWoCami);
 
         // Draw the scene
-        scene.get()->draw();
+        // scene.get()->draw();
         glfwSwapBuffers(window);
 
         // Handle input

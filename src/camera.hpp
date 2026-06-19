@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "hasTransform.hpp"
+#include "transform.hpp"
 
 namespace GlWorld
 {

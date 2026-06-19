@@ -7,14 +7,35 @@
 
 namespace GlWorld {
 
-class Model {
+class Scene;
+class WorldObject;
+class MeshTextured;
+class MaterialTexturedSimple;
+
+class Model
+{
 public:
     virtual void draw(
-        const glm::mat4 &matrixModel,
-        const glm::mat4 &matrixView,
-        const glm::mat4 &matrixProject 
+        const Scene &scene,
+        const WorldObject &worldObject
     ) const = 0;
 private:
+};
+
+class ModelTexturedSimple : public Model 
+{
+public:
+    ModelTexturedSimple(
+        std::shared_ptr<MeshTextured> mesh,
+        std::shared_ptr<MaterialTexturedSimple> material
+    );
+    void draw(
+        const Scene &scene,
+        const WorldObject &worldObject
+    ) const;
+private:
+    std::shared_ptr<MeshTextured> mesh;
+    std::shared_ptr<MaterialTexturedSimple> material;
 };
 
 }

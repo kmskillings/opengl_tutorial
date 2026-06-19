@@ -3,6 +3,8 @@
 
 #include "gl_includes.h"
 
+#include <memory>
+
 namespace GlWorld
 {
  
@@ -28,6 +30,12 @@ private:
     glm::vec3 position;
     glm::quat rotation;
     glm::vec3 scale;
+};
+
+class HasTransform
+{
+public:
+    virtual std::shared_ptr<Transform> getTransform(void) const = 0;
 };
 
 }

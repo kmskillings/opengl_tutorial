@@ -1,4 +1,6 @@
-#include "modelTexturedSimple.hpp"
+#include "model.hpp"
+#include "material.hpp"
+#include "meshTextured.hpp"
 
 namespace GlWorld {
 
@@ -17,14 +19,11 @@ ModelTexturedSimple::ModelTexturedSimple(
 }
 
 void ModelTexturedSimple::draw(
-    const glm::mat4 &matrixModel,
-    const glm::mat4 &matrixView,
-    const glm::mat4 &matrixProject 
+    const Scene &scene,
+    const WorldObject &worldObject
 ) const
 {
-    glm::mat4 matrix = matrixProject * matrixView * matrixModel;
-    this->material.get()->setMatrix(matrix);
-    this->material.get()->activate();
+    this->material.get()->activate(scene, worldObject);
     this->mesh.get()->activate();
     this->mesh.get()->draw();
 }

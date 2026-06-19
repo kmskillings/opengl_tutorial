@@ -4,11 +4,13 @@
 #include <memory>
 
 #include "gl_includes.h"
+
 #include "transform.hpp"
-#include "hasTransform.hpp"
 
 namespace GlWorld
 {
+
+class Transform;
 
 class LightDirectional : public HasTransform
 {

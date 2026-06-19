@@ -9,10 +9,10 @@ scene.cpp \
 camera.cpp \
 worldObject.cpp \
 transform.cpp \
-modelTexturedSimple.cpp \
+model.cpp \
 meshTextured.cpp \
-materialTexturedSimple.cpp \
-light.cpp
+light.cpp \
+material.cpp
 
 srcs_cpp := ${src_cpp_names:%=${src_dir}/%}
 src_c_names := shaders.c tex_cami.c
@@ -23,12 +23,10 @@ scene.hpp \
 camera.hpp \
 worldObject.hpp \
 transform.hpp \
-hasTransform.hpp \
 model.hpp \
-modelTexturedSimple.hpp \
 meshTextured.hpp \
-materialTexturedSimple.hpp \
-light.hpp
+light.hpp \
+material.hpp
 
 headers := ${header_names:%=${src_dir}/%}
 

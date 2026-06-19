@@ -1,5 +1,10 @@
 #include "worldObject.hpp"
 
+#include "scene.hpp"
+#include "model.hpp"
+
+#include <memory>
+
 namespace GlWorld
 {
 
@@ -15,12 +20,10 @@ std::shared_ptr<Transform> WorldObject::getTransform(void) const
 }
 
 void WorldObject::draw(
-    const glm::mat4 &matrixView,
-    const glm::mat4 &matrixProject
+    const Scene &scene
 ) const
 {
-    glm::mat4 matrixModel = this->getTransform().get()->getMatrixModel();
-    this->model.get()->draw(matrixModel, matrixView, matrixProject);
+    this->model->draw(scene, *this);
 }
 
 }
