@@ -10,7 +10,7 @@ camera.cpp \
 worldObject.cpp \
 transform.cpp \
 model.cpp \
-meshTextured.cpp \
+mesh.cpp \
 light.cpp \
 material.cpp
 
@@ -24,14 +24,14 @@ camera.hpp \
 worldObject.hpp \
 transform.hpp \
 model.hpp \
-meshTextured.hpp \
+mesh.hpp \
 light.hpp \
 material.hpp
 
 headers := ${header_names:%=${src_dir}/%}
 
 shader_dir := ./src/shaders
-shader_names := vertex.glsl fragment.glsl
+shader_names := vertex.glsl fragment.glsl vertexPhongFaceted.glsl fragmentPhongFaceted.glsl
 shaders := ${shader_names:%=${shader_dir}/%}
 
 shader_dumps := ${shaders:%.glsl=%.xxd}

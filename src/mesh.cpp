@@ -1,4 +1,9 @@
-#include "meshTextured.hpp"
+#include "gl_includes.h"
+
+#include "mesh.hpp"
+
+#include <memory>
+#include <vector>
 
 namespace GlWorld
 {
@@ -37,7 +42,12 @@ MeshTextured::MeshTextured(
     glBindVertexArray(0);
 }
 
-void MeshTextured::bindPosition(GLuint location)
+bool MeshTextured::has4dPosition(void)
+{
+    return true;
+}
+
+void MeshTextured::bind4dPosition(GLuint location)
 {
     this->locationPosition = location;
     glBindVertexArray(this->vao);
@@ -54,7 +64,12 @@ void MeshTextured::bindPosition(GLuint location)
     glBindVertexArray(0);
 }
 
-void MeshTextured::bindTextureCoords(GLuint location)
+bool MeshTextured::has2dTextureCoords(void)
+{
+    return true;
+}
+
+void MeshTextured::bind2dTextureCoords(GLuint location)
 {
     this->locationTextureCoords = location;
     glBindVertexArray(this->vao);
@@ -69,6 +84,16 @@ void MeshTextured::bindTextureCoords(GLuint location)
     );
     // glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+}
+
+bool MeshTextured::hasVertexNormals(void)
+{
+    return false;
+}
+
+void MeshTextured::bindVertexNormals(GLuint location)
+{
+    return;
 }
 
 void MeshTextured::activate(void)
