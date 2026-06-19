@@ -11,7 +11,8 @@ worldObject.cpp \
 transform.cpp \
 modelTexturedSimple.cpp \
 meshTextured.cpp \
-materialTexturedSimple.cpp
+materialTexturedSimple.cpp \
+light.cpp
 
 srcs_cpp := ${src_cpp_names:%=${src_dir}/%}
 src_c_names := shaders.c tex_cami.c
@@ -27,6 +28,7 @@ model.hpp \
 modelTexturedSimple.hpp \
 meshTextured.hpp \
 materialTexturedSimple.hpp \
+light.hpp
 
 headers := ${header_names:%=${src_dir}/%}
 
