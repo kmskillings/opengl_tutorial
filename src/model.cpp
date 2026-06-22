@@ -1,21 +1,18 @@
 #include "model.hpp"
 #include "material.hpp"
-#include "meshTextured.hpp"
+#include "mesh.hpp"
 
 namespace GlWorld {
 
 ModelTexturedSimple::ModelTexturedSimple(
-    std::shared_ptr<MeshTextured> mesh,
-    std::shared_ptr<MaterialTexturedSimple> material
+    std::shared_ptr<Mesh> mesh,
+    std::shared_ptr<Material> material
 )
 {
     this->mesh = mesh;
     this->material = material;
 
-    GLuint locationPosition = this->material.get()->getLocationPosition();
-    this->mesh.get()->bindPosition(locationPosition);
-    GLuint locationTextureCoords = this->material.get()->getLocationTextureCoords();
-    this->mesh.get()->bindTextureCoords(locationTextureCoords);
+    
 }
 
 void ModelTexturedSimple::draw(
@@ -23,9 +20,12 @@ void ModelTexturedSimple::draw(
     const WorldObject &worldObject
 ) const
 {
-    this->material.get()->activate(scene, worldObject);
-    this->mesh.get()->activate();
-    this->mesh.get()->draw();
+    this->material->activate(scene, worldObject);
+    this->material->bindMesh(*this->mesh.get());
+    this->mesh->activate();
+    this->mesh->draw();
+    this->material->deactivate();
+    this->mesh->deactivate();
 }
 
 }

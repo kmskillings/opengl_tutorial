@@ -6,6 +6,7 @@
 #include "transform.hpp"
 #include "camera.hpp"
 #include "light.hpp"
+#include "mesh.hpp"
 
 namespace GlWorld
 {
@@ -28,18 +29,24 @@ MaterialTexturedSimple::MaterialTexturedSimple(
     this->texture = texture;
     glBindFragDataLocation(this->shaderProgram, 0, "outColor");
 
+    this->attributePosition4d = glGetAttribLocation(this->shaderProgram, "position");
+    this->attributeTextureCoords2d = glGetAttribLocation(this->shaderProgram, "textureCoords");
+
     this->uniformMatrix = glGetUniformLocation(this->shaderProgram, "transform");
     this->uniformTexture = glGetUniformLocation(this->shaderProgram, "textureMain");
 }
 
-GLuint MaterialTexturedSimple::getLocationPosition(void) const
+void MaterialTexturedSimple::bindMesh(
+    Mesh &mesh
+)
 {
-    return glGetAttribLocation(this->shaderProgram, "position");
-}
+    if (!mesh.has2dTextureCoords() || !mesh.has4dPosition())
+    {
+        return;
+    }
 
-GLuint MaterialTexturedSimple::getLocationTextureCoords(void) const
-{
-    return glGetAttribLocation(this->shaderProgram, "textureCoords");
+    mesh.bind4dPosition(this->attributePosition4d);
+    mesh.bind2dTextureCoords(this->attributeTextureCoords2d);
 }
 
 void MaterialTexturedSimple::activate(
@@ -47,6 +54,7 @@ void MaterialTexturedSimple::activate(
     const WorldObject &worldObject
 )
 {
+    
     glUseProgram(this->shaderProgram);
 
     glActiveTexture(GL_TEXTURE0);
@@ -84,6 +92,9 @@ MaterialPhongFaceted::MaterialPhongFaceted(
 {
     this->shaderProgram = shaderProgram;
 
+    this->attribute4dPosition = glGetAttribLocation(this->shaderProgram, "position");
+    this->attribute2dTextureCoords = glGetAttribLocation(this->shaderProgram, "textureCoords");
+
     this->uniformMatrixModel = glGetUniformLocation(this->shaderProgram, "matrixModel");
     this->uniformMatrixView = glGetUniformLocation(this->shaderProgram, "matrixView");
     this->uniformMatrixProjection = glGetUniformLocation(this->shaderProgram, "matrixProjection");
@@ -104,19 +115,25 @@ MaterialPhongFaceted::MaterialPhongFaceted(
     
 }
 
-GLuint MaterialPhongFaceted::getLocationPosition(void) const
+void MaterialPhongFaceted::bindMesh(
+    Mesh &mesh
+)
 {
-    return glGetAttribLocation(this->shaderProgram, "position");
-}
+    if (
+        !mesh.has4dPosition() ||
+        !mesh.has2dTextureCoords()
+    )
+    {
+        return;
+    }
 
-GLuint MaterialPhongFaceted::getLocationTextureCoords(void) const
-{
-    return glGetAttribLocation(this->shaderProgram, "textureCoords");
+    mesh.bind4dPosition(this->attribute4dPosition);
+    mesh.bind2dTextureCoords(this->attribute2dTextureCoords);
 }
 
 void MaterialPhongFaceted::activate(
-    const WorldObject &worldObject,
-    const Scene &scene
+    const Scene &scene,
+    const WorldObject &worldObject
 )
 {
     
@@ -194,7 +211,7 @@ GLuint assignTexture(std::variant<GLuint, float> v)
     {
         float textureLevel = std::get<float>(v);
         return create1x1Texture(
-            GL_RED, 
+            GL_R32F, 
             GL_RED, 
             GL_FLOAT, 
             &textureLevel

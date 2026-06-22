@@ -59,7 +59,7 @@ void Transform::setRotation(float angle, const glm::vec3 axis)
 
 void Transform::rotate(const glm::quat &rotation)
 {
-    this->rotation = this->rotation + rotation;
+    this->rotation = rotation * this->rotation;
 }
 
 void Transform::rotate(float angle, const glm::vec3 axis)

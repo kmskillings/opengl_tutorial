@@ -42,7 +42,7 @@ MeshTextured::MeshTextured(
     glBindVertexArray(0);
 }
 
-bool MeshTextured::has4dPosition(void)
+bool MeshTextured::has4dPosition(void) const
 {
     return true;
 }
@@ -64,7 +64,7 @@ void MeshTextured::bind4dPosition(GLuint location)
     glBindVertexArray(0);
 }
 
-bool MeshTextured::has2dTextureCoords(void)
+bool MeshTextured::has2dTextureCoords(void) const
 {
     return true;
 }
@@ -86,7 +86,7 @@ void MeshTextured::bind2dTextureCoords(GLuint location)
     glBindVertexArray(0);
 }
 
-bool MeshTextured::hasVertexNormals(void)
+bool MeshTextured::hasVertexNormals(void) const
 {
     return false;
 }

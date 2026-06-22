@@ -6,6 +6,7 @@
 #include <chrono>
 #include <cmath>
 #include <memory>
+#include <stdio.h>
 
 #include "textures.h"
 #include "shaders.h"
@@ -15,8 +16,9 @@
 #include "transform.hpp"
 #include "model.hpp"
 #include "material.hpp"
-#include "meshTextured.hpp"
 #include "worldObject.hpp"
+#include "light.hpp"
+#include "mesh.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -26,11 +28,12 @@
 
 GLFWwindow* setupGl(void);
 uint64_t millisSinceEpoch(void);
+void reportShaderStatus(GLuint shader);
 
 int main(void)
 {
 
-    constexpr float PI_F = 3.1415927f;
+    GLuint error;
 
     // Setup code
     GLFWwindow* window = setupGl();
@@ -43,7 +46,7 @@ int main(void)
     std::shared_ptr<GlWorld::Transform> cameraTransform = std::make_shared<GlWorld::Transform>();
     std::shared_ptr<GlWorld::Camera> camera = std::make_shared<GlWorld::Camera>(
         cameraTransform,
-        PI_F / 4,
+        M_PI / 4,
         (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT,
         0.1f,
         10.0f
@@ -72,26 +75,29 @@ int main(void)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     // Then create the shader program
-    GLint shaderStatus;
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    glShaderSource(vertexShader, 1, &vertexPhongFacetedSource, NULL);
     glCompileShader(vertexShader);
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &shaderStatus);
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+    glShaderSource(fragmentShader, 1, &fragmentPhongFacetedSource, NULL);
     glCompileShader(fragmentShader);
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &shaderStatus);
     GLuint shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
     glLinkProgram(shaderProgram);
-    glGetShaderiv(fragmentShader, GL_LINK_STATUS, &shaderStatus);
 
     // Create the material
-    std::shared_ptr<GlWorld::MaterialTexturedSimple> material = std::make_shared<GlWorld::MaterialTexturedSimple>(shaderProgram, textureCami);
+    std::shared_ptr<GlWorld::MaterialPhongFaceted> material = std::make_shared<GlWorld::MaterialPhongFaceted>(
+        shaderProgram,
+        textureCami,
+        glm::vec3(0.1f, 0.1f, 0.1f),
+        16.0f,
+        glm::vec3(0.0f, 0.0f, 0.0f)
+    );
 
     // Create the mesh
-    std::shared_ptr<GlWorld::MeshTextured> meshCube = GlWorld::MeshTextured::sphere(1.0f, 2, 4);
+    std::shared_ptr<GlWorld::MeshTextured> meshCube = GlWorld::MeshTextured::cube(2.0f);
+    
 
     // Create the model
     std::shared_ptr<GlWorld::ModelTexturedSimple> modelCami = std::make_shared<GlWorld::ModelTexturedSimple>(meshCube, material);
@@ -99,34 +105,46 @@ int main(void)
     // Create the WorldObject
     std::shared_ptr<GlWorld::WorldObject> woCami = std::make_shared<GlWorld::WorldObject>(modelCami);
 
+    // Create the LightAmbient
+    std::shared_ptr<GlWorld::LightAmbient> lightAmbient = std::make_shared<GlWorld::LightAmbient>(glm::vec3(0.1f, 0.1f, 0.1f));
+
+    // Create and position the LightDirectional
+    std::shared_ptr<GlWorld::Transform> transformLight = std::make_shared<GlWorld::Transform>();
+    transformLight->rotate(-(float)M_PI / 4.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+    std::shared_ptr<GlWorld::LightDirectional> lightDirectional = std::make_shared<GlWorld::LightDirectional>(transformLight, glm::vec3(0.9, 0.9, 0.9));
+
     // Create and populate the scene
     glm::vec4 skyColor = glm::vec4(0.5f, 0.8f, 1.0f, 1.0f);
-    // std::unique_ptr<GlWorld::Scene> scene = std::make_unique<GlWorld::Scene>(camera, skyColor);
-    // scene.get()->addWorldObject(woCami);
+    std::unique_ptr<GlWorld::Scene> scene = std::make_unique<GlWorld::Scene>(camera, skyColor, lightAmbient, lightDirectional);
+    scene.get()->addWorldObject(woCami);
 
     // Position the camera
-    glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 5.0f);
+    glm::vec3 cameraPos = glm::vec3(0.0f, 2.0f, 5.0f);
     glm::vec3 cameraAxis = glm::vec3(1.0f, 0.0f, 0.0f);
     float angle = atan2(-cameraPos.y, cameraPos.z);
     cameraTransform.get()->setPosition(cameraPos);
     cameraTransform.get()->setRotation(angle, cameraAxis);
 
-    glm::vec3 axisWoCami = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::vec3 axisWoCami = glm::normalize(glm::vec3(0.7f, 0.5f, 0.2f));
     float rotationsPerSecond = 0.2f;
-    float radiansPerMilli = 2.0f * PI_F * rotationsPerSecond / 1000.0f;
+    float radiansPerMilli = 2.0f * M_PI * rotationsPerSecond / 1000.0f;
 
     uint64_t millisStart = millisSinceEpoch();
 
     // Game loop
     while(glfwWindowShouldClose(window) == GL_FALSE) {
 
+        
+
         uint64_t millisFrame = millisSinceEpoch();
         int millisElapsed = millisFrame - millisStart;
         float angle = radiansPerMilli * millisElapsed;
         woCami.get()->getTransform().get()->setRotation(angle, axisWoCami);
+        
 
         // Draw the scene
-        // scene.get()->draw();
+        scene->draw();
+        
         glfwSwapBuffers(window);
 
         // Handle input
@@ -155,4 +173,16 @@ GLFWwindow* setupGl(void) {
 uint64_t millisSinceEpoch()
 {
     return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+}
+
+void reportShaderStatus(GLuint shader)
+{
+    GLint shaderStatus;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &shaderStatus);
+    if (shaderStatus == GL_TRUE) return;
+
+    char log[512];
+    glGetShaderInfoLog(shader, 511, NULL, log);
+    printf("%s", log);
+
 }

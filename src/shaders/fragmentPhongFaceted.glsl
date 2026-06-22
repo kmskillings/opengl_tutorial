@@ -1,6 +1,6 @@
 #version 150 core
 
-in vec2 TextureCoords
+in vec2 TextureCoords;
 in vec3 Position; // In view space
 
 uniform sampler2D textureDiffuse;
@@ -17,31 +17,39 @@ out vec4 outColor;
 
 void main()
 {
-    float dx = dFdx(position);
-    float dy = dFdy(position);
-    vec3 facetNormal = normalize(cross(dy, dx));
+    vec3 dx = dFdx(Position);
+    vec3 dy = dFdy(Position);
+    vec3 facetNormal = normalize(cross(dx, dy));
 
-    vec3 reflection = -lightDirection + 2 * facetNormal;
+    vec3 reflection = -lightDirection + 2 * (dot(facetNormal, lightDirection) * facetNormal);
     
-    vec3 colorAmbient = 
-        texture(textureDiffuse, TextureCoords)
-        * ambientColor 
-        * ambientIntensity;
+    vec3 colorDiffuse = texture(textureDiffuse, TextureCoords).xyz;
 
-    vec3 colorDiffuse = 
-        texture(textureDiffuse, TextureCoords) 
+    vec3 componentAmbient = 
+        colorDiffuse
+        * ambientColor;
+
+    vec3 componentDiffuse =
+        colorDiffuse
         * max(dot(facetNormal, lightDirection), 0)
-        * lightColor 
-        * lightIntensity;
+        * lightColor;
 
-    vec3 colorSpecular =
-        texture(textureSpecular, TextureCoords)
-        * pow(max(dot(reflection, -normalize(position))), texture(textureSpecularExp, TextureCoords))
-        * lightColor
-        * lightIntensity;
+    vec3 colorSpecular = texture(textureSpecular, TextureCoords).xyz;
+    float specularExp = texture(textureSpecularExp, TextureCoords).x;
+    float specularStrength = max(dot(reflection, -normalize(Position)), 0);
+    vec3 componentSpecular =
+        colorSpecular
+        * pow(specularStrength, specularExp)
+        * lightColor;
 
-    vec3 colorEmissive = 
-        texture(textureEmissive, TextureCoords);
+    vec3 componenetEmissive = 
+        texture(textureEmissive, TextureCoords).xyz;
 
-    outColor = colorAmbient + colorDiffuse + colorSpecular + colorEmissive;
+    vec3 componentTotal = 
+        componentAmbient 
+        + componentDiffuse
+        + componentSpecular 
+        + componenetEmissive;
+
+    outColor = vec4(componentTotal, 1.0);
 }

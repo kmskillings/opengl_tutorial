@@ -9,11 +9,16 @@ namespace GlWorld {
 
 class Scene;
 class WorldObject;
+class Mesh;
 
 class Material
 {
 
 public:
+
+    virtual void bindMesh(
+        Mesh &mesh
+    ) = 0;
 
     virtual void activate(
         const Scene &scene,
@@ -37,8 +42,9 @@ public:
         GLuint texture
     );
 
-    GLuint getLocationPosition(void) const;
-    GLuint getLocationTextureCoords(void) const;
+    void bindMesh(
+        Mesh &mesh
+    );
 
     void activate(
         const Scene &scene,
@@ -53,6 +59,9 @@ private:
     GLuint uniformMatrix;
     GLuint uniformTexture;
     GLuint shaderProgram;
+
+    GLuint attributePosition4d;
+    GLuint attributeTextureCoords2d;
 
 };
 
@@ -69,12 +78,13 @@ public:
         std::variant<GLuint, glm::vec3> emissive
     );
 
-    GLuint getLocationPosition(void) const;
-    GLuint getLocationTextureCoords(void) const;
+    void bindMesh(
+        Mesh &mesh
+    );
 
     void activate(
-        const WorldObject &worldObject,
-        const Scene &scene
+        const Scene &scene,
+        const WorldObject &worldObject
     );
 
     void deactivate(void);
@@ -82,6 +92,8 @@ public:
 private:
 
     GLuint shaderProgram;
+    GLuint attribute4dPosition;
+    GLuint attribute2dTextureCoords;
     GLuint uniformMatrixModel;
     GLuint uniformMatrixView;
     GLuint uniformMatrixProjection;

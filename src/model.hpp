@@ -9,8 +9,8 @@ namespace GlWorld {
 
 class Scene;
 class WorldObject;
-class MeshTextured;
-class MaterialTexturedSimple;
+class Mesh;
+class Material;
 
 class Model
 {
@@ -26,16 +26,16 @@ class ModelTexturedSimple : public Model
 {
 public:
     ModelTexturedSimple(
-        std::shared_ptr<MeshTextured> mesh,
-        std::shared_ptr<MaterialTexturedSimple> material
+        std::shared_ptr<Mesh> mesh,
+        std::shared_ptr<Material> material
     );
     void draw(
         const Scene &scene,
         const WorldObject &worldObject
     ) const;
 private:
-    std::shared_ptr<MeshTextured> mesh;
-    std::shared_ptr<MaterialTexturedSimple> material;
+    std::shared_ptr<Mesh> mesh;
+    std::shared_ptr<Material> material;
 };
 
 }

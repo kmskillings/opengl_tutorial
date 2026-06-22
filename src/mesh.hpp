@@ -13,13 +13,13 @@ class Mesh
 {
 public:
 
-    virtual bool has4dPosition(void) = 0;
+    virtual bool has4dPosition(void) const = 0;
     virtual void bind4dPosition(GLuint location) = 0;
 
-    virtual bool hasVertexNormals(void) = 0;
+    virtual bool hasVertexNormals(void) const = 0;
     virtual void bindVertexNormals(GLuint location) = 0;
 
-    virtual bool has2dTextureCoords(void) = 0;
+    virtual bool has2dTextureCoords(void) const = 0;
     virtual void bind2dTextureCoords(GLuint location) = 0;
 
     virtual void activate(void) = 0;
@@ -38,13 +38,13 @@ public:
         const std::vector<GLuint> &elements
     );
 
-    bool has4dPosition(void);
+    bool has4dPosition(void) const;
     void bind4dPosition(GLuint location);
 
-    bool hasVertexNormals(void);
+    bool hasVertexNormals(void) const;
     void bindVertexNormals(GLuint location);
 
-    bool has2dTextureCoords(void);
+    bool has2dTextureCoords(void) const;
     void bind2dTextureCoords(GLuint location);
 
     void activate(void);
