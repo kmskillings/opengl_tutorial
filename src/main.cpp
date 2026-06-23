@@ -8,8 +8,10 @@
 #include <memory>
 #include <stdio.h>
 
+extern "C" {
 #include "textures.h"
 #include "shaders.h"
+}
 
 #include "scene.hpp"
 #include "camera.hpp"
@@ -75,16 +77,12 @@ int main(void)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     // Then create the shader program
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexPhongFacetedSource, NULL);
-    glCompileShader(vertexShader);
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentPhongFacetedSource, NULL);
-    glCompileShader(fragmentShader);
-    GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
+    GLuint shaderProgram = compileShader(
+        &vertexPhongFacetedSource,
+        1,
+        &fragmentPhongFacetedSource,
+        1
+    );
 
     // Create the material
     std::shared_ptr<GlWorld::MaterialPhongFaceted> material = std::make_shared<GlWorld::MaterialPhongFaceted>(
@@ -175,14 +173,3 @@ uint64_t millisSinceEpoch()
     return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
-void reportShaderStatus(GLuint shader)
-{
-    GLint shaderStatus;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &shaderStatus);
-    if (shaderStatus == GL_TRUE) return;
-
-    char log[512];
-    glGetShaderInfoLog(shader, 511, NULL, log);
-    printf("%s", log);
-
-}
