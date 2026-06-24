@@ -31,7 +31,12 @@ material.hpp
 headers := ${header_names:%=${src_dir}/%}
 
 shader_dir := ./src/shaders
-shader_names := vertex.glsl fragment.glsl vertexPhongFaceted.glsl fragmentPhongFaceted.glsl
+shader_names := \
+vertex.glsl \
+fragment.glsl \
+vertexPhongFaceted.glsl \
+fragmentPhongFaceted.glsl \
+utilsPhong.glsl
 shaders := ${shader_names:%=${shader_dir}/%}
 
 shader_dumps := ${shaders:%.glsl=%.xxd}

@@ -28,6 +28,12 @@ const char fragmentPhongFacetedSourceArray[] = {
 };
 const char* fragmentPhongFacetedSource = fragmentPhongFacetedSourceArray;
 
+const char utilsPhongSourceArray[] = {
+    #include "shaders/utilsPhong.xxd"
+    , 0x00
+};
+const char* utilsPhongSource = utilsPhongSourceArray;
+
 unsigned int compileShader(
     const char** vertexShaderSources,
     GLuint vertexShaderCount,

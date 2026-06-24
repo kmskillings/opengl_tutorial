@@ -77,11 +77,18 @@ int main(void)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     // Then create the shader program
+    const char* fragmentShaderSources[2] = {
+        utilsPhongSource,
+        fragmentPhongFacetedSource
+    };
+    const char* vertexShaderSources[1] = {
+        vertexPhongFacetedSource
+    };
     GLuint shaderProgram = compileShader(
-        &vertexPhongFacetedSource,
+        vertexShaderSources,
         1,
-        &fragmentPhongFacetedSource,
-        1
+        fragmentShaderSources,
+        2
     );
 
     // Create the material
