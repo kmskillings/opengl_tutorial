@@ -26,6 +26,9 @@ extern "C" {
 #define WINDOW_HEIGHT 600
 #define WINDOW_TITLE "Cami Cube"
 
+#define CLOUD_RADIUS 10.0f
+#define CLOUD_ROTATION_RATE_MAX 1.0f
+
 #define THROB_PERIOD_MILLIS 2000
 
 GLFWwindow* setupGl(void);
@@ -51,7 +54,7 @@ int main(void)
         M_PI / 4,
         (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT,
         0.1f,
-        10.0f
+        100.0f
     );
 
     // Create Cami Cube
@@ -101,14 +104,59 @@ int main(void)
     );
 
     // Create the mesh
-    std::shared_ptr<GlWorld::MeshTextured> meshCube = GlWorld::MeshTextured::cube(2.0f);
-    
+    std::shared_ptr<GlWorld::MeshTextured> meshCube = 
+        GlWorld::MeshTextured::cube(1.0f);
 
     // Create the model
     std::shared_ptr<GlWorld::ModelTexturedSimple> modelCami = std::make_shared<GlWorld::ModelTexturedSimple>(meshCube, material);
 
-    // Create the WorldObject
-    std::shared_ptr<GlWorld::WorldObject> woCami = std::make_shared<GlWorld::WorldObject>(modelCami);
+    // Create each worldObject
+
+    // Transform data is in the form:
+    // posX, posY, posZ, orientationAngle, orientationAxisX, Y, Z, rotationAngle, rotationX, Y, Z
+    // The position is scaled by CLOUD_RADIUS. The rotation angle is scaled by CLOUD_ROTATION_RATE_MAX.
+    float transformData[] = {
+        #include "cloud.txt"
+    };
+    int transformCount = sizeof(transformData) / sizeof(float) / 11;
+    std::shared_ptr<GlWorld::WorldObject> wos[transformCount];
+    glm::quat transformRotations[transformCount];
+    for (int i = 0; i < transformCount; i++)
+    {
+        glm::vec3 position = glm::vec3(
+            transformData[11 * i + 0], 
+            transformData[11 * i + 1], 
+            transformData[11 * i + 2]
+        );
+        position = position * CLOUD_RADIUS;
+
+        float orientationAngle = 
+            transformData[11 * i + 3];
+        glm::vec3 orientationAxis = glm::vec3(
+            transformData[11 * i + 4],
+            transformData[11 * i + 5],
+            transformData[11 * i + 6]
+        );
+
+        float rotationAngle =
+            transformData[11 * i + 7] * CLOUD_ROTATION_RATE_MAX;
+        glm::vec3 rotationAxis = glm::vec3(
+            transformData[11 * i + 8],
+            transformData[11 * i + 9],
+            transformData[11 * i + 10]
+        );
+
+        std::shared_ptr<GlWorld::Transform> t =
+            std::make_shared<GlWorld::Transform>();
+        t->setPosition(position);
+        t->setRotation(orientationAngle, orientationAxis);
+        
+        wos[i] = std::make_shared<GlWorld::WorldObject>(
+            modelCami,
+            t
+        );
+        transformRotations[i] = glm::angleAxis(rotationAngle, rotationAxis);
+    }
 
     // Create the LightAmbient
     std::shared_ptr<GlWorld::LightAmbient> lightAmbient = std::make_shared<GlWorld::LightAmbient>(glm::vec3(0.1f, 0.1f, 0.1f));
@@ -121,7 +169,10 @@ int main(void)
     // Create and populate the scene
     glm::vec4 skyColor = glm::vec4(0.5f, 0.8f, 1.0f, 1.0f);
     std::unique_ptr<GlWorld::Scene> scene = std::make_unique<GlWorld::Scene>(camera, skyColor, lightAmbient, lightDirectional);
-    scene.get()->addWorldObject(woCami);
+    for (std::shared_ptr<GlWorld::WorldObject> wo : wos)
+    {
+        scene->addWorldObject(wo);
+    }
 
     // Position the camera
     glm::vec3 cameraPos = glm::vec3(0.0f, 2.0f, 5.0f);
@@ -144,8 +195,6 @@ int main(void)
         uint64_t millisFrame = millisSinceEpoch();
         int millisElapsed = millisFrame - millisStart;
         float angle = radiansPerMilli * millisElapsed;
-        woCami.get()->getTransform().get()->setRotation(angle, axisWoCami);
-        
 
         // Draw the scene
         scene->draw();
