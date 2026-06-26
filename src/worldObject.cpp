@@ -8,7 +8,10 @@
 namespace GlWorld
 {
 
-WorldObject::WorldObject(std::shared_ptr<Model> model)
+WorldObject::WorldObject(
+    std::shared_ptr<Model> model, 
+    std::shared_ptr<Transform> transform
+)
 {
     this->model = model;
     this->transform = std::make_shared<Transform>();

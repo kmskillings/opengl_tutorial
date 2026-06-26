@@ -10,12 +10,15 @@ namespace GlWorld {
 
 class Model;
 class Scene;
-
+class Transform;
 
 class WorldObject : public HasTransform
 {
 public:
-    WorldObject(std::shared_ptr<Model> model);
+    WorldObject(
+        std::shared_ptr<Model> model,
+        std::shared_ptr<Transform> transform
+    );
     std::shared_ptr<Transform> getTransform(void) const;
     void draw(
         const Scene &scene
