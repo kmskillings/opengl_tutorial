@@ -14,7 +14,7 @@ WorldObject::WorldObject(
 )
 {
     this->model = model;
-    this->transform = std::make_shared<Transform>();
+    this->transform = transform;
 }
 
 std::shared_ptr<Transform> WorldObject::getTransform(void) const
