@@ -32,7 +32,7 @@ extern "C" {
 #define THROB_PERIOD_MILLIS 2000
 
 GLFWwindow* setupGl(void);
-uint64_t millisSinceEpoch(void);
+double secondsSinceEpoch(void);
 void reportShaderStatus(GLuint shader);
 
 int main(void)
@@ -120,7 +120,8 @@ int main(void)
     };
     int transformCount = sizeof(transformData) / sizeof(float) / 11;
     std::shared_ptr<GlWorld::WorldObject> wos[transformCount];
-    glm::quat transformRotations[transformCount];
+    float transformRotationAngles[transformCount];
+    glm::vec3 transformRotationAxes[transformCount];
     for (int i = 0; i < transformCount; i++)
     {
         glm::vec3 position = glm::vec3(
@@ -155,7 +156,8 @@ int main(void)
             modelCami,
             t
         );
-        transformRotations[i] = glm::angleAxis(rotationAngle, rotationAxis);
+        transformRotationAngles[i] = rotationAngle;
+        transformRotationAxes[i] = rotationAxis;
     }
 
     // Create the LightAmbient
@@ -185,16 +187,24 @@ int main(void)
     float rotationsPerSecond = 0.2f;
     float radiansPerMilli = 2.0f * M_PI * rotationsPerSecond / 1000.0f;
 
-    uint64_t millisStart = millisSinceEpoch();
+    double secondsStart = secondsSinceEpoch();
+    double secondsLast = secondsStart;
+    double secondsNow = secondsLast;
 
     // Game loop
     while(glfwWindowShouldClose(window) == GL_FALSE) {
 
-        
-
-        uint64_t millisFrame = millisSinceEpoch();
-        int millisElapsed = millisFrame - millisStart;
-        float angle = radiansPerMilli * millisElapsed;
+        secondsLast = secondsNow;
+        secondsNow = secondsSinceEpoch();
+        float secondsDelta = secondsNow - secondsLast;
+        for (int i = 0; i < transformCount; i++)
+        {
+            std::shared_ptr<GlWorld::Transform> t = wos[i]->getTransform();
+            t->rotate(
+                transformRotationAngles[i] * secondsDelta,
+                transformRotationAxes[i]
+            );
+        }        
 
         // Draw the scene
         scene->draw();
@@ -224,8 +234,10 @@ GLFWwindow* setupGl(void) {
 
 }
 
-uint64_t millisSinceEpoch()
+double secondsSinceEpoch()
 {
-    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    auto now = std::chrono::system_clock::now();
+    std::chrono::duration<double> ds = now.time_since_epoch();
+    return ds.count();
 }
 
