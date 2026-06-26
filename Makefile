@@ -63,6 +63,9 @@ ${dir_build}/${program_name}: ${objects}
 ${filter %.cpp.o,${objects}}: ${dir_build}/%.cpp.o: ${src_dir}/%.cpp ${headers}
 	g++ ${compile_options} -o $@ $<
 
+# main also depends on cloud.txt
+${dir_build}/main.cpp.o: ${src_dir}/main.cpp ${src_dir}/cloud.txt
+
 # Compile .c sources
 ${filter %.c.o,${objects}}: ${dir_build}/%.c.o: ${src_dir}/%.c
 	gcc ${compile_options} -o $@ $<
