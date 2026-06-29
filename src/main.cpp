@@ -21,6 +21,7 @@ extern "C" {
 #include "worldObject.hpp"
 #include "light.hpp"
 #include "mesh.hpp"
+#include "motionPath.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -172,6 +173,38 @@ int main(void)
     transformLight->rotate(-(float)M_PI / 4.0f, glm::vec3(1.0f, 0.0f, 0.0f));
     std::shared_ptr<GlWorld::LightDirectional> lightDirectional = std::make_shared<GlWorld::LightDirectional>(transformLight, glm::vec3(0.9, 0.9, 0.9));
 
+    // Create the lightbulb WO
+    std::shared_ptr<GlWorld::MaterialPhongFaceted> materialLightbulb
+        = std::make_shared<GlWorld::MaterialPhongFaceted>(
+            shaderProgram,
+            glm::vec3(0.0f, 0.0f, 0.0f),
+            glm::vec3(0.0f, 0.0f, 0.0f),
+            0.0f,
+            glm::vec3(1.0f, 1.0f, 1.0f)
+        );
+
+    std::shared_ptr<GlWorld::MeshTextured> meshLightbulb =
+        GlWorld::MeshTextured::cube(0.2f);
+
+    std::shared_ptr<GlWorld::ModelTexturedSimple> modelLightbulb =
+        std::make_shared<GlWorld::ModelTexturedSimple>(
+            meshLightbulb,
+            materialLightbulb
+        );
+
+    GlWorld::MotionPathCircular pathLightbulb = GlWorld::MotionPathCircular(
+        11.0f,
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f),
+        10.0f,
+        glm::vec3(0.0f, 0.0f, 1.0f)
+    );
+
+    std::shared_ptr<GlWorld::WorldObject> woLightbulb = std::make_shared<GlWorld::WorldObject>(
+        modelLightbulb,
+        pathLightbulb.getAttachedTransform()
+    );
+
     // Create and populate the scene
     glm::vec4 skyColor = glm::vec4(0.5f, 0.8f, 1.0f, 1.0f);
     std::unique_ptr<GlWorld::Scene> scene = std::make_unique<GlWorld::Scene>(camera, skyColor, lightAmbient, lightDirectional);
@@ -179,6 +212,7 @@ int main(void)
     {
         scene->addWorldObject(wo);
     }
+    scene->addWorldObject(woLightbulb);
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -265,7 +299,9 @@ int main(void)
                 transformRotationAngles[i] * secondsDelta,
                 transformRotationAxes[i]
             );
-        }        
+        }
+        
+        pathLightbulb.tick(secondsDelta);
 
         // Draw the scene
         scene->draw();
