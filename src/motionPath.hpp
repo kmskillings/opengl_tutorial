@@ -15,7 +15,7 @@ class MotionPath
 
 public:
 
-    virtual void tick(float secondsDelta) = 0;
+    virtual void tick(const float& secondsDelta) = 0;
 
     virtual std::shared_ptr<Transform> getAttachedTransform(void) const = 0;
 
