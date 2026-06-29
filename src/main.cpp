@@ -30,6 +30,8 @@ extern "C" {
 #define CLOUD_ROTATION_RATE_MAX 1.0f
 
 #define CAMERA_SPEED_TRANSLATION 5.0f
+#define CAMERA_SENSITIVITY_PITCH 0.1f
+#define CAMERA_SENSITIVITY_YAW   0.1f
 
 #define THROB_PERIOD_MILLIS 2000
 
@@ -178,6 +180,15 @@ int main(void)
         scene->addWorldObject(wo);
     }
 
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    bool mouseInitialized = false;
+    double mousePositionNowX;
+    double mousePositionNowY;
+    glfwGetCursorPos(window, &mousePositionNowX, &mousePositionNowY);
+    double mousePositionLastX;
+    double mousePositionLastY;
+
     double secondsStart = secondsSinceEpoch();
     double secondsLast = secondsStart;
     double secondsNow = secondsLast;
@@ -191,6 +202,8 @@ int main(void)
 
         // Handle input
         glfwPollEvents();
+
+        // Translation controls
         glm::vec4 movementNorm = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
         {
@@ -215,7 +228,30 @@ int main(void)
         glm::vec3 cameraVelocityWorld = glm::vec3(cameraDirectionWorld) * CAMERA_SPEED_TRANSLATION * secondsDelta;
         camera->getTransform()->translate(cameraVelocityWorld);
 
+        // Camera view controls
+        mousePositionLastX = mousePositionNowX;
+        mousePositionLastY = mousePositionNowY;
+        glfwGetCursorPos(window, &mousePositionNowX, &mousePositionNowY);
+        double mousePositionDeltaX = mousePositionNowX - mousePositionLastX;
+        double mousePositionDeltaY = mousePositionNowY - mousePositionLastY;
 
+        glm::vec3 cameraPitchAxis = glm::vec3(
+            camera->getTransform()->getMatrixModel() 
+            * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f)
+        );
+        camera->getTransform()->rotate(
+            -mousePositionDeltaY * CAMERA_SENSITIVITY_PITCH * secondsDelta,
+            cameraPitchAxis
+        );
+
+        glm::vec3 cameraYawAxis = glm::vec3(
+            camera->getTransform()->getMatrixModel()
+            * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)
+        );
+        camera->getTransform()->rotate(
+            -mousePositionDeltaX * CAMERA_SENSITIVITY_YAW * secondsDelta,
+            cameraYawAxis
+        );
 
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         {
