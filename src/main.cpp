@@ -29,6 +29,8 @@ extern "C" {
 #define CLOUD_RADIUS 10.0f
 #define CLOUD_ROTATION_RATE_MAX 1.0f
 
+#define CAMERA_SPEED_TRANSLATION 5.0f
+
 #define THROB_PERIOD_MILLIS 2000
 
 GLFWwindow* setupGl(void);
@@ -176,17 +178,6 @@ int main(void)
         scene->addWorldObject(wo);
     }
 
-    // Position the camera
-    glm::vec3 cameraPos = glm::vec3(0.0f, 2.0f, 5.0f);
-    glm::vec3 cameraAxis = glm::vec3(1.0f, 0.0f, 0.0f);
-    float angle = atan2(-cameraPos.y, cameraPos.z);
-    cameraTransform.get()->setPosition(cameraPos);
-    cameraTransform.get()->setRotation(angle, cameraAxis);
-
-    glm::vec3 axisWoCami = glm::normalize(glm::vec3(0.7f, 0.5f, 0.2f));
-    float rotationsPerSecond = 0.2f;
-    float radiansPerMilli = 2.0f * M_PI * rotationsPerSecond / 1000.0f;
-
     double secondsStart = secondsSinceEpoch();
     double secondsLast = secondsStart;
     double secondsNow = secondsLast;
@@ -197,6 +188,40 @@ int main(void)
         secondsLast = secondsNow;
         secondsNow = secondsSinceEpoch();
         float secondsDelta = secondsNow - secondsLast;
+
+        // Handle input
+        glfwPollEvents();
+        glm::vec4 movementNorm = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        {
+            movementNorm = movementNorm + glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
+        }
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        {
+            movementNorm = movementNorm + glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
+        }
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        {
+            movementNorm = movementNorm + glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
+        }
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        {
+            movementNorm = movementNorm + glm::vec4(-1.0f, 0.0f, 0.0f, 0.0f);
+        }
+        if (glm::length(movementNorm) > 0.01f) {
+            movementNorm = glm::normalize(movementNorm);
+        }
+        glm::vec4 cameraDirectionWorld = camera->getTransform()->getMatrixModel() * movementNorm;
+        glm::vec3 cameraVelocityWorld = glm::vec3(cameraDirectionWorld) * CAMERA_SPEED_TRANSLATION * secondsDelta;
+        camera->getTransform()->translate(cameraVelocityWorld);
+
+
+
+        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        {
+            glfwSetWindowShouldClose(window, GL_TRUE);
+        }
+
         for (int i = 0; i < transformCount; i++)
         {
             std::shared_ptr<GlWorld::Transform> t = wos[i]->getTransform();
@@ -210,13 +235,6 @@ int main(void)
         scene->draw();
         
         glfwSwapBuffers(window);
-
-        // Handle input
-        glfwPollEvents();
-        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        {
-            glfwSetWindowShouldClose(window, GL_TRUE);
-        }
 
     }
 
