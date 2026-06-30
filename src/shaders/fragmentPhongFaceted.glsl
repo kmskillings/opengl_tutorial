@@ -42,14 +42,14 @@ void main()
         Position
     );
 
-    vec3 componenetEmissive = 
+    vec3 componentEmissive = 
         texture(textureEmissive, TextureCoords).xyz;
 
     vec3 componentTotal = 
         componentAmbient 
         + componentDiffuse
         + componentSpecular 
-        + componenetEmissive;
+        + componentEmissive;
 
     outColor = vec4(componentTotal, 1.0);
 }
