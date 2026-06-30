@@ -150,7 +150,7 @@ int main(void)
     float transformData[] = {
         #include "cloud.txt"
     };
-    int transformCount = 1; // sizeof(transformData) / sizeof(float) / 11;
+    int transformCount = sizeof(transformData) / sizeof(float) / 11;
     for (int i = 0; i < transformCount; i++)
     {
         createCamiCube(
