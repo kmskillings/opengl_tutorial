@@ -22,7 +22,7 @@ public:
 
     virtual void activate(
         const Scene &scene,
-        const WorldObject &worldObject
+        const Transform& transformModel
     ) = 0;
 
     virtual void deactivate(void) = 0;
@@ -48,7 +48,7 @@ public:
 
     void activate(
         const Scene &scene,
-        const WorldObject &worldObject
+        const Transform& transformModel
     );
 
     void deactivate(void);
@@ -84,7 +84,7 @@ public:
 
     void activate(
         const Scene &scene,
-        const WorldObject &worldObject
+        const Transform& transformModel
     );
 
     void deactivate(void);

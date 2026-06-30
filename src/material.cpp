@@ -51,7 +51,7 @@ void MaterialTexturedSimple::bindMesh(
 
 void MaterialTexturedSimple::activate(
     const Scene &scene,
-    const WorldObject &worldObject
+    const Transform& transformModel
 )
 {
     
@@ -63,7 +63,7 @@ void MaterialTexturedSimple::activate(
     
     glUniform1i(this->uniformTexture, 0);
 
-    glm::mat4 matrixModel = worldObject.getTransform()->getMatrixModel();
+    glm::mat4 matrixModel = transformModel.getMatrixModel();
     glm::mat4 matrixView = scene.getCamera()->getMatrixView();
     glm::mat4 matrixProject = scene.getCamera()->getMatrixProject();
     glm::mat4 matrix = matrixProject * matrixView * matrixModel;
@@ -133,7 +133,7 @@ void MaterialPhongFaceted::bindMesh(
 
 void MaterialPhongFaceted::activate(
     const Scene &scene,
-    const WorldObject &worldObject
+    const Transform& transformModel
 )
 {
     
@@ -148,7 +148,7 @@ void MaterialPhongFaceted::activate(
     glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D, this->emissive);
 
-    glm::mat4 matrixModel = worldObject.getTransform()->getMatrixModel();
+    glm::mat4 matrixModel = transformModel.getMatrixModel();
     glUniformMatrix4fv(
         this->uniformMatrixModel,
         1,
