@@ -4,28 +4,92 @@
 
 namespace GlWorld {
 
-ModelTexturedSimple::ModelTexturedSimple(
-    std::shared_ptr<Mesh> mesh,
-    std::shared_ptr<Material> material
-)
+Model::Model(
+    std::shared_ptr<Transform> transform,
+    std::shared_ptr<Material> material,
+    std::shared_ptr<Mesh> mesh
+) : 
+    mesh(std::move(mesh)),
+    material(std::move(material)),
+    transform(std::move(transform))
 {
-    this->mesh = mesh;
-    this->material = material;
 
-    
 }
 
-void ModelTexturedSimple::draw(
-    const Scene &scene,
-    const WorldObject &worldObject
-) const
+bool Model::caresAboutUpdatePhysical(void) const
 {
-    this->material->activate(scene, worldObject);
-    this->material->bindMesh(*this->mesh.get());
+    return false;
+}
+
+bool Model::caresAboutUpdateVisual(void) const
+{
+    return false;
+}
+
+bool Model::caresAboutRenderPass(void) const
+{
+    return true;
+}
+
+void Model::updatePhysicalPre(
+    const Scene& scene,
+    const float& secondsDelta
+)
+{
+    return;
+}
+
+void Model::updateVisualPre(
+    const Scene& scene,
+    const float& secondsDelta
+)
+{
+    return;
+}
+
+void Model::updatePhysical(
+    const Scene& scene,
+    const float& secondsDelta
+)
+{
+    return;
+}
+
+void Model::updateVisual(
+    const Scene& scene,
+    const float& secondsDelta
+)
+{
+    return;
+}
+
+void Model::updatePhysicalPost(
+    const Scene& scene,
+    const float& secondsDelta
+)
+{
+    return;
+}
+
+void Model::updateVisualPost(
+    const Scene& scene,
+    const float& secondsDelta
+)
+{
+    return;
+}
+
+void Model::draw(
+    const Scene& scene
+
+)
+{
+    this->material->activate(scene, *this->transform.get());
+    this->material->bindMesh(*this->mesh.get()); 
     this->mesh->activate();
     this->mesh->draw();
-    this->material->deactivate();
     this->mesh->deactivate();
+    this->material->deactivate();
 }
 
 }
