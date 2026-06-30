@@ -1,4 +1,10 @@
+#include "gl_includes.h"
+
 #include "scene.hpp"
+
+#include <vector>
+#include <memory>
+#include <unordered_set>
 
 #include "camera.hpp"
 #include "light.hpp"
@@ -34,22 +40,79 @@ std::shared_ptr<LightDirectional> Scene::getLightDirectional(void) const
     return this->lightDirectional;
 }
 
-void Scene::addWorldObject(std::shared_ptr<WorldObject> worldObject)
+void Scene::addElement(
+    std::shared_ptr<SceneElement> element
+)
 {
-    this->worldObjects.push_back(worldObject);
+    this->elements.insert(element);
+}
+
+void Scene::updatePhysical(
+    const float& secondsDelta
+)
+{
+    for (std::shared_ptr<SceneElement> element : this->elements)
+    {
+        if (element->caresAboutUpdatePhysical())
+        {
+            element->updatePhysicalPre(*this, secondsDelta);
+        }
+    }
+
+    for (std::shared_ptr<SceneElement> element : this->elements)
+    {
+        if (element->caresAboutUpdatePhysical())
+        {
+            element->updatePhysical(*this, secondsDelta);
+        }
+    }
+
+    for (std::shared_ptr<SceneElement> element : this->elements)
+    {
+        if (element->caresAboutUpdatePhysical())
+        {
+            element->updatePhysicalPost(*this, secondsDelta);
+        }
+    }
+}
+
+void Scene::updateVisual(
+    const float& secondsDelta
+)
+{
+    for (std::shared_ptr<SceneElement> element : this->elements)
+    {
+        if (element->caresAboutUpdateVisual())
+        {
+            element->updateVisualPre(*this, secondsDelta);
+        }
+    }
+
+    for (std::shared_ptr<SceneElement> element : this->elements)
+    {
+        if (element->caresAboutUpdateVisual())
+        {
+            element->updateVisual(*this, secondsDelta);
+        }
+    }
+
+    for (std::shared_ptr<SceneElement> element : this->elements)
+    {
+        if (element->caresAboutUpdateVisual())
+        {
+            element->updateVisualPost(*this, secondsDelta);
+        }
+    }
 }
 
 void Scene::draw(void)
 {
-    glm::mat4 matrixView = this->camera.get()->getMatrixView();
-    glm::mat4 matrixProject = this->camera.get()->getMatrixProject();
-
     glEnable(GL_DEPTH_TEST);
     glClearColor(this->skyColor.r, this->skyColor.g, this->skyColor.b, this->skyColor.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    for (std::shared_ptr<WorldObject> worldObject : this->worldObjects)
+    for (std::shared_ptr<SceneElement> element : this->elements)
     {
-        worldObject->draw(*this);
+        element->draw(*this);
     }
 }
 
