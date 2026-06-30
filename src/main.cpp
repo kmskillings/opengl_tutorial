@@ -123,7 +123,7 @@ int main(void)
     float transformData[] = {
         #include "cloud.txt"
     };
-    int transformCount = sizeof(transformData) / sizeof(float) / 11;
+    int transformCount = 1; // sizeof(transformData) / sizeof(float) / 11;
     std::shared_ptr<GlWorld::WorldObject> wos[transformCount];
     float transformRotationAngles[transformCount];
     glm::vec3 transformRotationAxes[transformCount];
