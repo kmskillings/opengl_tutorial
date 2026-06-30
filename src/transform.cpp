@@ -11,7 +11,7 @@ Transform::Transform(void)
     this->scale = glm::vec3(1.0f, 1.0f, 1.0f);
 }
 
-const glm::mat4 Transform::getMatrixModel(void)
+glm::mat4 Transform::getMatrixModel(void) const
 {
     glm::mat4 identity = glm::mat4(1.0f);
     glm::mat4 translate = glm::translate(identity, glm::vec3(this->position));
@@ -20,7 +20,7 @@ const glm::mat4 Transform::getMatrixModel(void)
     return translate * rotate * scale;
 }
 
-const glm::mat4 Transform::getMatrixModelInv(void)
+glm::mat4 Transform::getMatrixModelInv(void) const
 {
     return glm::inverse(this->getMatrixModel());
 }
@@ -41,7 +41,7 @@ void Transform::translate(const glm::vec3 &direction, float distance)
     this->position = this->position + direction * distance;
 }
 
-const glm::quat Transform::getRotation(void)
+glm::quat Transform::getRotation(void) const
 {
     return this->rotation;
 }
@@ -68,7 +68,7 @@ void Transform::rotate(float angle, const glm::vec3 axis)
     this->rotate(q);
 }
 
-const glm::vec3 Transform::getScale(void)
+glm::vec3 Transform::getScale(void) const
 {
     return this->scale;
 }

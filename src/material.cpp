@@ -2,7 +2,6 @@
 #include "material.hpp"
 
 #include "scene.hpp"
-#include "worldObject.hpp"
 #include "transform.hpp"
 #include "camera.hpp"
 #include "light.hpp"

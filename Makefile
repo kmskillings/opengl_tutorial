@@ -7,7 +7,6 @@ src_cpp_names := \
 main.cpp \
 scene.cpp \
 camera.cpp \
-worldObject.cpp \
 transform.cpp \
 model.cpp \
 mesh.cpp \
@@ -22,7 +21,6 @@ srcs_c := ${src_c_names:%=${src_dir}/%}
 header_names := \
 scene.hpp \
 camera.hpp \
-worldObject.hpp \
 transform.hpp \
 model.hpp \
 mesh.hpp \

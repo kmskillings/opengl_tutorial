@@ -12,7 +12,6 @@ namespace GlWorld {
 class Camera;
 class LightAmbient;
 class LightDirectional;
-class WorldObject;
 
 class SceneElement;
 

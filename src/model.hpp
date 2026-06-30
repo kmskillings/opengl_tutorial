@@ -10,7 +10,6 @@
 
 namespace GlWorld {
 
-class WorldObject;
 class Mesh;
 class Material;
 
@@ -26,6 +25,8 @@ public:
         std::shared_ptr<Material> material,
         std::shared_ptr<Mesh> mesh
     );
+
+    std::shared_ptr<Transform> getTransform(void) const;
 
     bool caresAboutUpdatePhysical(void) const;
 

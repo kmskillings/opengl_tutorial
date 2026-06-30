@@ -8,7 +8,6 @@
 
 #include "camera.hpp"
 #include "light.hpp"
-#include "worldObject.hpp"
 
 namespace GlWorld {
 

@@ -8,8 +8,8 @@
 namespace GlWorld {
 
 class Scene;
-class WorldObject;
 class Mesh;
+class Transform;
 
 class Material
 {

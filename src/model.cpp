@@ -16,6 +16,11 @@ Model::Model(
 
 }
 
+std::shared_ptr<Transform> Model::getTransform(void) const
+{
+    return this->transform;
+}
+
 bool Model::caresAboutUpdatePhysical(void) const
 {
     return false;
