@@ -18,7 +18,6 @@ extern "C" {
 #include "transform.hpp"
 #include "model.hpp"
 #include "material.hpp"
-#include "worldObject.hpp"
 #include "light.hpp"
 #include "mesh.hpp"
 #include "motionPath.hpp"
@@ -37,8 +36,17 @@ extern "C" {
 #define THROB_PERIOD_MILLIS 2000
 
 GLFWwindow* setupGl(void);
+
 double secondsSinceEpoch(void);
+
 void reportShaderStatus(GLuint shader);
+
+void createCamiCube(
+    std::shared_ptr<GlWorld::Mesh> mesh,
+    std::shared_ptr<GlWorld::Material> material,
+    GlWorld::Scene& scene,
+    float* data
+);
 
 int main(void)
 {
@@ -50,19 +58,45 @@ int main(void)
     glfwMakeContextCurrent(window);
     glewInit();
 
-    // Set up scene
-
     // Create camera
-    std::shared_ptr<GlWorld::Transform> cameraTransform = std::make_shared<GlWorld::Transform>();
-    std::shared_ptr<GlWorld::Camera> camera = std::make_shared<GlWorld::Camera>(
-        cameraTransform,
-        M_PI / 4,
-        (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT,
-        0.1f,
-        100.0f
-    );
 
-    // Create Cami Cube
+    std::shared_ptr<GlWorld::Transform> cameraTransform 
+        = std::make_shared<GlWorld::Transform>();
+    std::shared_ptr<GlWorld::Camera> camera 
+        = std::make_shared<GlWorld::Camera>(
+            cameraTransform,
+            M_PI / 4,
+            (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT,
+            0.1f,
+            100.0f
+        );
+
+    std::shared_ptr<GlWorld::LightAmbient> lightAmbient 
+        = std::make_shared<GlWorld::LightAmbient>(
+            glm::vec3(0.1f, 0.1f, 0.1f)
+        );
+
+    std::shared_ptr<GlWorld::Transform> transformLight 
+        = std::make_shared<GlWorld::Transform>();
+
+    transformLight->rotate(-(float)M_PI / 4.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+    
+    std::shared_ptr<GlWorld::LightDirectional> lightDirectional 
+        = std::make_shared<GlWorld::LightDirectional>(
+            transformLight, 
+            glm::vec3(0.9, 0.9, 0.9)
+        );
+
+    glm::vec4 skyColor = glm::vec4(0.5f, 0.8f, 1.0f, 1.0f);
+    
+    std::unique_ptr<GlWorld::Scene> scene 
+        = std::make_unique<GlWorld::Scene>(
+            camera, 
+            skyColor, 
+            lightAmbient, 
+            lightDirectional
+        );
+
     // First load the Cami texture
     GLuint textureCami;
     glGenTextures(1, &textureCami);
@@ -100,119 +134,32 @@ int main(void)
     );
 
     // Create the material
-    std::shared_ptr<GlWorld::MaterialPhongFaceted> material = std::make_shared<GlWorld::MaterialPhongFaceted>(
-        shaderProgram,
-        textureCami,
-        glm::vec3(0.1f, 0.1f, 0.1f),
-        16.0f,
-        glm::vec3(0.0f, 0.0f, 0.0f)
-    );
+    std::shared_ptr<GlWorld::MaterialPhongFaceted> material 
+        = std::make_shared<GlWorld::MaterialPhongFaceted>(
+            shaderProgram,
+            textureCami,
+            glm::vec3(0.1f, 0.1f, 0.1f),
+            16.0f,
+            glm::vec3(0.0f, 0.0f, 0.0f)
+        );
 
     // Create the mesh
     std::shared_ptr<GlWorld::MeshTextured> meshCube = 
         GlWorld::MeshTextured::cube(1.0f);
 
-    // Create the model
-    std::shared_ptr<GlWorld::ModelTexturedSimple> modelCami = std::make_shared<GlWorld::ModelTexturedSimple>(meshCube, material);
-
-    // Create each worldObject
-
-    // Transform data is in the form:
-    // posX, posY, posZ, orientationAngle, orientationAxisX, Y, Z, rotationAngle, rotationX, Y, Z
-    // The position is scaled by CLOUD_RADIUS. The rotation angle is scaled by CLOUD_ROTATION_RATE_MAX.
     float transformData[] = {
         #include "cloud.txt"
     };
     int transformCount = 1; // sizeof(transformData) / sizeof(float) / 11;
-    std::shared_ptr<GlWorld::WorldObject> wos[transformCount];
-    float transformRotationAngles[transformCount];
-    glm::vec3 transformRotationAxes[transformCount];
     for (int i = 0; i < transformCount; i++)
     {
-        glm::vec3 position = glm::vec3(
-            transformData[11 * i + 0], 
-            transformData[11 * i + 1], 
-            transformData[11 * i + 2]
+        createCamiCube(
+            meshCube,
+            material,
+            *scene.get(),
+            transformData + 11 * i
         );
-        position = position * CLOUD_RADIUS;
-
-        float orientationAngle = 
-            transformData[11 * i + 3];
-        glm::vec3 orientationAxis = glm::vec3(
-            transformData[11 * i + 4],
-            transformData[11 * i + 5],
-            transformData[11 * i + 6]
-        );
-
-        float rotationAngle =
-            transformData[11 * i + 7] * CLOUD_ROTATION_RATE_MAX;
-        glm::vec3 rotationAxis = glm::vec3(
-            transformData[11 * i + 8],
-            transformData[11 * i + 9],
-            transformData[11 * i + 10]
-        );
-
-        std::shared_ptr<GlWorld::Transform> t =
-            std::make_shared<GlWorld::Transform>();
-        t->setPosition(position);
-        t->setRotation(orientationAngle, orientationAxis);
-        
-        wos[i] = std::make_shared<GlWorld::WorldObject>(
-            modelCami,
-            t
-        );
-        transformRotationAngles[i] = rotationAngle;
-        transformRotationAxes[i] = rotationAxis;
     }
-
-    // Create the LightAmbient
-    std::shared_ptr<GlWorld::LightAmbient> lightAmbient = std::make_shared<GlWorld::LightAmbient>(glm::vec3(0.1f, 0.1f, 0.1f));
-
-    // Create and position the LightDirectional
-    std::shared_ptr<GlWorld::Transform> transformLight = std::make_shared<GlWorld::Transform>();
-    transformLight->rotate(-(float)M_PI / 4.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-    std::shared_ptr<GlWorld::LightDirectional> lightDirectional = std::make_shared<GlWorld::LightDirectional>(transformLight, glm::vec3(0.9, 0.9, 0.9));
-
-    // Create the lightbulb WO
-    std::shared_ptr<GlWorld::MaterialPhongFaceted> materialLightbulb
-        = std::make_shared<GlWorld::MaterialPhongFaceted>(
-            shaderProgram,
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            0.0f,
-            glm::vec3(1.0f, 1.0f, 1.0f)
-        );
-
-    std::shared_ptr<GlWorld::MeshTextured> meshLightbulb =
-        GlWorld::MeshTextured::cube(0.2f);
-
-    std::shared_ptr<GlWorld::ModelTexturedSimple> modelLightbulb =
-        std::make_shared<GlWorld::ModelTexturedSimple>(
-            meshLightbulb,
-            materialLightbulb
-        );
-
-    GlWorld::MotionPathCircular pathLightbulb = GlWorld::MotionPathCircular(
-        11.0f,
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 1.0f, 0.0f),
-        10.0f,
-        glm::vec3(0.0f, 0.0f, 1.0f)
-    );
-
-    std::shared_ptr<GlWorld::WorldObject> woLightbulb = std::make_shared<GlWorld::WorldObject>(
-        modelLightbulb,
-        pathLightbulb.getAttachedTransform()
-    );
-
-    // Create and populate the scene
-    glm::vec4 skyColor = glm::vec4(0.5f, 0.8f, 1.0f, 1.0f);
-    std::unique_ptr<GlWorld::Scene> scene = std::make_unique<GlWorld::Scene>(camera, skyColor, lightAmbient, lightDirectional);
-    for (std::shared_ptr<GlWorld::WorldObject> wo : wos)
-    {
-        scene->addWorldObject(wo);
-    }
-    scene->addWorldObject(woLightbulb);
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -292,17 +239,6 @@ int main(void)
             glfwSetWindowShouldClose(window, GL_TRUE);
         }
 
-        for (int i = 0; i < transformCount; i++)
-        {
-            std::shared_ptr<GlWorld::Transform> t = wos[i]->getTransform();
-            t->rotate(
-                transformRotationAngles[i] * secondsDelta,
-                transformRotationAxes[i]
-            );
-        }
-        
-        pathLightbulb.tick(secondsDelta);
-
         // Draw the scene
         scene->draw();
         
@@ -310,6 +246,45 @@ int main(void)
 
     }
 
+}
+
+void createCamiCube(
+    std::shared_ptr<GlWorld::Mesh> mesh,
+    std::shared_ptr<GlWorld::Material> material,
+    GlWorld::Scene& scene,
+    float* data
+)
+{
+
+    glm::vec3 position = glm::vec3(
+        data[0], 
+        data[1], 
+        data[2]
+    );
+    position = position * CLOUD_RADIUS;
+
+    float orientationAngle = 
+        data[3];
+    glm::vec3 orientationAxis = glm::vec3(
+        data[4],
+        data[5],
+        data[6]
+    );
+
+    std::shared_ptr<GlWorld::Transform> transform
+        = std::make_unique<GlWorld::Transform>();
+    transform->setPosition(position);
+    transform->setRotation(orientationAngle, orientationAxis);
+    
+    std::shared_ptr<GlWorld::Model> camiCube
+        = std::make_shared<GlWorld::Model>(
+            transform,
+            material,
+            mesh
+        );
+
+    scene.addElement(camiCube);
+    
 }
 
 GLFWwindow* setupGl(void) {
