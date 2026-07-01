@@ -12,7 +12,7 @@ model.cpp \
 mesh.cpp \
 light.cpp \
 material.cpp \
-motionPath.cpp
+motion.cpp
 
 srcs_cpp := ${src_cpp_names:%=${src_dir}/%}
 src_c_names := shaders.c tex_cami.c
@@ -26,7 +26,7 @@ model.hpp \
 mesh.hpp \
 light.hpp \
 material.hpp \
-motionPath.hpp
+motion.hpp
 
 headers := ${header_names:%=${src_dir}/%}
 

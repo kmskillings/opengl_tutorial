@@ -20,7 +20,7 @@ extern "C" {
 #include "material.hpp"
 #include "light.hpp"
 #include "mesh.hpp"
-#include "motionPath.hpp"
+#include "motion.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
