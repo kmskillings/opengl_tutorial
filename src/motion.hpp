@@ -71,6 +71,72 @@ private:
 
 };
 
+class MotionCamera : public SceneElement
+{
+
+public:
+
+    MotionCamera(
+        GLFWwindow* window,
+        const float& speedTranslate,
+        const float& speedRotate,
+        std::shared_ptr<Transform> transformCamera
+    );
+
+    bool caresAboutUpdatePhysical(void) const;
+
+    bool caresAboutUpdateVisual(void) const;
+
+    bool caresAboutRenderPass(void) const;
+
+    void updatePhysicalPre(
+        const Scene& scene,
+        const float& secondsDelta
+    );
+
+    void updateVisualPre(
+        const Scene& scene,
+        const float& secondsDelta
+    );
+
+    void updatePhysical(
+        const Scene& scene,
+        const float& secondsDelta
+    );
+
+    void updateVisual(
+        const Scene& scene,
+        const float& secondsDelta
+    );
+
+    void updatePhysicalPost(
+        const Scene& scene,
+        const float& secondsDelta
+    );
+
+    void updateVisualPost(
+        const Scene& scene,
+        const float& secondsDelta
+    );
+
+    void draw(
+        const Scene& scene
+    );
+
+private:
+
+    GLFWwindow* window;
+
+    std::shared_ptr<Transform> transformCamera;
+
+    float speedTranslate;
+    float speedRotate;
+
+    double mousePositionLastX;
+    double mousePositionLastY;
+
+};
+
 }
 
 #endif

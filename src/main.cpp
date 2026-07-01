@@ -201,6 +201,119 @@ private:
 
 };
 
+class Player : public GlWorld::SceneElement
+{
+
+private:
+    std::shared_ptr<GlWorld::Camera> camera;
+    std::shared_ptr<GlWorld::Transform> transform;
+    std::shared_ptr<GlWorld::MotionCamera> motion;
+
+public:
+
+    Player(
+        const float& cameraFovVertical,
+        const float& cameraAspect,
+        const float& cameraClippingNear,
+        const float& cameraClippingFar,
+        const float& speedTranslate,
+        const float& speedRotate,
+        GLFWwindow* window
+    )
+    {
+        this->transform = std::make_shared<GlWorld::Transform>();
+        this->camera = std::make_shared<GlWorld::Camera>(
+            this->transform,
+            cameraFovVertical,
+            cameraAspect,
+            cameraClippingNear,
+            cameraClippingFar
+        );
+        this->motion = std::make_shared<GlWorld::MotionCamera>(
+            window,
+            speedTranslate,
+            speedRotate,
+            this->transform
+        );
+    }
+
+    std::shared_ptr<GlWorld::Camera> getCamera(void) const
+    {
+        return this->camera;
+    }
+
+    bool caresAboutUpdatePhysical(void) const
+    {
+        return true;
+    }
+
+    bool caresAboutUpdateVisual(void) const
+    {
+        return false;
+    }
+
+    bool caresAboutRenderPass(void) const
+    {
+        return false;
+    }
+
+    void updatePhysicalPre(
+        const GlWorld::Scene& scene,
+        const float& secondsDelta
+    )
+    {
+
+    }
+
+    void updateVisualPre(
+        const GlWorld::Scene& scene,
+        const float& secondsDelta
+    )
+    {
+
+    }
+
+    void updatePhysical(
+        const GlWorld::Scene& scene,
+        const float& secondsDelta
+    )
+    {
+        this->motion->updatePhysical(scene, secondsDelta);
+    }
+
+    void updateVisual(
+        const GlWorld::Scene& scene,
+        const float& secondsDelta
+    )
+    {
+
+    }
+
+    void updatePhysicalPost(
+        const GlWorld::Scene& scene,
+        const float& secondsDelta
+    )
+    {
+
+    }
+
+    void updateVisualPost(
+        const GlWorld::Scene& scene,
+        const float& secondsDelta
+    )
+    {
+
+    }
+
+    void draw(
+        const GlWorld::Scene& scene
+    )
+    {
+
+    }
+
+};
+
 int main(void)
 {
 
@@ -210,19 +323,6 @@ int main(void)
     GLFWwindow* window = setupGl();
     glfwMakeContextCurrent(window);
     glewInit();
-
-    // Create camera
-
-    std::shared_ptr<GlWorld::Transform> cameraTransform 
-        = std::make_shared<GlWorld::Transform>();
-    std::shared_ptr<GlWorld::Camera> camera 
-        = std::make_shared<GlWorld::Camera>(
-            cameraTransform,
-            M_PI / 4,
-            (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT,
-            0.1f,
-            100.0f
-        );
 
     std::shared_ptr<GlWorld::LightAmbient> lightAmbient 
         = std::make_shared<GlWorld::LightAmbient>(
@@ -241,14 +341,26 @@ int main(void)
         );
 
     glm::vec4 skyColor = glm::vec4(0.5f, 0.8f, 1.0f, 1.0f);
+
+    std::shared_ptr<Player> player = std::make_shared<Player>(
+        M_PI / 3,
+        (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT,
+        0.1f,
+        100.0f,
+        CAMERA_SPEED_TRANSLATION,
+        CAMERA_SENSITIVITY_PITCH,
+        window
+    );
     
     std::unique_ptr<GlWorld::Scene> scene 
         = std::make_unique<GlWorld::Scene>(
-            camera, 
+            player->getCamera(), 
             skyColor, 
             lightAmbient, 
             lightDirectional
         );
+
+    scene->addElement(player);
 
     // First load the Cami texture
     GLuint textureCami;
@@ -316,13 +428,6 @@ int main(void)
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    bool mouseInitialized = false;
-    double mousePositionNowX;
-    double mousePositionNowY;
-    glfwGetCursorPos(window, &mousePositionNowX, &mousePositionNowY);
-    double mousePositionLastX;
-    double mousePositionLastY;
-
     double secondsStart = secondsSinceEpoch();
     double secondsLast = secondsStart;
     double secondsNow = secondsLast;
@@ -336,56 +441,6 @@ int main(void)
 
         // Handle input
         glfwPollEvents();
-
-        // Translation controls
-        glm::vec4 movementNorm = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        {
-            movementNorm = movementNorm + glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
-        }
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        {
-            movementNorm = movementNorm + glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
-        }
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        {
-            movementNorm = movementNorm + glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
-        }
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        {
-            movementNorm = movementNorm + glm::vec4(-1.0f, 0.0f, 0.0f, 0.0f);
-        }
-        if (glm::length(movementNorm) > 0.01f) {
-            movementNorm = glm::normalize(movementNorm);
-        }
-        glm::vec4 cameraDirectionWorld = camera->getTransform()->getMatrixModel() * movementNorm;
-        glm::vec3 cameraVelocityWorld = glm::vec3(cameraDirectionWorld) * CAMERA_SPEED_TRANSLATION * secondsDelta;
-        camera->getTransform()->translate(cameraVelocityWorld);
-
-        // Camera view controls
-        mousePositionLastX = mousePositionNowX;
-        mousePositionLastY = mousePositionNowY;
-        glfwGetCursorPos(window, &mousePositionNowX, &mousePositionNowY);
-        double mousePositionDeltaX = mousePositionNowX - mousePositionLastX;
-        double mousePositionDeltaY = mousePositionNowY - mousePositionLastY;
-
-        glm::vec3 cameraPitchAxis = glm::vec3(
-            camera->getTransform()->getMatrixModel() 
-            * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f)
-        );
-        camera->getTransform()->rotate(
-            -mousePositionDeltaY * CAMERA_SENSITIVITY_PITCH * secondsDelta,
-            cameraPitchAxis
-        );
-
-        glm::vec3 cameraYawAxis = glm::vec3(
-            camera->getTransform()->getMatrixModel()
-            * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)
-        );
-        camera->getTransform()->rotate(
-            -mousePositionDeltaX * CAMERA_SENSITIVITY_YAW * secondsDelta,
-            cameraYawAxis
-        );
 
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         {
