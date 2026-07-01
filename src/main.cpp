@@ -27,7 +27,7 @@ extern "C" {
 #define WINDOW_TITLE "Cami Cube"
 
 #define CLOUD_RADIUS 10.0f
-#define CLOUD_ROTATION_RATE_MAX 1.0f
+#define CLOUD_ROTATION_RATE_MAX 0.1f
 
 #define CAMERA_SPEED_TRANSLATION 5.0f
 #define CAMERA_SENSITIVITY_PITCH 0.1f
@@ -67,32 +67,54 @@ public:
             transformData[6]
         );
 
+        float rotationAngle = transformData[7] * CLOUD_ROTATION_RATE_MAX;
+        glm::vec3 rotationAxis = glm::vec3(
+            transformData[8],
+            transformData[9],
+            transformData[10]
+        );
+
         std::shared_ptr<GlWorld::Transform> transform
             = std::make_unique<GlWorld::Transform>();
         transform->setPosition(position);
         transform->setRotation(orientationAngle, orientationAxis);
 
-        this->model = std::make_unique<GlWorld::Model>(
+        this->model = std::make_shared<GlWorld::Model>(
             transform,
             material,
             mesh
+        );
+
+        this->motion = std::make_shared<GlWorld::MotionRotate>(
+            transform,
+            rotationAngle,
+            rotationAxis
         );
         
     }
 
     bool caresAboutUpdatePhysical(void) const
     {
-        return this->model->caresAboutUpdatePhysical();
+        return 
+            this->model->caresAboutUpdatePhysical() ||
+            this->motion->caresAboutUpdatePhysical()    
+        ;
     }
 
     bool caresAboutUpdateVisual(void) const
     {
-        return this->model->caresAboutUpdateVisual();
+        return 
+            this->model->caresAboutUpdateVisual() ||
+            this->motion->caresAboutUpdateVisual()
+        ;
     }
 
     bool caresAboutRenderPass(void) const
     {
-        return this->model->caresAboutRenderPass();
+        return 
+            this->model->caresAboutRenderPass() ||
+            this->motion->caresAboutRenderPass()
+        ;
     }
 
     void updatePhysicalPre(
@@ -100,7 +122,10 @@ public:
         const float& secondsDelta
     )
     {
-        return this->model->updatePhysicalPre(scene, secondsDelta);
+        if (this->model->caresAboutUpdatePhysical())
+            this->model->updatePhysicalPre(scene, secondsDelta);
+        if (this->motion->caresAboutUpdatePhysical())
+            this->motion->updatePhysicalPre(scene, secondsDelta);
     }
 
     void updateVisualPre(
@@ -108,7 +133,10 @@ public:
         const float& secondsDelta
     )
     {
-        return this->model->updateVisualPre(scene, secondsDelta);
+        if (this->model->caresAboutUpdateVisual())
+            this->model->updateVisualPre(scene, secondsDelta);
+        if (this->motion->caresAboutUpdateVisual())
+            this->motion->updateVisualPre(scene, secondsDelta);
     }
 
     void updatePhysical(
@@ -116,7 +144,10 @@ public:
         const float& secondsDelta
     )
     {
-        return this->model->updatePhysical(scene, secondsDelta);
+        if (this->model->caresAboutUpdatePhysical())
+            this->model->updatePhysical(scene, secondsDelta);
+        if (this->motion->caresAboutUpdatePhysical())
+            this->motion->updatePhysical(scene, secondsDelta);
     }
 
     void updateVisual(
@@ -124,7 +155,10 @@ public:
         const float& secondsDelta
     )
     {
-        return this->model->updateVisual(scene, secondsDelta);
+        if (this->model->caresAboutUpdateVisual())
+            this->model->updateVisual(scene, secondsDelta);
+        if (this->motion->caresAboutUpdateVisual())
+            this->motion->updateVisual(scene, secondsDelta);
     }
 
     void updatePhysicalPost(
@@ -132,7 +166,10 @@ public:
         const float& secondsDelta
     )
     {
-        return this->model->updatePhysicalPost(scene, secondsDelta);
+        if (this->model->caresAboutUpdatePhysical())
+            this->model->updatePhysicalPost(scene, secondsDelta);
+        if (this->motion->caresAboutUpdatePhysical())
+            this->motion->updatePhysicalPost(scene, secondsDelta);
     }
 
     void updateVisualPost(
@@ -140,19 +177,27 @@ public:
         const float& secondsDelta
     )
     {
-        return this->model->updateVisualPost(scene, secondsDelta);
+        if (this->model->caresAboutUpdateVisual())
+            this->model->updateVisualPost(scene, secondsDelta);
+        if (this->motion->caresAboutUpdateVisual())
+            this->motion->updateVisualPost(scene, secondsDelta);
     }
 
     void draw(
         const GlWorld::Scene& scene
     )
     {
-        return this->model->draw(scene);
+        if (this->model->caresAboutRenderPass())
+            this->model->draw(scene);
+        if (this->motion->caresAboutRenderPass())
+            this->motion->draw(scene);
     }
 
 private:
 
     std::shared_ptr<GlWorld::Model> model;
+
+    std::shared_ptr<GlWorld::MotionRotate> motion;
 
 };
 
@@ -347,7 +392,8 @@ int main(void)
             glfwSetWindowShouldClose(window, GL_TRUE);
         }
 
-        // Draw the scene
+        scene->updatePhysical(secondsDelta);
+        scene->updateVisual(secondsDelta);
         scene->draw();
         
         glfwSwapBuffers(window);
