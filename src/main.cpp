@@ -41,12 +41,120 @@ double secondsSinceEpoch(void);
 
 void reportShaderStatus(GLuint shader);
 
-void createCamiCube(
-    std::shared_ptr<GlWorld::Mesh> mesh,
-    std::shared_ptr<GlWorld::Material> material,
-    GlWorld::Scene& scene,
-    float* data
-);
+class CamiCube : public GlWorld::SceneElement
+{
+
+public:
+
+    CamiCube(
+        std::shared_ptr<GlWorld::Mesh> mesh,
+        std::shared_ptr<GlWorld::Material> material,
+        float* transformData
+    )
+    {
+        glm::vec3 position = glm::vec3(
+            transformData[0], 
+            transformData[1], 
+            transformData[2]
+        );
+        position = position * CLOUD_RADIUS;
+
+        float orientationAngle = 
+            transformData[3];
+        glm::vec3 orientationAxis = glm::vec3(
+            transformData[4],
+            transformData[5],
+            transformData[6]
+        );
+
+        std::shared_ptr<GlWorld::Transform> transform
+            = std::make_unique<GlWorld::Transform>();
+        transform->setPosition(position);
+        transform->setRotation(orientationAngle, orientationAxis);
+
+        this->model = std::make_unique<GlWorld::Model>(
+            transform,
+            material,
+            mesh
+        );
+        
+    }
+
+    bool caresAboutUpdatePhysical(void) const
+    {
+        return this->model->caresAboutUpdatePhysical();
+    }
+
+    bool caresAboutUpdateVisual(void) const
+    {
+        return this->model->caresAboutUpdateVisual();
+    }
+
+    bool caresAboutRenderPass(void) const
+    {
+        return this->model->caresAboutRenderPass();
+    }
+
+    void updatePhysicalPre(
+        const GlWorld::Scene& scene,
+        const float& secondsDelta
+    )
+    {
+        return this->model->updatePhysicalPre(scene, secondsDelta);
+    }
+
+    void updateVisualPre(
+        const GlWorld::Scene& scene,
+        const float& secondsDelta
+    )
+    {
+        return this->model->updateVisualPre(scene, secondsDelta);
+    }
+
+    void updatePhysical(
+        const GlWorld::Scene& scene,
+        const float& secondsDelta
+    )
+    {
+        return this->model->updatePhysical(scene, secondsDelta);
+    }
+
+    void updateVisual(
+        const GlWorld::Scene& scene,
+        const float& secondsDelta
+    )
+    {
+        return this->model->updateVisual(scene, secondsDelta);
+    }
+
+    void updatePhysicalPost(
+        const GlWorld::Scene& scene,
+        const float& secondsDelta
+    )
+    {
+        return this->model->updatePhysicalPost(scene, secondsDelta);
+    }
+
+    void updateVisualPost(
+        const GlWorld::Scene& scene,
+        const float& secondsDelta
+    )
+    {
+        return this->model->updateVisualPost(scene, secondsDelta);
+    }
+
+    void draw(
+        const GlWorld::Scene& scene
+    )
+    {
+        return this->model->draw(scene);
+    }
+
+private:
+
+    std::shared_ptr<GlWorld::Model> model;
+
+};
 
 int main(void)
 {
@@ -153,12 +261,12 @@ int main(void)
     int transformCount = sizeof(transformData) / sizeof(float) / 11;
     for (int i = 0; i < transformCount; i++)
     {
-        createCamiCube(
+        std::shared_ptr<CamiCube> cc = std::make_shared<CamiCube>(
             meshCube,
             material,
-            *scene.get(),
             transformData + 11 * i
         );
+        scene->addElement(cc);
     }
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -246,45 +354,6 @@ int main(void)
 
     }
 
-}
-
-void createCamiCube(
-    std::shared_ptr<GlWorld::Mesh> mesh,
-    std::shared_ptr<GlWorld::Material> material,
-    GlWorld::Scene& scene,
-    float* data
-)
-{
-
-    glm::vec3 position = glm::vec3(
-        data[0], 
-        data[1], 
-        data[2]
-    );
-    position = position * CLOUD_RADIUS;
-
-    float orientationAngle = 
-        data[3];
-    glm::vec3 orientationAxis = glm::vec3(
-        data[4],
-        data[5],
-        data[6]
-    );
-
-    std::shared_ptr<GlWorld::Transform> transform
-        = std::make_unique<GlWorld::Transform>();
-    transform->setPosition(position);
-    transform->setRotation(orientationAngle, orientationAxis);
-    
-    std::shared_ptr<GlWorld::Model> camiCube
-        = std::make_shared<GlWorld::Model>(
-            transform,
-            material,
-            mesh
-        );
-
-    scene.addElement(camiCube);
-    
 }
 
 GLFWwindow* setupGl(void) {
