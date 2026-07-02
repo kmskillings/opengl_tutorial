@@ -315,6 +315,102 @@ public:
 
 };
 
+class Lightbulb : public GlWorld::SceneElement
+{
+
+private:
+
+    std::unique_ptr<GlWorld::Transform> transform;
+
+    std::unique_ptr<GlWorld::Model> model;
+
+public:
+
+    Lightbulb(
+        GlWorld::Mesh* mesh,
+        GlWorld::Material* material
+    )
+    {
+        this->transform = std::make_unique<GlWorld::Transform>();
+        this->model = std::make_unique<GlWorld::Model>(
+            this->transform.get(),
+            material,
+            mesh
+        );
+    }
+
+    bool caresAboutUpdatePhysical(void) const
+    {
+        return false;
+    }
+
+    bool caresAboutUpdateVisual(void) const
+    {
+        return false;
+    }
+
+    bool caresAboutRenderPass(void) const
+    {
+        return true;
+    }
+
+    void updatePhysicalPre(
+        const GlWorld::Scene& scene,
+        const float& secondsDelta
+    )
+    {
+        
+    }
+
+    void updateVisualPre(
+        const GlWorld::Scene& scene,
+        const float& secondsDelta
+    )
+    {
+        
+    }
+
+    void updatePhysical(
+        const GlWorld::Scene& scene,
+        const float& secondsDelta
+    )
+    {
+        
+    }
+
+    void updateVisual(
+        const GlWorld::Scene& scene,
+        const float& secondsDelta
+    )
+    {
+        
+    }
+
+    void updatePhysicalPost(
+        const GlWorld::Scene& scene,
+        const float& secondsDelta
+    )
+    {
+        
+    }
+
+    void updateVisualPost(
+        const GlWorld::Scene& scene,
+        const float& secondsDelta
+    )
+    {
+        
+    }
+
+    void draw(
+        const GlWorld::Scene& scene
+    )
+    {
+        this->model->draw(scene);
+    }
+
+};
+
 int main(void)
 {
 
@@ -428,6 +524,22 @@ int main(void)
         scene->addElement(cc.get());
         camiCubes.push_back(std::move(cc));
     }
+
+    std::unique_ptr<GlWorld::MeshTextured> meshLightbulb =
+        GlWorld::MeshTextured::cube(0.1f);
+    std::unique_ptr<GlWorld::MaterialPhongFaceted> materialLightbulb =
+        std::make_unique<GlWorld::MaterialPhongFaceted>(
+            shaderProgram,
+            glm::vec3(0.0f, 0.0f, 0.0f),
+            glm::vec3(0.0f, 0.0f, 0.0f),
+            1.0f,
+            glm::vec3(0.0f, 1.0f, 0.0f)
+        );
+    std::unique_ptr<Lightbulb> lightbulb = std::make_unique<Lightbulb>(
+        meshLightbulb.get(),
+        materialLightbulb.get()
+    );
+    scene->addElement(lightbulb.get());
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
