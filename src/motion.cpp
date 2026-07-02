@@ -9,7 +9,7 @@ namespace GlWorld
 {
 
 MotionRotate::MotionRotate(
-    std::shared_ptr<Transform> transform,
+    Transform* transform,
     const float& rotationsPerSecond,
     const glm::vec3& axis
 ) :
@@ -99,7 +99,7 @@ MotionCamera::MotionCamera(
     GLFWwindow* window,
     const float& speedTranslate,
     const float& speedRotate,
-    std::shared_ptr<Transform> transformCamera
+    Transform* transformCamera
 ) :
     window(window),
     speedTranslate(speedTranslate),

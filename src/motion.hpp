@@ -18,7 +18,7 @@ class MotionRotate : public SceneElement
 public:
 
     MotionRotate(
-        std::shared_ptr<Transform> transform,
+        Transform* transform,
         const float& rotationsPerSecond,
         const glm::vec3& axis
     );
@@ -65,7 +65,7 @@ public:
 
 private:
 
-    std::shared_ptr<Transform> transform;
+    Transform* transform;
     float rotationsPerSecond;
     glm::vec3 axis;
 
@@ -80,7 +80,7 @@ public:
         GLFWwindow* window,
         const float& speedTranslate,
         const float& speedRotate,
-        std::shared_ptr<Transform> transformCamera
+        Transform* transformCamera
     );
 
     bool caresAboutUpdatePhysical(void) const;
@@ -127,7 +127,7 @@ private:
 
     GLFWwindow* window;
 
-    std::shared_ptr<Transform> transformCamera;
+    Transform* transformCamera;
 
     float speedTranslate;
     float speedRotate;
