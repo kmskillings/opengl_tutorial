@@ -33,10 +33,7 @@ void LightDirectional::setColor(
 
 glm::vec4 LightDirectional::getDirection(void) const
 {
-    glm::vec4 direction = glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
-    direction = this->getTransform()->getMatrixModel() * direction;
-    direction = glm::normalize(direction);
-    return direction;
+    return glm::vec4(glm::normalize(this->transform->getPosition()), 0.0f);
 }
 
 LightAmbient::LightAmbient(
