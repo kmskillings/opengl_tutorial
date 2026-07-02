@@ -120,7 +120,7 @@ void MeshTextured::draw(void)
     ;
 }
 
-std::shared_ptr<MeshTextured> MeshTextured::cube(float sideLength)
+std::unique_ptr<MeshTextured> MeshTextured::cube(float sideLength)
 {
     float s = sideLength / 2;
     std::vector<float> vertices = {
@@ -157,7 +157,7 @@ std::shared_ptr<MeshTextured> MeshTextured::cube(float sideLength)
     return std::make_unique<MeshTextured>(vertices, elements);
 }
 
-std::shared_ptr<MeshTextured> MeshTextured::sphere(
+std::unique_ptr<MeshTextured> MeshTextured::sphere(
     float radius, 
     unsigned int segmentsVertical, 
     unsigned int segmentsHorizontal
@@ -207,7 +207,7 @@ std::shared_ptr<MeshTextured> MeshTextured::sphere(
         }
     }
 
-    return std::make_shared<MeshTextured>(vertices, elements);
+    return std::make_unique<MeshTextured>(vertices, elements);
 }
 
 }

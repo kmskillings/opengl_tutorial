@@ -51,8 +51,8 @@ public:
     void deactivate(void);
     void draw(void);
 
-    static std::shared_ptr<MeshTextured> cube(float sideLength);
-    static std::shared_ptr<MeshTextured> sphere(
+    static std::unique_ptr<MeshTextured> cube(float sideLength);
+    static std::unique_ptr<MeshTextured> sphere(
         float radius, 
         unsigned int segmentsVertical, 
         unsigned int segmentsHorizontal
