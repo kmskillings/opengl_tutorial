@@ -25,6 +25,11 @@ glm::mat4 Transform::getMatrixModelInv(void) const
     return glm::inverse(this->getMatrixModel());
 }
 
+glm::vec3 Transform::getPosition(void) const
+{
+    return this->position;
+}
+
 void Transform::setPosition(const glm::vec3 &position)
 {
     this->position = glm::vec3(position);
