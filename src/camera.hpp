@@ -13,20 +13,17 @@ class Camera : public HasTransform
 public:
     Camera(
         Transform* transform,
-        float fovVert, 
-        float aspect, 
-        float near, 
-        float far
+        const float& fovVert, 
+        const float& aspect, 
+        const float& near, 
+        const float& far
     );
     Transform* getTransform(void) const;
     glm::mat4 getMatrixView(void) const;
     glm::mat4 getMatrixProject(void) const;
 private:
     Transform* transform;
-    float fovVert;
-    float aspect;
-    float near;
-    float far;
+    glm::mat4 matrixProject;
 };
 
 }
