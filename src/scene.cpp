@@ -12,35 +12,36 @@
 namespace GlWorld {
 
 Scene::Scene(
-    std::shared_ptr<Camera> camera,
+    Camera* camera,
     glm::vec4 skyColor,
-    std::shared_ptr<LightAmbient> lightAmbient,
-    std::shared_ptr<LightDirectional> lightDirectional
-)
+    LightAmbient* lightAmbient,
+    LightDirectional* lightDirectional
+) :
+    camera(camera),
+    skyColor(skyColor),
+    lightAmbient(lightAmbient),
+    lightDirectional(lightDirectional)
 {
-    this->camera = camera;
-    this->skyColor = skyColor;
-    this->lightAmbient = lightAmbient;
-    this->lightDirectional = lightDirectional;
+    
 }
 
-std::shared_ptr<Camera> Scene::getCamera(void) const
+Camera* Scene::getCamera(void) const
 {
     return this->camera;
 }
 
-std::shared_ptr<LightAmbient> Scene::getLightAmbient(void) const
+LightAmbient* Scene::getLightAmbient(void) const
 {
     return this->lightAmbient;
 }
 
-std::shared_ptr<LightDirectional> Scene::getLightDirectional(void) const
+LightDirectional* Scene::getLightDirectional(void) const
 {
     return this->lightDirectional;
 }
 
 void Scene::addElement(
-    std::shared_ptr<SceneElement> element
+    SceneElement* element
 )
 {
     this->elements.insert(element);
@@ -50,7 +51,7 @@ void Scene::updatePhysical(
     const float& secondsDelta
 )
 {
-    for (std::shared_ptr<SceneElement> element : this->elements)
+    for (SceneElement* element : this->elements)
     {
         if (element->caresAboutUpdatePhysical())
         {
@@ -58,7 +59,7 @@ void Scene::updatePhysical(
         }
     }
 
-    for (std::shared_ptr<SceneElement> element : this->elements)
+    for (SceneElement* element : this->elements)
     {
         if (element->caresAboutUpdatePhysical())
         {
@@ -66,7 +67,7 @@ void Scene::updatePhysical(
         }
     }
 
-    for (std::shared_ptr<SceneElement> element : this->elements)
+    for (SceneElement* element : this->elements)
     {
         if (element->caresAboutUpdatePhysical())
         {
@@ -79,7 +80,7 @@ void Scene::updateVisual(
     const float& secondsDelta
 )
 {
-    for (std::shared_ptr<SceneElement> element : this->elements)
+    for (SceneElement* element : this->elements)
     {
         if (element->caresAboutUpdateVisual())
         {
@@ -87,7 +88,7 @@ void Scene::updateVisual(
         }
     }
 
-    for (std::shared_ptr<SceneElement> element : this->elements)
+    for (SceneElement* element : this->elements)
     {
         if (element->caresAboutUpdateVisual())
         {
@@ -95,7 +96,7 @@ void Scene::updateVisual(
         }
     }
 
-    for (std::shared_ptr<SceneElement> element : this->elements)
+    for (SceneElement* element : this->elements)
     {
         if (element->caresAboutUpdateVisual())
         {
@@ -109,7 +110,7 @@ void Scene::draw(void)
     glEnable(GL_DEPTH_TEST);
     glClearColor(this->skyColor.r, this->skyColor.g, this->skyColor.b, this->skyColor.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    for (std::shared_ptr<SceneElement> element : this->elements)
+    for (SceneElement* element : this->elements)
     {
         element->draw(*this);
     }

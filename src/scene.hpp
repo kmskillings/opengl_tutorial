@@ -20,19 +20,19 @@ class Scene {
 public:
 
     Scene(
-        std::shared_ptr<Camera> camera,
+        Camera* camera,
         glm::vec4 skyColor,
-        std::shared_ptr<LightAmbient> lightAmbient,
-        std::shared_ptr<LightDirectional> lightDirectional
+        LightAmbient* lightAmbient,
+        LightDirectional* lightDirectional
     );
 
-    std::shared_ptr<Camera> getCamera(void) const;
+    Camera* getCamera(void) const;
 
-    std::shared_ptr<LightAmbient> getLightAmbient(void) const;
+    LightAmbient* getLightAmbient(void) const;
 
-    std::shared_ptr<LightDirectional> getLightDirectional(void) const;
+    LightDirectional* getLightDirectional(void) const;
 
-    void addElement(std::shared_ptr<SceneElement> sceneElement);
+    void addElement(SceneElement* sceneElement);
 
     void updatePhysical(const float& secondsDelta);
 
@@ -43,10 +43,13 @@ public:
 private:
 
     glm::vec4 skyColor;
-    std::shared_ptr<Camera> camera;
-    std::unordered_set<std::shared_ptr<SceneElement>> elements;
-    std::shared_ptr<LightAmbient> lightAmbient;
-    std::shared_ptr<LightDirectional> lightDirectional;
+
+    // The scene is an observer of the camera. An external entity (the "world?")
+    // owns it. The same is true for each SceneElement.
+    Camera* camera;
+    std::unordered_set<SceneElement*> elements;
+    LightAmbient* lightAmbient;
+    LightDirectional* lightDirectional;
 
 };
 
