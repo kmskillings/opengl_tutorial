@@ -47,8 +47,8 @@ class CamiCube : public GlWorld::SceneElement
 public:
 
     CamiCube(
-        std::shared_ptr<GlWorld::Mesh> mesh,
-        std::shared_ptr<GlWorld::Material> material,
+        GlWorld::Mesh* mesh,
+        GlWorld::Material* material,
         float* transformData
     )
     {
@@ -74,19 +74,18 @@ public:
             transformData[10]
         );
 
-        std::shared_ptr<GlWorld::Transform> transform
-            = std::make_unique<GlWorld::Transform>();
-        transform->setPosition(position);
-        transform->setRotation(orientationAngle, orientationAxis);
+        this->transform = std::make_unique<GlWorld::Transform>();
+        this->transform->setPosition(position);
+        this->transform->setRotation(orientationAngle, orientationAxis);
 
-        this->model = std::make_shared<GlWorld::Model>(
-            transform,
+        this->model = std::make_unique<GlWorld::Model>(
+            this->transform.get(),
             material,
             mesh
         );
 
-        this->motion = std::make_shared<GlWorld::MotionRotate>(
-            transform,
+        this->motion = std::make_unique<GlWorld::MotionRotate>(
+            this->transform.get(),
             rotationAngle,
             rotationAxis
         );
@@ -195,9 +194,11 @@ public:
 
 private:
 
-    std::shared_ptr<GlWorld::Model> model;
+    std::unique_ptr<GlWorld::Transform> transform;
 
-    std::shared_ptr<GlWorld::MotionRotate> motion;
+    std::unique_ptr<GlWorld::Model> model;
+
+    std::unique_ptr<GlWorld::MotionRotate> motion;
 
 };
 
@@ -205,9 +206,9 @@ class Player : public GlWorld::SceneElement
 {
 
 private:
-    std::shared_ptr<GlWorld::Camera> camera;
-    std::shared_ptr<GlWorld::Transform> transform;
-    std::shared_ptr<GlWorld::MotionCamera> motion;
+    std::unique_ptr<GlWorld::Camera> camera;
+    std::unique_ptr<GlWorld::Transform> transform;
+    std::unique_ptr<GlWorld::MotionCamera> motion;
 
 public:
 
@@ -221,25 +222,25 @@ public:
         GLFWwindow* window
     )
     {
-        this->transform = std::make_shared<GlWorld::Transform>();
-        this->camera = std::make_shared<GlWorld::Camera>(
-            this->transform,
+        this->transform = std::make_unique<GlWorld::Transform>();
+        this->camera = std::make_unique<GlWorld::Camera>(
+            this->transform.get(),
             cameraFovVertical,
             cameraAspect,
             cameraClippingNear,
             cameraClippingFar
         );
-        this->motion = std::make_shared<GlWorld::MotionCamera>(
+        this->motion = std::make_unique<GlWorld::MotionCamera>(
             window,
             speedTranslate,
             speedRotate,
-            this->transform
+            this->transform.get()
         );
     }
 
-    std::shared_ptr<GlWorld::Camera> getCamera(void) const
+    GlWorld::Camera* getCamera(void) const
     {
-        return this->camera;
+        return this->camera.get();
     }
 
     bool caresAboutUpdatePhysical(void) const
@@ -324,25 +325,25 @@ int main(void)
     glfwMakeContextCurrent(window);
     glewInit();
 
-    std::shared_ptr<GlWorld::LightAmbient> lightAmbient 
-        = std::make_shared<GlWorld::LightAmbient>(
+    std::unique_ptr<GlWorld::LightAmbient> lightAmbient 
+        = std::make_unique<GlWorld::LightAmbient>(
             glm::vec3(0.1f, 0.1f, 0.1f)
         );
 
-    std::shared_ptr<GlWorld::Transform> transformLight 
-        = std::make_shared<GlWorld::Transform>();
+    std::unique_ptr<GlWorld::Transform> transformLight 
+        = std::make_unique<GlWorld::Transform>();
 
-    transformLight->rotate(-(float)M_PI / 4.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+    transformLight->setPosition(glm::vec3(0.3f, 1.0f, 0.7f));
     
-    std::shared_ptr<GlWorld::LightDirectional> lightDirectional 
-        = std::make_shared<GlWorld::LightDirectional>(
-            transformLight, 
+    std::unique_ptr<GlWorld::LightDirectional> lightDirectional 
+        = std::make_unique<GlWorld::LightDirectional>(
+            transformLight.get(), 
             glm::vec3(0.9, 0.9, 0.9)
         );
 
     glm::vec4 skyColor = glm::vec4(0.5f, 0.8f, 1.0f, 1.0f);
 
-    std::shared_ptr<Player> player = std::make_shared<Player>(
+    std::unique_ptr<Player> player = std::make_unique<Player>(
         M_PI / 3,
         (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT,
         0.1f,
@@ -356,11 +357,11 @@ int main(void)
         = std::make_unique<GlWorld::Scene>(
             player->getCamera(), 
             skyColor, 
-            lightAmbient, 
-            lightDirectional
+            lightAmbient.get(), 
+            lightDirectional.get()
         );
 
-    scene->addElement(player);
+    scene->addElement(player.get());
 
     // First load the Cami texture
     GLuint textureCami;
@@ -399,8 +400,8 @@ int main(void)
     );
 
     // Create the material
-    std::shared_ptr<GlWorld::MaterialPhongFaceted> material 
-        = std::make_shared<GlWorld::MaterialPhongFaceted>(
+    std::unique_ptr<GlWorld::MaterialPhongFaceted> material 
+        = std::make_unique<GlWorld::MaterialPhongFaceted>(
             shaderProgram,
             textureCami,
             glm::vec3(0.1f, 0.1f, 0.1f),
@@ -409,21 +410,23 @@ int main(void)
         );
 
     // Create the mesh
-    std::shared_ptr<GlWorld::MeshTextured> meshCube = 
+    std::unique_ptr<GlWorld::MeshTextured> meshCube = 
         GlWorld::MeshTextured::cube(1.0f);
 
     float transformData[] = {
         #include "cloud.txt"
     };
     int transformCount = sizeof(transformData) / sizeof(float) / 11;
+    std::vector<std::unique_ptr<CamiCube>> camiCubes;
     for (int i = 0; i < transformCount; i++)
     {
-        std::shared_ptr<CamiCube> cc = std::make_shared<CamiCube>(
-            meshCube,
-            material,
+        std::unique_ptr<CamiCube> cc = std::make_unique<CamiCube>(
+            meshCube.get(),
+            material.get(),
             transformData + 11 * i
         );
-        scene->addElement(cc);
+        scene->addElement(cc.get());
+        camiCubes.push_back(std::move(cc));
     }
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
