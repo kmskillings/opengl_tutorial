@@ -7,7 +7,7 @@ namespace GlWorld
 
 LightDirectional::LightDirectional(
     Transform* transform,
-    glm::vec3 color
+    const glm::vec3& color
 )
 {
     this->transform = transform;
@@ -24,7 +24,9 @@ glm::vec3 LightDirectional::getColor(void) const
     return this->color;
 }
 
-void LightDirectional::setColor(glm::vec3 color)
+void LightDirectional::setColor(
+    const glm::vec3& color
+)
 {
     this->color = color;
 }
@@ -37,7 +39,9 @@ glm::vec4 LightDirectional::getDirection(void) const
     return direction;
 }
 
-LightAmbient::LightAmbient(glm::vec3 color)
+LightAmbient::LightAmbient(
+    const glm::vec3& color
+)
 {
     this->color = color;
 }
@@ -47,7 +51,9 @@ glm::vec3 LightAmbient::getColor(void) const
     return this->color;
 }
 
-void LightAmbient::setColor(glm::vec3 color)
+void LightAmbient::setColor(
+    const glm::vec3& color
+)
 {
     this->color = color;
 }

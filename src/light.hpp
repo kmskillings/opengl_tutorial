@@ -18,13 +18,13 @@ public:
 
     LightDirectional(
         Transform* transform, 
-        glm::vec3 color
+        const glm::vec3& color
     );
 
     Transform* getTransform(void) const;
 
     glm::vec3 getColor(void) const;
-    void setColor(glm::vec3 color);
+    void setColor(const glm::vec3& color);
 
     glm::vec4 getDirection(void) const;
     
@@ -41,11 +41,11 @@ class LightAmbient
 public:
 
     LightAmbient(
-        glm::vec3 color
+        const glm::vec3& color
     );
 
     glm::vec3 getColor(void) const;
-    void setColor(glm::vec3 color);
+    void setColor(const glm::vec3& color);
 
 private:
 
