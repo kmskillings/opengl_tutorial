@@ -17,11 +17,11 @@ class LightDirectional : public HasTransform
 public:
 
     LightDirectional(
-        std::shared_ptr<Transform> transform, 
+        Transform* transform, 
         glm::vec3 color
     );
 
-    std::shared_ptr<Transform> getTransform(void) const;
+    Transform* getTransform(void) const;
 
     glm::vec3 getColor(void) const;
     void setColor(glm::vec3 color);
@@ -30,7 +30,7 @@ public:
     
 private:
 
-    std::shared_ptr<Transform> transform;
+    Transform* transform;
 
     glm::vec3 color;
 

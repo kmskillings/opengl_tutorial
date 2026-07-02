@@ -6,7 +6,7 @@ namespace GlWorld
 {
 
 LightDirectional::LightDirectional(
-    std::shared_ptr<Transform> transform,
+    Transform* transform,
     glm::vec3 color
 )
 {
@@ -14,7 +14,7 @@ LightDirectional::LightDirectional(
     this->color = color;
 }
 
-std::shared_ptr<Transform> LightDirectional::getTransform(void) const
+Transform* LightDirectional::getTransform(void) const
 {
     return this->transform;
 }
