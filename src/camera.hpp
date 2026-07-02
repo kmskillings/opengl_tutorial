@@ -12,17 +12,17 @@ class Camera : public HasTransform
 {
 public:
     Camera(
-        std::shared_ptr<Transform> transform,
+        Transform* transform,
         float fovVert, 
         float aspect, 
         float near, 
         float far
     );
-    std::shared_ptr<Transform> getTransform(void) const;
+    Transform* getTransform(void) const;
     glm::mat4 getMatrixView(void) const;
     glm::mat4 getMatrixProject(void) const;
 private:
-    std::shared_ptr<Transform> transform;
+    Transform* transform;
     float fovVert;
     float aspect;
     float near;

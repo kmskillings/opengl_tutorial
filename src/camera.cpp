@@ -4,7 +4,7 @@ namespace GlWorld
 {
 
 Camera::Camera(
-    std::shared_ptr<Transform> transform,
+    Transform* transform,
     float fovVert, 
     float aspect, 
     float near, 
@@ -18,14 +18,14 @@ Camera::Camera(
     this->far = far;
 }
 
-std::shared_ptr<Transform> Camera::getTransform(void) const
+Transform* Camera::getTransform(void) const
 {
     return this->transform;
 }
 
 glm::mat4 Camera::getMatrixView(void) const
 {
-    return this->getTransform().get()->getMatrixModelInv();
+    return this->getTransform()->getMatrixModelInv();
 }
 
 glm::mat4 Camera::getMatrixProject(void) const

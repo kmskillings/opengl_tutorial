@@ -51,7 +51,7 @@ private:
 class HasTransform
 {
 public:
-    virtual std::shared_ptr<Transform> getTransform(void) const = 0;
+    virtual Transform* getTransform(void) const = 0;
 };
 
 }
