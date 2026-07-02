@@ -5,9 +5,9 @@
 namespace GlWorld {
 
 Model::Model(
-    std::shared_ptr<Transform> transform,
-    std::shared_ptr<Material> material,
-    std::shared_ptr<Mesh> mesh
+    Transform* transform,
+    Material* material,
+    Mesh* mesh
 ) : 
     mesh(std::move(mesh)),
     material(std::move(material)),
@@ -16,7 +16,7 @@ Model::Model(
 
 }
 
-std::shared_ptr<Transform> Model::getTransform(void) const
+Transform* Model::getTransform(void) const
 {
     return this->transform;
 }
@@ -89,8 +89,8 @@ void Model::draw(
 
 )
 {
-    this->material->activate(scene, *this->transform.get());
-    this->material->bindMesh(*this->mesh.get()); 
+    this->material->activate(scene, *this->transform);
+    this->material->bindMesh(*this->mesh); 
     this->mesh->activate();
     this->mesh->draw();
     this->mesh->deactivate();

@@ -21,12 +21,12 @@ class Model :
 public:
 
     Model(
-        std::shared_ptr<Transform> transform,
-        std::shared_ptr<Material> material,
-        std::shared_ptr<Mesh> mesh
+        Transform* transform,
+        Material* material,
+        Mesh* mesh
     );
 
-    std::shared_ptr<Transform> getTransform(void) const;
+    Transform* getTransform(void) const;
 
     bool caresAboutUpdatePhysical(void) const;
 
@@ -70,9 +70,9 @@ public:
 
 private:
 
-    std::shared_ptr<Transform> transform;
-    std::shared_ptr<Material> material;
-    std::shared_ptr<Mesh> mesh;
+    Transform* transform;
+    Material* material;
+    Mesh* mesh;
 
 };
 
