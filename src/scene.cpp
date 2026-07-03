@@ -40,6 +40,11 @@ LightDirectional* Scene::getLightDirectional(void) const
     return this->lightDirectional;
 }
 
+const std::unordered_set<SceneElement*>& Scene::getSceneElements(void) const
+{
+    return this->elements;
+}
+
 void Scene::addElement(
     SceneElement* element
 )
@@ -47,73 +52,35 @@ void Scene::addElement(
     this->elements.insert(element);
 }
 
-void Scene::updatePhysical(
+void Scene::physicsTick(
     const float& secondsDelta
 )
 {
-    for (SceneElement* element : this->elements)
-    {
-        if (element->caresAboutUpdatePhysical())
-        {
-            element->updatePhysicalPre(*this, secondsDelta);
-        }
-    }
-
-    for (SceneElement* element : this->elements)
-    {
-        if (element->caresAboutUpdatePhysical())
-        {
-            element->updatePhysical(*this, secondsDelta);
-        }
-    }
-
-    for (SceneElement* element : this->elements)
-    {
-        if (element->caresAboutUpdatePhysical())
-        {
-            element->updatePhysicalPost(*this, secondsDelta);
-        }
-    }
+    this->updatePhysicalPre(*this, secondsDelta);
+    this->updatePhysical(*this, secondsDelta);
+    this->updatePhysicalPost(*this, secondsDelta);
 }
 
-void Scene::updateVisual(
+void Scene::visualTick(
     const float& secondsDelta
 )
 {
-    for (SceneElement* element : this->elements)
-    {
-        if (element->caresAboutUpdateVisual())
-        {
-            element->updateVisualPre(*this, secondsDelta);
-        }
-    }
-
-    for (SceneElement* element : this->elements)
-    {
-        if (element->caresAboutUpdateVisual())
-        {
-            element->updateVisual(*this, secondsDelta);
-        }
-    }
-
-    for (SceneElement* element : this->elements)
-    {
-        if (element->caresAboutUpdateVisual())
-        {
-            element->updateVisualPost(*this, secondsDelta);
-        }
-    }
+    this->updateVisualPre(*this, secondsDelta);
+    this->updateVisual(*this, secondsDelta);
+    this->updateVisualPost(*this, secondsDelta);
 }
 
-void Scene::draw(void)
+void Scene::render(void)
 {
     glEnable(GL_DEPTH_TEST);
-    glClearColor(this->skyColor.r, this->skyColor.g, this->skyColor.b, this->skyColor.a);
+    glClearColor(
+        this->skyColor.r,
+        this->skyColor.g,
+        this->skyColor.b,
+        this->skyColor.a
+    );
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    for (SceneElement* element : this->elements)
-    {
-        element->draw(*this);
-    }
+    this->draw(*this);
 }
 
 bool SceneElement::caresAboutUpdatePhysical(void) const

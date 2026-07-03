@@ -349,9 +349,9 @@ int main(void)
             glfwSetWindowShouldClose(window, GL_TRUE);
         }
 
-        scene->updatePhysical(secondsDelta);
-        scene->updateVisual(secondsDelta);
-        scene->draw();
+        scene->physicsTick(secondsDelta);
+        scene->visualTick(secondsDelta);
+        scene->render();
         
         glfwSwapBuffers(window);
 

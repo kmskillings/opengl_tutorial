@@ -13,46 +13,7 @@ class Camera;
 class LightAmbient;
 class LightDirectional;
 
-class SceneElement;
-
-class Scene {
-
-public:
-
-    Scene(
-        Camera* camera,
-        glm::vec4 skyColor,
-        LightAmbient* lightAmbient,
-        LightDirectional* lightDirectional
-    );
-
-    Camera* getCamera(void) const;
-
-    LightAmbient* getLightAmbient(void) const;
-
-    LightDirectional* getLightDirectional(void) const;
-
-    void addElement(SceneElement* sceneElement);
-
-    void updatePhysical(const float& secondsDelta);
-
-    void updateVisual(const float& secondsDelta);
-
-    void draw(void);
-
-private:
-
-    glm::vec4 skyColor;
-
-    // The scene is an observer of the camera. An external entity (the "world?")
-    // owns it. The same is true for each SceneElement.
-    Camera* camera;
-    std::unordered_set<SceneElement*> elements;
-    LightAmbient* lightAmbient;
-    LightDirectional* lightDirectional;
-
-};
-
+class Scene;
 class SceneElement
 {
 
@@ -263,6 +224,48 @@ public:
             }
         }
     }
+
+};
+
+class Scene :
+    public SceneElementGroup<std::unordered_set<SceneElement*>>
+{
+
+private:
+
+    glm::vec4 skyColor;
+
+    // The scene is an observer of the camera. An external entity (the "world?")
+    // owns it. The same is true for each SceneElement.
+    Camera* camera;
+    std::unordered_set<SceneElement*> elements;
+    LightAmbient* lightAmbient;
+    LightDirectional* lightDirectional;
+
+public:
+
+    Scene(
+        Camera* camera,
+        glm::vec4 skyColor,
+        LightAmbient* lightAmbient,
+        LightDirectional* lightDirectional
+    );
+
+    Camera* getCamera(void) const;
+
+    LightAmbient* getLightAmbient(void) const;
+
+    LightDirectional* getLightDirectional(void) const;
+
+    void addElement(SceneElement* sceneElement);
+
+    void physicsTick(const float& secondsDelta);
+
+    void visualTick(const float& secondsDelta);
+
+    void render(void);
+
+    const std::unordered_set<SceneElement*>& getSceneElements(void) const override;
 
 };
 
