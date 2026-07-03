@@ -116,4 +116,74 @@ void Scene::draw(void)
     }
 }
 
+bool SceneElement::caresAboutUpdatePhysical(void) const
+{
+    return false;
+}
+
+bool SceneElement::caresAboutUpdateVisual(void) const
+{
+    return false;
+}
+
+bool SceneElement::caresAboutRenderPass(void) const
+{
+    return false;
+}
+
+void SceneElement::updatePhysicalPre(
+    const Scene& scene,
+    const float& secondsDelta
+)
+{
+
+}
+
+void SceneElement::updatePhysical(
+    const Scene& scene,
+    const float& secondsDelta
+)
+{
+
+}
+
+void SceneElement::updatePhysicalPost(
+    const Scene& scene,
+    const float& secondsDelta
+)
+{
+
+}
+
+void SceneElement::updateVisualPre(
+    const Scene& scene,
+    const float& secondsDelta
+)
+{
+
+}
+
+void SceneElement::updateVisual(
+    const Scene& scene,
+    const float& secondsDelta
+)
+{
+
+}
+
+void SceneElement::updateVisualPost(
+    const Scene& scene,
+    const float& secondsDelta
+)
+{
+
+}
+
+void SceneElement::draw(
+    const Scene& scene
+)
+{
+
+}
+
 }

@@ -41,7 +41,8 @@ double secondsSinceEpoch(void);
 
 void reportShaderStatus(GLuint shader);
 
-class CamiCube : public GlWorld::SceneElement
+class CamiCube : 
+    public GlWorld::SceneElementGroup<std::unordered_set<GlWorld::SceneElement*>>
 {
 
 public:
@@ -89,108 +90,16 @@ public:
             rotationAngle,
             rotationAxis
         );
+
+        this->elements.insert(this->motion.get());
+        this->elements.insert(this->model.get());
         
     }
 
-    bool caresAboutUpdatePhysical(void) const
+    const std::unordered_set<SceneElement*>& getSceneElements(void) const override
     {
-        return 
-            this->model->caresAboutUpdatePhysical() ||
-            this->motion->caresAboutUpdatePhysical()    
-        ;
-    }
-
-    bool caresAboutUpdateVisual(void) const
-    {
-        return 
-            this->model->caresAboutUpdateVisual() ||
-            this->motion->caresAboutUpdateVisual()
-        ;
-    }
-
-    bool caresAboutRenderPass(void) const
-    {
-        return 
-            this->model->caresAboutRenderPass() ||
-            this->motion->caresAboutRenderPass()
-        ;
-    }
-
-    void updatePhysicalPre(
-        const GlWorld::Scene& scene,
-        const float& secondsDelta
-    )
-    {
-        if (this->model->caresAboutUpdatePhysical())
-            this->model->updatePhysicalPre(scene, secondsDelta);
-        if (this->motion->caresAboutUpdatePhysical())
-            this->motion->updatePhysicalPre(scene, secondsDelta);
-    }
-
-    void updateVisualPre(
-        const GlWorld::Scene& scene,
-        const float& secondsDelta
-    )
-    {
-        if (this->model->caresAboutUpdateVisual())
-            this->model->updateVisualPre(scene, secondsDelta);
-        if (this->motion->caresAboutUpdateVisual())
-            this->motion->updateVisualPre(scene, secondsDelta);
-    }
-
-    void updatePhysical(
-        const GlWorld::Scene& scene,
-        const float& secondsDelta
-    )
-    {
-        if (this->model->caresAboutUpdatePhysical())
-            this->model->updatePhysical(scene, secondsDelta);
-        if (this->motion->caresAboutUpdatePhysical())
-            this->motion->updatePhysical(scene, secondsDelta);
-    }
-
-    void updateVisual(
-        const GlWorld::Scene& scene,
-        const float& secondsDelta
-    )
-    {
-        if (this->model->caresAboutUpdateVisual())
-            this->model->updateVisual(scene, secondsDelta);
-        if (this->motion->caresAboutUpdateVisual())
-            this->motion->updateVisual(scene, secondsDelta);
-    }
-
-    void updatePhysicalPost(
-        const GlWorld::Scene& scene,
-        const float& secondsDelta
-    )
-    {
-        if (this->model->caresAboutUpdatePhysical())
-            this->model->updatePhysicalPost(scene, secondsDelta);
-        if (this->motion->caresAboutUpdatePhysical())
-            this->motion->updatePhysicalPost(scene, secondsDelta);
-    }
-
-    void updateVisualPost(
-        const GlWorld::Scene& scene,
-        const float& secondsDelta
-    )
-    {
-        if (this->model->caresAboutUpdateVisual())
-            this->model->updateVisualPost(scene, secondsDelta);
-        if (this->motion->caresAboutUpdateVisual())
-            this->motion->updateVisualPost(scene, secondsDelta);
-    }
-
-    void draw(
-        const GlWorld::Scene& scene
-    )
-    {
-        if (this->model->caresAboutRenderPass())
-            this->model->draw(scene);
-        if (this->motion->caresAboutRenderPass())
-            this->motion->draw(scene);
-    }
+        return this->elements;
+    } 
 
 private:
 
@@ -200,15 +109,19 @@ private:
 
     std::unique_ptr<GlWorld::MotionRotate> motion;
 
+    std::unordered_set<GlWorld::SceneElement*> elements;
+
 };
 
-class Player : public GlWorld::SceneElement
+class Player : 
+    public GlWorld::SceneElementGroup<std::unordered_set<GlWorld::SceneElement*>>
 {
 
 private:
     std::unique_ptr<GlWorld::Camera> camera;
     std::unique_ptr<GlWorld::Transform> transform;
     std::unique_ptr<GlWorld::MotionCamera> motion;
+    std::unordered_set<GlWorld::SceneElement*> elements;
 
 public:
 
@@ -236,6 +149,7 @@ public:
             speedRotate,
             this->transform.get()
         );
+        this->elements.insert(this->motion.get());
     }
 
     GlWorld::Camera* getCamera(void) const
@@ -243,79 +157,15 @@ public:
         return this->camera.get();
     }
 
-    bool caresAboutUpdatePhysical(void) const
+    const std::unordered_set<GlWorld::SceneElement*>& getSceneElements(void) const override
     {
-        return true;
-    }
-
-    bool caresAboutUpdateVisual(void) const
-    {
-        return false;
-    }
-
-    bool caresAboutRenderPass(void) const
-    {
-        return false;
-    }
-
-    void updatePhysicalPre(
-        const GlWorld::Scene& scene,
-        const float& secondsDelta
-    )
-    {
-
-    }
-
-    void updateVisualPre(
-        const GlWorld::Scene& scene,
-        const float& secondsDelta
-    )
-    {
-
-    }
-
-    void updatePhysical(
-        const GlWorld::Scene& scene,
-        const float& secondsDelta
-    )
-    {
-        this->motion->updatePhysical(scene, secondsDelta);
-    }
-
-    void updateVisual(
-        const GlWorld::Scene& scene,
-        const float& secondsDelta
-    )
-    {
-
-    }
-
-    void updatePhysicalPost(
-        const GlWorld::Scene& scene,
-        const float& secondsDelta
-    )
-    {
-
-    }
-
-    void updateVisualPost(
-        const GlWorld::Scene& scene,
-        const float& secondsDelta
-    )
-    {
-
-    }
-
-    void draw(
-        const GlWorld::Scene& scene
-    )
-    {
-
+        return this->elements;
     }
 
 };
 
-class Lightbulb : public GlWorld::SceneElement
+class Lightbulb : 
+    public GlWorld::SceneElementGroup<std::unordered_set<GlWorld::SceneElement*>>
 {
 
 private:
@@ -323,6 +173,8 @@ private:
     std::unique_ptr<GlWorld::Transform> transform;
 
     std::unique_ptr<GlWorld::Model> model;
+
+    std::unordered_set<GlWorld::SceneElement*> elements;
 
 public:
 
@@ -337,78 +189,13 @@ public:
             material,
             mesh
         );
+        this->elements.insert(this->model.get());
     }
 
-    bool caresAboutUpdatePhysical(void) const
+    const std::unordered_set<GlWorld::SceneElement*>& getSceneElements(void) const override
     {
-        return false;
+        return this->elements;
     }
-
-    bool caresAboutUpdateVisual(void) const
-    {
-        return false;
-    }
-
-    bool caresAboutRenderPass(void) const
-    {
-        return true;
-    }
-
-    void updatePhysicalPre(
-        const GlWorld::Scene& scene,
-        const float& secondsDelta
-    )
-    {
-        
-    }
-
-    void updateVisualPre(
-        const GlWorld::Scene& scene,
-        const float& secondsDelta
-    )
-    {
-        
-    }
-
-    void updatePhysical(
-        const GlWorld::Scene& scene,
-        const float& secondsDelta
-    )
-    {
-        
-    }
-
-    void updateVisual(
-        const GlWorld::Scene& scene,
-        const float& secondsDelta
-    )
-    {
-        
-    }
-
-    void updatePhysicalPost(
-        const GlWorld::Scene& scene,
-        const float& secondsDelta
-    )
-    {
-        
-    }
-
-    void updateVisualPost(
-        const GlWorld::Scene& scene,
-        const float& secondsDelta
-    )
-    {
-        
-    }
-
-    void draw(
-        const GlWorld::Scene& scene
-    )
-    {
-        this->model->draw(scene);
-    }
-
 };
 
 int main(void)

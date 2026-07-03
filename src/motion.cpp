@@ -25,24 +25,6 @@ bool MotionRotate::caresAboutUpdatePhysical(void) const
     return true;
 }
 
-bool MotionRotate::caresAboutUpdateVisual(void) const
-{
-    return false;
-}
-
-bool MotionRotate::caresAboutRenderPass(void) const
-{
-    return false;
-}
-
-void MotionRotate::updatePhysicalPre(
-    const Scene& scene,
-    const float& secondsDelta
-)
-{
-    return;
-}
-
 void MotionRotate::updatePhysical(
     const Scene& scene,
     const float& secondsDelta
@@ -52,45 +34,6 @@ void MotionRotate::updatePhysical(
         2.0f * M_PI * this->rotationsPerSecond * secondsDelta,
         this->axis
     );
-}
-
-void MotionRotate::updatePhysicalPost(
-    const Scene& scene,
-    const float& secondsDelta
-)
-{
-    return;
-}
-
-void MotionRotate::updateVisualPre(
-    const Scene& scene,
-    const float& secondsDelta
-)
-{
-    return;
-}
-
-void MotionRotate::updateVisual(
-    const Scene& scene,
-    const float& secondsDelta
-)
-{
-    return;
-}
-
-void MotionRotate::updateVisualPost(
-    const Scene& scene,
-    const float& secondsDelta
-)
-{
-    return;
-}
-
-void MotionRotate::draw(
-    const Scene& scene
-)
-{
-    return;
 }
 
 
@@ -112,24 +55,6 @@ MotionCamera::MotionCamera(
 bool MotionCamera::caresAboutUpdatePhysical(void) const
 {
     return true;
-}
-
-bool MotionCamera::caresAboutUpdateVisual(void) const
-{
-    return false;
-}
-
-bool MotionCamera::caresAboutRenderPass(void) const
-{
-    return false;
-}
-
-void MotionCamera::updatePhysicalPre(
-    const Scene& scene,
-    const float& secondsDelta
-)
-{
-
 }
 
 void MotionCamera::updatePhysical(
@@ -186,43 +111,6 @@ void MotionCamera::updatePhysical(
 
     this->mousePositionLastX = mousePositionNowX;
     this->mousePositionLastY = mousePositionNowY;
-}
-
-void MotionCamera::updatePhysicalPost(
-    const Scene& scene,
-    const float& secondsDelta
-)
-{
-
-}
-
-void MotionCamera::updateVisualPre(
-    const Scene& scene,
-    const float& secondsDelta
-)
-{
-
-}
-
-void MotionCamera::updateVisual(
-    const Scene& scene,
-    const float& secondsDelta
-)
-{
-
-}
-
-void MotionCamera::updateVisualPost(
-    const Scene& scene,
-    const float& secondsDelta
-)
-{
-
-}
-
-void MotionCamera::draw(const Scene& scene)
-{
-
 }
 
 }
