@@ -48,6 +48,7 @@ unsigned int compileShader(
 
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, fragmentShaderCount, fragmentShaderSources, NULL);
+    glCompileShader(fragmentShader);
     reportCompileStatus(fragmentShader);
 
     GLuint shaderProgram = glCreateProgram();
@@ -74,11 +75,11 @@ void reportCompileStatus(GLuint shader)
 void reportLinkStatus(GLuint shaderProgram)
 {
     GLint linkStatus;
-    glGetShaderiv(shaderProgram, GL_LINK_STATUS, &linkStatus);
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &linkStatus);
 
     if (linkStatus == GL_TRUE) return;
 
     char log[512];
-    glGetShaderInfoLog(shaderProgram, 511, NULL, log);
+    glGetProgramInfoLog(shaderProgram, 511, NULL, log);
     printf("%s", log);
 }
