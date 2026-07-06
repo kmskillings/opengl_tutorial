@@ -174,22 +174,37 @@ private:
 
     std::unique_ptr<GlWorld::Model> model;
 
+    std::unique_ptr<GlWorld::MotionRevolve> motion;
+
     std::unordered_set<GlWorld::SceneElement*> elements;
 
 public:
 
     Lightbulb(
         GlWorld::Mesh* mesh,
-        GlWorld::Material* material
-    )
-    {
-        this->transform = std::make_unique<GlWorld::Transform>();
-        this->model = std::make_unique<GlWorld::Model>(
+        GlWorld::Material* material,
+        const glm::vec3 &motionCenter,
+        const glm::vec3 &motionAxis,
+        const float& motionRps,
+        const glm::vec3 &positionStarting
+    ) :
+        transform(std::make_unique<GlWorld::Transform>()),
+        model(std::make_unique<GlWorld::Model>(
             this->transform.get(),
             material,
             mesh
-        );
+        )),
+        motion(std::make_unique<GlWorld::MotionRevolve>(
+            motionCenter,
+            motionAxis,
+            motionRps,
+            this->transform.get()
+        )),
+        elements(std::unordered_set<GlWorld::SceneElement*>())
+    {
+        this->transform->setPosition(positionStarting);
         this->elements.insert(this->model.get());
+        this->elements.insert(this->motion.get());
     }
 
     const std::unordered_set<GlWorld::SceneElement*>& getSceneElements(void) const override
@@ -324,7 +339,11 @@ int main(void)
         );
     std::unique_ptr<Lightbulb> lightbulb = std::make_unique<Lightbulb>(
         meshLightbulb.get(),
-        materialLightbulb.get()
+        materialLightbulb.get(),
+        glm::vec3(6.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, -1.0f, 0.0f),
+        0.1f,
+        glm::vec3(0.0f, 0.0f, 0.0f)
     );
     scene->addElement(lightbulb.get());
 

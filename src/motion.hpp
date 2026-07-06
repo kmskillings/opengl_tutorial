@@ -71,6 +71,29 @@ private:
 
 };
 
+class MotionRevolve : 
+    public SceneElementGroup<std::unordered_set<SceneElement*>>
+{
+
+private:
+    std::unique_ptr<Transform> center;
+    std::unique_ptr<MotionRotate> centerRotation;
+    Transform* transform;
+    std::unordered_set<SceneElement*> elements;
+
+public:
+
+    MotionRevolve(
+        const glm::vec3& center,
+        const glm::vec3& axis,
+        const float& revolutionsPerSecond,
+        Transform* transform
+    );
+
+    const std::unordered_set<SceneElement*>& getSceneElements(void) const;
+
+};
+
 }
 
 #endif

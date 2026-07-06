@@ -227,6 +227,7 @@ public:
 
 };
 
+class Transform;
 class Scene :
     public SceneElementGroup<std::unordered_set<SceneElement*>>
 {
@@ -241,6 +242,8 @@ private:
     std::unordered_set<SceneElement*> elements;
     LightAmbient* lightAmbient;
     LightDirectional* lightDirectional;
+
+    std::unique_ptr<Transform> transformBase;
 
 public:
 
@@ -266,6 +269,8 @@ public:
     void render(void);
 
     const std::unordered_set<SceneElement*>& getSceneElements(void) const override;
+
+    const Transform& getTransformBase(void) const;
 
 };
 
