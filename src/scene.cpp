@@ -20,7 +20,8 @@ Scene::Scene(
     camera(camera),
     skyColor(skyColor),
     lightAmbient(lightAmbient),
-    lightDirectional(lightDirectional)
+    lightDirectional(lightDirectional),
+    transformBase(std::make_unique<Transform>())
 {
     
 }
@@ -82,6 +83,13 @@ void Scene::render(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     this->draw(*this);
 }
+
+const Transform& Scene::getTransformBase(void) const
+{
+    return *this->transformBase.get();
+}
+
+
 
 bool SceneElement::caresAboutUpdatePhysical(void) const
 {
