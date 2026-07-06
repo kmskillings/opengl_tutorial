@@ -116,4 +116,29 @@ void MotionCamera::updatePhysical(
     this->mousePositionLastY = mousePositionNowY;
 }
 
+MotionRevolve::MotionRevolve(
+    const glm::vec3& center,
+    const glm::vec3& axis,
+    const float& revolutionsPerSecond,
+    Transform* transform
+) :
+    center(std::make_unique<Transform>()),
+    centerRotation(std::make_unique<MotionRotate>(
+        this->center.get(), 
+        revolutionsPerSecond, 
+        axis
+    )),
+    transform(transform),
+    elements(std::unordered_set<SceneElement*>())
+{
+    this->elements.insert(this->centerRotation.get());
+    this->center->setPosition(center, TransformAxes::Global);
+    this->transform->setParent(this->center.get(), TransformAxes::Global);
+}
+
+const std::unordered_set<SceneElement*>& MotionRevolve::getSceneElements(void) const
+{
+    return this->elements;
+}
+
 }
