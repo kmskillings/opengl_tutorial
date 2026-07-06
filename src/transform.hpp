@@ -4,6 +4,7 @@
 #include "gl_includes.h"
 
 #include <memory>
+#include <unordered_set>
 
 namespace GlWorld
 {
@@ -57,9 +58,17 @@ public:
 
     void scaleBy(const glm::vec3 &scale);
 
+    Transform* getParent(void) const;
+
+    void setParent(Transform* parent);
+    void setParent(Transform* parent, TransformAxes preserve);
+
     static const Transform& zero(void);
 
 private:
+
+    std::unordered_set<Transform*> getParents(void);
+
     glm::vec3 position; // Stored in parent space.
     glm::quat rotation;
     glm::vec3 scale;
