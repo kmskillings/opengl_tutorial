@@ -90,8 +90,7 @@ void MotionCamera::updatePhysical(
     if (glm::length(direction) > 0.1f)
         direction = glm::normalize(direction);
     glm::vec3 velocity = direction * this->speedTranslate;
-    velocity = glm::mat3(this->transformCamera->getMatrixModel()) * velocity;
-    this->transformCamera->translate(velocity * secondsDelta);
+    this->transformCamera->translate(velocity * secondsDelta, TransformAxes::Local);
 
     double mousePositionNowX;
     double mousePositionNowY;
@@ -99,15 +98,19 @@ void MotionCamera::updatePhysical(
     double mousePositionDeltaX = mousePositionNowX - this->mousePositionLastX;
     double mousePositionDeltaY = mousePositionNowY - this->mousePositionLastY;
 
-    glm::vec3 pitchAxis = glm::mat3(this->transformCamera->getMatrixModel()) * glm::vec3(1.0f, 0.0f, 0.0f);
-    pitchAxis = glm::normalize(pitchAxis);
     float pitchAngle = -mousePositionDeltaY * this->speedRotate * secondsDelta;
-    this->transformCamera->rotate(pitchAngle, pitchAxis);
+    this->transformCamera->rotate(
+        pitchAngle, 
+        glm::vec3(1.0f, 0.0f, 0.0f), 
+        TransformAxes::Local
+    );
 
-    glm::vec3 yawAxis = glm::mat3(this->transformCamera->getMatrixModel()) * glm::vec3(0.0f, 1.0f, 0.0f);
-    yawAxis = glm::normalize(yawAxis);
     float yawAngle = -mousePositionDeltaX * this->speedRotate * secondsDelta;
-    this->transformCamera->rotate(yawAngle, yawAxis);
+    this->transformCamera->rotate(
+        yawAngle,
+        glm::vec3(0.0f, 1.0f, 0.0f),
+        TransformAxes::Local
+    );
 
     this->mousePositionLastX = mousePositionNowX;
     this->mousePositionLastY = mousePositionNowY;
