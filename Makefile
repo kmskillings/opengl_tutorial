@@ -32,14 +32,12 @@ headers := ${header_names:%=${src_dir}/%}
 
 shader_dir := ./src/shaders
 shader_names := \
-vertex.glsl \
-fragment.glsl \
-vertexPhongFaceted.glsl \
-fragmentPhongFaceted.glsl \
-utilsPhong.glsl
+phongFaceted.frag \
+phongFaceted.vert \
+utilsPhong.frag
 shaders := ${shader_names:%=${shader_dir}/%}
 
-shader_dumps := ${shaders:%.glsl=%.xxd}
+shader_dumps := ${shaders:%=%.xxd}
 
 object_names := ${src_cpp_names:%.cpp=%.cpp.o} ${src_c_names:%.c=%.c.o}
 objects := ${object_names:%=${dir_build}/%}
@@ -74,7 +72,7 @@ ${filter %.c.o,${objects}}: ${dir_build}/%.c.o: ${src_dir}/%.c
 ${dir_build}/shaders.c.o: ${src_dir}/shaders.c ${shader_dumps}
 
 # Create shader dumps
-${shader_dumps}: %.xxd: %.glsl
+${shader_dumps}: %.xxd: %
 	xxd -i < $< > $@
 
 .PHONY: wc

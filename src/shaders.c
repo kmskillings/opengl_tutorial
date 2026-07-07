@@ -4,32 +4,20 @@
 void reportCompileStatus(GLuint shader);
 void reportLinkStatus(GLuint shaderProgram);
 
-const char vertexShaderSourceArray[] = {
-    #include "shaders/vertex.xxd"
-    , 0x00
-};
-const char* vertexShaderSource = vertexShaderSourceArray;
-
-const char fragmentShaderSourceArray[] = {
-    #include "shaders/fragment.xxd"
-    , 0x00
-};
-const char* fragmentShaderSource = fragmentShaderSourceArray;
-
 const char vertexPhongFacetedSourceArray[] = {
-    #include "shaders/vertexPhongFaceted.xxd"
+    #include "shaders/phongFaceted.vert.xxd"
     , 0x00
 };
 const char* vertexPhongFacetedSource = vertexPhongFacetedSourceArray;
 
 const char fragmentPhongFacetedSourceArray[] = {
-    #include "shaders/fragmentPhongFaceted.xxd"
+    #include "shaders/phongFaceted.frag.xxd"
     , 0x00
 };
 const char* fragmentPhongFacetedSource = fragmentPhongFacetedSourceArray;
 
 const char utilsPhongSourceArray[] = {
-    #include "shaders/utilsPhong.xxd"
+    #include "shaders/utilsPhong.frag.xxd"
     , 0x00
 };
 const char* utilsPhongSource = utilsPhongSourceArray;
