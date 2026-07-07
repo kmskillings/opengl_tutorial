@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <unordered_set>
+#include <stdio.h>
 
 #include "camera.hpp"
 #include "light.hpp"
@@ -23,7 +24,53 @@ Scene::Scene(
     lightDirectional(lightDirectional),
     transformBase(std::make_unique<Transform>())
 {
-    
+    glGenFramebuffers(1, &this->framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+    // Create color attachment as a texture
+    glGenTextures(1, &this->textureColorBuffer);
+    glBindTexture(GL_TEXTURE_2D, this->textureColorBuffer);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGB,
+        800,
+        600,
+        0,
+        GL_RGB,
+        GL_UNSIGNED_BYTE,
+        NULL
+    );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER, 
+        GL_COLOR_ATTACHMENT0, 
+        GL_TEXTURE_2D, 
+        textureColorBuffer,
+        0
+    );
+
+    // Create depth/stencil attachment and renderbuffer
+    glGenRenderbuffers(1, &this->rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, this->rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+    glFramebufferRenderbuffer(
+        GL_FRAMEBUFFER, 
+        GL_DEPTH_STENCIL_ATTACHMENT, 
+        GL_RENDERBUFFER, 
+        this->rbo
+    );
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        printf("Framebuffer is not complete.");
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 Camera* Scene::getCamera(void) const

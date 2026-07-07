@@ -243,6 +243,10 @@ private:
 
     std::unique_ptr<Transform> transformBase;
 
+    GLuint framebuffer;
+    GLuint textureColorBuffer;
+    GLuint rbo;
+
 public:
 
     Scene(
