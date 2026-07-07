@@ -139,7 +139,6 @@ public:
         const float& secondsDelta
     ) override
     {
-        {
         T elements = this->getSceneElements();
         for (SceneElement* element : elements)
         {
@@ -148,7 +147,6 @@ public:
                 element->updatePhysical(scene, secondsDelta);
             }
         }
-    }
     }
 
     void updatePhysicalPost(
