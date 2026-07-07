@@ -77,6 +77,10 @@ ${dir_build}/shaders.c.o: ${src_dir}/shaders.c ${shader_dumps}
 ${shader_dumps}: %.xxd: %.glsl
 	xxd -i < $< > $@
 
+.PHONY: wc
+wc:
+	wc -l ./src/* ./src/shaders/*.glsl
+
 .PHONY: clean
 clean:
 	rm -f ${dir_build}/*.o
