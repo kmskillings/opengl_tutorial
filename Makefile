@@ -12,7 +12,8 @@ model.cpp \
 mesh.cpp \
 light.cpp \
 material.cpp \
-motion.cpp
+motion.cpp \
+uiRect.cpp
 
 srcs_cpp := ${src_cpp_names:%=${src_dir}/%}
 src_c_names := shaders.c tex_cami.c
@@ -26,7 +27,8 @@ model.hpp \
 mesh.hpp \
 light.hpp \
 material.hpp \
-motion.hpp
+motion.hpp \
+uiRect.hpp
 
 headers := ${header_names:%=${src_dir}/%}
 
