@@ -77,7 +77,7 @@ ${shader_dumps}: %.xxd: %
 
 .PHONY: wc
 wc:
-	wc -l ./src/* ./src/shaders/*.glsl
+	wc -l ./src/* ./src/shaders/*.frag ./src/shaders/*.vert
 
 .PHONY: clean
 clean:
