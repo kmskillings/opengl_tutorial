@@ -4,39 +4,22 @@ program_name := program
 src_dir := ./src
 
 src_cpp_names := \
-main.cpp \
-scene.cpp \
-camera.cpp \
-worldObject.cpp \
-transform.cpp \
-model.cpp \
-mesh.cpp \
-light.cpp \
-material.cpp
+main.cpp
 
 srcs_cpp := ${src_cpp_names:%=${src_dir}/%}
 src_c_names := shaders.c tex_cami.c
 srcs_c := ${src_c_names:%=${src_dir}/%}
 
 header_names := \
-scene.hpp \
-camera.hpp \
-worldObject.hpp \
-transform.hpp \
-model.hpp \
-mesh.hpp \
-light.hpp \
-material.hpp
+shaders.h \
+textures.h
 
 headers := ${header_names:%=${src_dir}/%}
 
 shader_dir := ./src/shaders
 shader_names := \
 vertex.glsl \
-fragment.glsl \
-vertexPhongFaceted.glsl \
-fragmentPhongFaceted.glsl \
-utilsPhong.glsl
+fragment.glsl
 shaders := ${shader_names:%=${shader_dir}/%}
 
 shader_dumps := ${shaders:%.glsl=%.xxd}

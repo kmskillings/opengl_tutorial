@@ -1,14 +1,14 @@
-#version 150 core
+#version 460 core
 
-in vec4 position;
-in vec2 textureCoords;
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec2 textureCoords;
 
 out vec2 TextureCoords;
 
-uniform mat4 transform;
+layout(location = 0) uniform mat4 transform;
 
 void main()
 {
-    gl_Position = transform * position;
+    gl_Position = transform * vec4(position, 1.0f);
     TextureCoords = textureCoords;
 }

@@ -2,25 +2,15 @@
 #define GLEW_STATIC
 #include <glew.h>
 #include <glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
-#include <chrono>
 #include <cmath>
-#include <memory>
-#include <stdio.h>
 
 extern "C" {
 #include "textures.h"
 #include "shaders.h"
 }
-
-#include "scene.hpp"
-#include "camera.hpp"
-#include "transform.hpp"
-#include "model.hpp"
-#include "material.hpp"
-#include "worldObject.hpp"
-#include "light.hpp"
-#include "mesh.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -48,21 +38,9 @@ int main(void)
     GLFWwindow* window = setupGl();
     glfwMakeContextCurrent(window);
     glewInit();
+    error = glGetError();
 
-    // Set up scene
-
-    // Create camera
-    std::shared_ptr<GlWorld::Transform> cameraTransform = std::make_shared<GlWorld::Transform>();
-    std::shared_ptr<GlWorld::Camera> camera = std::make_shared<GlWorld::Camera>(
-        cameraTransform,
-        M_PI / 4,
-        (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT,
-        0.1f,
-        100.0f
-    );
-
-    // Create Cami Cube
-    // First load the Cami texture
+    // Load Cami texture
     GLuint textureCami;
     glGenTextures(1, &textureCami);
     glActiveTexture(GL_TEXTURE0);
@@ -82,196 +60,190 @@ int main(void)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    error = glGetError();
 
-    // Then create the shader program
-    const char* fragmentShaderSources[2] = {
-        utilsPhongSource,
-        fragmentPhongFacetedSource
-    };
-    const char* vertexShaderSources[1] = {
-        vertexPhongFacetedSource
-    };
-    GLuint shaderProgram = compileShader(
-        vertexShaderSources,
+    // Load Cube mesh
+    GLuint vaoCube;
+    GLuint vboCube;
+    GLuint eboCube;
+    glGenVertexArrays(1, &vaoCube);
+    glBindVertexArray(vaoCube);
+    glGenBuffers(1, &vboCube);
+    glBindBuffer(GL_ARRAY_BUFFER, vboCube);
+    float cubeVertices[] = 
+    {
+        -1.0f, -1.0f, -1.0f,    0.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,    1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,   -1.0f,  0.0f,
+        -1.0f, -1.0f,  1.0f,    0.0f,  0.0f,
+         1.0f, -1.0f,  1.0f,    1.0f,  0.0f,
+         1.0f, -1.0f, -1.0f,    2.0f,  0.0f,
+        -1.0f, -1.0f, -1.0f,    3.0f,  0.0f,
+        -1.0f,  1.0f, -1.0f,   -1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,    0.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,    1.0f,  1.0f,
+         1.0f,  1.0f, -1.0f,    2.0f,  1.0f,
+        -1.0f,  1.0f, -1.0f,    3.0f,  1.0f,
+        -1.0f,  1.0f, -1.0f,    0.0f,  2.0f,
+         1.0f,  1.0f, -1.0f,    1.0f,  2.0f
+    }; // Side length is hard-coded as 2 because we can always adjust it later
+       // in the model matrix.
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(cubeVertices) / sizeof(cubeVertices[0]),
+        cubeVertices,
+        GL_STATIC_DRAW
+    );
+    glVertexAttribPointer(  // 3D world position in location 0
+        0,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        5 * sizeof(float),
+        (void*)0
+    );
+    glVertexAttribPointer(  // 2D texture coordinate in location 1
         1,
-        fragmentShaderSources,
-        2
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        5 * sizeof(float),
+        (void*)(3 * sizeof(float))
     );
-
-    // Create the material
-    std::shared_ptr<GlWorld::MaterialPhongFaceted> material = std::make_shared<GlWorld::MaterialPhongFaceted>(
-        shaderProgram,
-        textureCami,
-        glm::vec3(0.1f, 0.1f, 0.1f),
-        16.0f,
-        glm::vec3(0.0f, 0.0f, 0.0f)
+    glGenBuffers(1, &eboCube);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboCube);
+    uint cubeElements[] = {
+        0, 1, 4,
+        4, 3, 0,
+        2, 3, 8,
+        8, 7, 2,
+        3, 4, 9,
+        9, 8, 3,
+        4, 5, 10,
+        10, 9, 4,
+        5, 6, 11,
+        11, 10, 5,
+        8, 9, 13,
+        13, 12, 8
+    };
+    glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        sizeof(cubeElements) / sizeof(cubeElements[0]),
+        cubeElements,
+        GL_STATIC_DRAW
     );
+    glBindVertexArray(0);
+    error = glGetError();
 
-    // Create the mesh
-    std::shared_ptr<GlWorld::MeshTextured> meshCube = 
-        GlWorld::MeshTextured::cube(1.0f);
-
-    // Create the model
-    std::shared_ptr<GlWorld::ModelTexturedSimple> modelCami = std::make_shared<GlWorld::ModelTexturedSimple>(meshCube, material);
-
-    // Create each worldObject
-
-    // Transform data is in the form:
-    // posX, posY, posZ, orientationAngle, orientationAxisX, Y, Z, rotationAngle, rotationX, Y, Z
-    // The position is scaled by CLOUD_RADIUS. The rotation angle is scaled by CLOUD_ROTATION_RATE_MAX.
-    float transformData[] = {
+    // Load and configure shader
+    GLuint shaderVertex = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(shaderVertex, 1, &shaderVertexSource, NULL);
+    glCompileShader(shaderVertex);
+    reportCompileStatus(shaderVertex);
+    GLuint shaderFragment = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(shaderFragment, 1, &shaderFragmentSource, NULL);
+    glCompileShader(shaderFragment);
+    reportCompileStatus(shaderFragment);
+    GLuint shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, shaderVertex);
+    glAttachShader(shaderProgram, shaderFragment);
+    glLinkProgram(shaderProgram);
+    reportLinkStatus(shaderProgram);
+    error = glGetError();
+    
+    // Create array of model matrices
+    float dataTransform[] = {
         #include "cloud.txt"
     };
-    int transformCount = sizeof(transformData) / sizeof(float) / 11;
-    std::shared_ptr<GlWorld::WorldObject> wos[transformCount];
-    float transformRotationAngles[transformCount];
-    glm::vec3 transformRotationAxes[transformCount];
-    for (int i = 0; i < transformCount; i++)
+    constexpr uint countTransform = sizeof(dataTransform) / sizeof(float) / 11;
+    glm::mat4 matricesModel[countTransform];
+    for (int i = 0; i < countTransform; i++)
     {
         glm::vec3 position = glm::vec3(
-            transformData[11 * i + 0], 
-            transformData[11 * i + 1], 
-            transformData[11 * i + 2]
+            dataTransform[11 * i + 0],
+            dataTransform[11 * i + 1],
+            dataTransform[11 * i + 2]
         );
-        position = position * CLOUD_RADIUS;
-
-        float orientationAngle = 
-            transformData[11 * i + 3];
-        glm::vec3 orientationAxis = glm::vec3(
-            transformData[11 * i + 4],
-            transformData[11 * i + 5],
-            transformData[11 * i + 6]
+        float angle = dataTransform[11 * i + 3];
+        glm::vec3 axis = glm::vec3(
+            dataTransform[11 * i + 4],
+            dataTransform[11 * i + 5],
+            dataTransform[11 * i + 6]
         );
-
-        float rotationAngle =
-            transformData[11 * i + 7] * CLOUD_ROTATION_RATE_MAX;
-        glm::vec3 rotationAxis = glm::vec3(
-            transformData[11 * i + 8],
-            transformData[11 * i + 9],
-            transformData[11 * i + 10]
-        );
-
-        std::shared_ptr<GlWorld::Transform> t =
-            std::make_shared<GlWorld::Transform>();
-        t->setPosition(position);
-        t->setRotation(orientationAngle, orientationAxis);
-        
-        wos[i] = std::make_shared<GlWorld::WorldObject>(
-            modelCami,
-            t
-        );
-        transformRotationAngles[i] = rotationAngle;
-        transformRotationAxes[i] = rotationAxis;
+        glm::vec3 scale = glm::vec3(1.0f);
+        glm::mat4 matrix = glm::identity<glm::mat4>();
+        matrix = glm::translate(matrix, position);
+        matrix = glm::rotate(matrix, angle, axis);
+        matrix = glm::scale(matrix, scale);
+        matricesModel[i] = matrix;
     }
 
-    // Create the LightAmbient
-    std::shared_ptr<GlWorld::LightAmbient> lightAmbient = std::make_shared<GlWorld::LightAmbient>(glm::vec3(0.1f, 0.1f, 0.1f));
+    // Just leave the camera at the origin for now, looking straight ahead.
+    glm::vec3 positionCamera = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::quat orientationCamera = glm::angleAxis(
+        0.0f,
+        glm::vec3(1.0f, 0.0f, 0.0f)
+    );
 
-    // Create and position the LightDirectional
-    std::shared_ptr<GlWorld::Transform> transformLight = std::make_shared<GlWorld::Transform>();
-    transformLight->rotate(-(float)M_PI / 4.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-    std::shared_ptr<GlWorld::LightDirectional> lightDirectional = std::make_shared<GlWorld::LightDirectional>(transformLight, glm::vec3(0.9, 0.9, 0.9));
+    // Calculate project matrix
+    glm::mat4 matrixProject = glm::perspective(
+        (float)(M_PI / 4.0f),
+        (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT,
+        0.1f,
+        100.0f
+    );
 
-    // Create and populate the scene
-    glm::vec4 skyColor = glm::vec4(0.5f, 0.8f, 1.0f, 1.0f);
-    std::unique_ptr<GlWorld::Scene> scene = std::make_unique<GlWorld::Scene>(camera, skyColor, lightAmbient, lightDirectional);
-    for (std::shared_ptr<GlWorld::WorldObject> wo : wos)
-    {
-        scene->addWorldObject(wo);
-    }
+    // Set up for the render cycle
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // Activate the cube mesh
+    glBindVertexArray(vaoCube);
 
-    bool mouseInitialized = false;
-    double mousePositionNowX;
-    double mousePositionNowY;
-    glfwGetCursorPos(window, &mousePositionNowX, &mousePositionNowY);
-    double mousePositionLastX;
-    double mousePositionLastY;
+    // Activate the shader program
+    glUseProgram(shaderProgram);
+    glUniform1i(1, 0);  // Diffuse texture is in location 1. Only texture
+                        // unit 0 is used.
+    error = glGetError();
 
-    double secondsStart = secondsSinceEpoch();
-    double secondsLast = secondsStart;
-    double secondsNow = secondsLast;
-
-    // Game loop
     while(glfwWindowShouldClose(window) == GL_FALSE) {
 
-        secondsLast = secondsNow;
-        secondsNow = secondsSinceEpoch();
-        float secondsDelta = secondsNow - secondsLast;
-
-        // Handle input
         glfwPollEvents();
-
-        // Translation controls
-        glm::vec4 movementNorm = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        {
-            movementNorm = movementNorm + glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
-        }
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        {
-            movementNorm = movementNorm + glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
-        }
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        {
-            movementNorm = movementNorm + glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
-        }
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        {
-            movementNorm = movementNorm + glm::vec4(-1.0f, 0.0f, 0.0f, 0.0f);
-        }
-        if (glm::length(movementNorm) > 0.01f) {
-            movementNorm = glm::normalize(movementNorm);
-        }
-        glm::vec4 cameraDirectionWorld = camera->getTransform()->getMatrixModel() * movementNorm;
-        glm::vec3 cameraVelocityWorld = glm::vec3(cameraDirectionWorld) * CAMERA_SPEED_TRANSLATION * secondsDelta;
-        camera->getTransform()->translate(cameraVelocityWorld);
-
-        // Camera view controls
-        mousePositionLastX = mousePositionNowX;
-        mousePositionLastY = mousePositionNowY;
-        glfwGetCursorPos(window, &mousePositionNowX, &mousePositionNowY);
-        double mousePositionDeltaX = mousePositionNowX - mousePositionLastX;
-        double mousePositionDeltaY = mousePositionNowY - mousePositionLastY;
-
-        glm::vec3 cameraPitchAxis = glm::vec3(
-            camera->getTransform()->getMatrixModel() 
-            * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f)
-        );
-        camera->getTransform()->rotate(
-            -mousePositionDeltaY * CAMERA_SENSITIVITY_PITCH * secondsDelta,
-            cameraPitchAxis
-        );
-
-        glm::vec3 cameraYawAxis = glm::vec3(
-            camera->getTransform()->getMatrixModel()
-            * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)
-        );
-        camera->getTransform()->rotate(
-            -mousePositionDeltaX * CAMERA_SENSITIVITY_YAW * secondsDelta,
-            cameraYawAxis
-        );
-
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         {
             glfwSetWindowShouldClose(window, GL_TRUE);
         }
 
-        for (int i = 0; i < transformCount; i++)
+        // Calculate the view matrix
+        glm::mat4 matrixView = glm::identity<glm::mat4>();
+        matrixView = glm::mat4_cast(glm::inverse(orientationCamera)) * matrixView;
+        matrixView = glm::translate(matrixView, -positionCamera);
+        // Rotation is applied before translation because the view matrix is
+        // "backwards."
+
+        glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+
+        for (int i = 0; i < countTransform; i++)
         {
-            std::shared_ptr<GlWorld::Transform> t = wos[i]->getTransform();
-            t->rotate(
-                transformRotationAngles[i] * secondsDelta,
-                transformRotationAxes[i]
+            // Calculate the aggregate matrix
+            glm::mat4 matrix = matrixProject * matrixView * matricesModel[i];
+            glUniformMatrix4fv(
+                0,
+                1,
+                GL_FALSE,
+                glm::value_ptr(matrix)
             );
-        }        
 
-        // Draw the scene
-        scene->draw();
-        
+            glDrawElements(
+                GL_TRIANGLES,
+                sizeof(cubeElements) / sizeof(cubeElements[0]),
+                GL_UNSIGNED_INT,
+                0
+            );
+            error = glGetError();
+        }
+
         glfwSwapBuffers(window);
-
     }
 
 }
@@ -286,12 +258,5 @@ GLFWwindow* setupGl(void) {
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
     return glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, NULL, NULL);
 
-}
-
-double secondsSinceEpoch()
-{
-    auto now = std::chrono::system_clock::now();
-    std::chrono::duration<double> ds = now.time_since_epoch();
-    return ds.count();
 }
 

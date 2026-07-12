@@ -1,10 +1,10 @@
-#version 150 core
+#version 460 core
 
 in vec2 TextureCoords;
 
 out vec4 outColor;
 
-uniform sampler2D textureMain;
+layout(location = 1) uniform sampler2D textureMain;
 
 void main()
 {

@@ -8,13 +8,13 @@ const char vertexShaderSourceArray[] = {
     #include "shaders/vertex.xxd"
     , 0x00
 };
-const char* vertexShaderSource = vertexShaderSourceArray;
+const char* shaderVertexSource = vertexShaderSourceArray;
 
 const char fragmentShaderSourceArray[] = {
     #include "shaders/fragment.xxd"
     , 0x00
 };
-const char* fragmentShaderSource = fragmentShaderSourceArray;
+const char* shaderFragmentSource = fragmentShaderSourceArray;
 
 const char vertexPhongFacetedSourceArray[] = {
     #include "shaders/vertexPhongFaceted.xxd"
@@ -74,11 +74,11 @@ void reportCompileStatus(GLuint shader)
 void reportLinkStatus(GLuint shaderProgram)
 {
     GLint linkStatus;
-    glGetShaderiv(shaderProgram, GL_LINK_STATUS, &linkStatus);
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &linkStatus);
 
     if (linkStatus == GL_TRUE) return;
 
     char log[512];
-    glGetShaderInfoLog(shaderProgram, 511, NULL, log);
+    glGetProgramInfoLog(shaderProgram, 511, NULL, log);
     printf("%s", log);
 }

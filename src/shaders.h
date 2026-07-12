@@ -5,8 +5,8 @@
 #define GLEW_STATIC
 #include <glew.h>
 
-extern const char* vertexShaderSource;
-extern const char* fragmentShaderSource;
+extern const char* shaderVertexSource;
+extern const char* shaderFragmentSource;
 extern const char* vertexPhongFacetedSource;
 extern const char* fragmentPhongFacetedSource;
 extern const char* utilsPhongSource;
@@ -17,5 +17,8 @@ GLuint compileShader(
     const char** fragmentShaderSources,
     GLuint fragmentShaderCount
 );
+
+void reportCompileStatus(GLuint shader);
+void reportLinkStatus(GLuint shaderProgram);
 
 #endif
