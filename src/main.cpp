@@ -90,10 +90,11 @@ int main(void)
        // in the model matrix.
     glBufferData(
         GL_ARRAY_BUFFER,
-        sizeof(cubeVertices) / sizeof(cubeVertices[0]),
+        sizeof(cubeVertices),
         cubeVertices,
         GL_STATIC_DRAW
     );
+    glEnableVertexAttribArray(0);
     glVertexAttribPointer(  // 3D world position in location 0
         0,
         3,
@@ -102,6 +103,7 @@ int main(void)
         5 * sizeof(float),
         (void*)0
     );
+    glEnableVertexAttribArray(1);
     glVertexAttribPointer(  // 2D texture coordinate in location 1
         1,
         2,
@@ -128,7 +130,7 @@ int main(void)
     };
     glBufferData(
         GL_ELEMENT_ARRAY_BUFFER,
-        sizeof(cubeElements) / sizeof(cubeElements[0]),
+        sizeof(cubeElements),
         cubeElements,
         GL_STATIC_DRAW
     );
@@ -147,6 +149,7 @@ int main(void)
     GLuint shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, shaderVertex);
     glAttachShader(shaderProgram, shaderFragment);
+    glBindFragDataLocation(shaderProgram, 0, "outColor");
     glLinkProgram(shaderProgram);
     reportLinkStatus(shaderProgram);
     error = glGetError();
@@ -164,13 +167,14 @@ int main(void)
             dataTransform[11 * i + 1],
             dataTransform[11 * i + 2]
         );
+        position = position * CLOUD_RADIUS;
         float angle = dataTransform[11 * i + 3];
         glm::vec3 axis = glm::vec3(
             dataTransform[11 * i + 4],
             dataTransform[11 * i + 5],
             dataTransform[11 * i + 6]
         );
-        glm::vec3 scale = glm::vec3(1.0f);
+        glm::vec3 scale = glm::vec3(0.5f);
         glm::mat4 matrix = glm::identity<glm::mat4>();
         matrix = glm::translate(matrix, position);
         matrix = glm::rotate(matrix, angle, axis);
@@ -179,7 +183,7 @@ int main(void)
     }
 
     // Just leave the camera at the origin for now, looking straight ahead.
-    glm::vec3 positionCamera = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 positionCamera = glm::vec3(0.0f, 0.0f, 5.0f);
     glm::quat orientationCamera = glm::angleAxis(
         0.0f,
         glm::vec3(1.0f, 0.0f, 0.0f)
@@ -202,6 +206,7 @@ int main(void)
     glUseProgram(shaderProgram);
     glUniform1i(1, 0);  // Diffuse texture is in location 1. Only texture
                         // unit 0 is used.
+    glEnable(GL_DEPTH_TEST);
     error = glGetError();
 
     while(glfwWindowShouldClose(window) == GL_FALSE) {
@@ -220,7 +225,7 @@ int main(void)
         // "backwards."
 
         glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
         for (int i = 0; i < countTransform; i++)
