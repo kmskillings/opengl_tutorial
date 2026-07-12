@@ -25,6 +25,7 @@ extern "C" {
 #define CAMERA_SPEED_TRANSLATION 5.0f
 #define CAMERA_SENSITIVITY_PITCH 0.1f
 #define CAMERA_SENSITIVITY_YAW   0.1f
+#define CAMERA_SPEED_ROLL        1.0f
 
 #define THROB_PERIOD_MILLIS 2000
 
@@ -184,7 +185,7 @@ int main(void)
 
     // Calculate project matrix
     glm::mat4 matrixProject = glm::perspective(
-        (float)(M_PI / 4.0f),
+        (float)(M_PI / 3.0f),
         (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT,
         0.1f,
         100.0f
@@ -286,10 +287,25 @@ int main(void)
             Transform::Axes::Local
         );
 
+        float rollRate = 0.0f;
+        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+        {
+            rollRate = rollRate + 1.0f;
+        }
+        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+        {
+            rollRate = rollRate - 1.0f;
+        }
+        cameraTransform.rotate(
+            rollRate * CAMERA_SPEED_ROLL * secondsDelta,
+            glm::vec3(0.0f, 0.0f, 1.0f),
+            Transform::Axes::Local
+        );
+
         // Calculate the view matrix
         glm::mat4 matrixView = cameraTransform.getMatrixInv();
 
-        glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+        glClearColor(0.5f, 0.8f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
