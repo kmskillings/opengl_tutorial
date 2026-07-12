@@ -7,9 +7,6 @@
 
 extern const char* shaderVertexSource;
 extern const char* shaderFragmentSource;
-extern const char* vertexPhongFacetedSource;
-extern const char* fragmentPhongFacetedSource;
-extern const char* utilsPhongSource;
 
 GLuint compileShader(
     const char** vertexShaderSources,

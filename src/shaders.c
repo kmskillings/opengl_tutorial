@@ -16,24 +16,6 @@ const char fragmentShaderSourceArray[] = {
 };
 const char* shaderFragmentSource = fragmentShaderSourceArray;
 
-const char vertexPhongFacetedSourceArray[] = {
-    #include "shaders/vertexPhongFaceted.xxd"
-    , 0x00
-};
-const char* vertexPhongFacetedSource = vertexPhongFacetedSourceArray;
-
-const char fragmentPhongFacetedSourceArray[] = {
-    #include "shaders/fragmentPhongFaceted.xxd"
-    , 0x00
-};
-const char* fragmentPhongFacetedSource = fragmentPhongFacetedSourceArray;
-
-const char utilsPhongSourceArray[] = {
-    #include "shaders/utilsPhong.xxd"
-    , 0x00
-};
-const char* utilsPhongSource = utilsPhongSourceArray;
-
 unsigned int compileShader(
     const char** vertexShaderSources,
     GLuint vertexShaderCount,
@@ -48,6 +30,7 @@ unsigned int compileShader(
 
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, fragmentShaderCount, fragmentShaderSources, NULL);
+    glCompileShader(fragmentShader);
     reportCompileStatus(fragmentShader);
 
     GLuint shaderProgram = glCreateProgram();

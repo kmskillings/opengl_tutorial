@@ -4,7 +4,8 @@ program_name := program
 src_dir := ./src
 
 src_cpp_names := \
-main.cpp
+main.cpp \
+transform.cpp
 
 srcs_cpp := ${src_cpp_names:%=${src_dir}/%}
 src_c_names := shaders.c tex_cami.c
@@ -12,7 +13,8 @@ srcs_c := ${src_c_names:%=${src_dir}/%}
 
 header_names := \
 shaders.h \
-textures.h
+textures.h \
+transform.hpp
 
 headers := ${header_names:%=${src_dir}/%}
 

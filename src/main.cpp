@@ -6,11 +6,14 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <cmath>
+#include <chrono>
 
 extern "C" {
 #include "textures.h"
 #include "shaders.h"
 }
+
+#include "transform.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -27,7 +30,6 @@ extern "C" {
 
 GLFWwindow* setupGl(void);
 double secondsSinceEpoch(void);
-void reportShaderStatus(GLuint shader);
 
 int main(void)
 {
@@ -138,21 +140,10 @@ int main(void)
     error = glGetError();
 
     // Load and configure shader
-    GLuint shaderVertex = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(shaderVertex, 1, &shaderVertexSource, NULL);
-    glCompileShader(shaderVertex);
-    reportCompileStatus(shaderVertex);
-    GLuint shaderFragment = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(shaderFragment, 1, &shaderFragmentSource, NULL);
-    glCompileShader(shaderFragment);
-    reportCompileStatus(shaderFragment);
-    GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, shaderVertex);
-    glAttachShader(shaderProgram, shaderFragment);
-    glBindFragDataLocation(shaderProgram, 0, "outColor");
-    glLinkProgram(shaderProgram);
-    reportLinkStatus(shaderProgram);
-    error = glGetError();
+    GLuint shaderProgram = compileShader(
+        &shaderVertexSource, 1,
+        &shaderFragmentSource, 1
+    );
     
     // Create array of model matrices
     float dataTransform[] = {
@@ -175,18 +166,20 @@ int main(void)
             dataTransform[11 * i + 6]
         );
         glm::vec3 scale = glm::vec3(0.5f);
-        glm::mat4 matrix = glm::identity<glm::mat4>();
-        matrix = glm::translate(matrix, position);
-        matrix = glm::rotate(matrix, angle, axis);
-        matrix = glm::scale(matrix, scale);
-        matricesModel[i] = matrix;
+        Transform transform = Transform(position, angle, axis, scale);
+        matricesModel[i] = transform.getMatrix();
     }
 
     // Just leave the camera at the origin for now, looking straight ahead.
-    glm::vec3 positionCamera = glm::vec3(0.0f, 0.0f, 5.0f);
+    glm::vec3 positionCamera = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::quat orientationCamera = glm::angleAxis(
         0.0f,
         glm::vec3(1.0f, 0.0f, 0.0f)
+    );
+    Transform cameraTransform = Transform(
+        positionCamera, 
+        orientationCamera, 
+        glm::vec3(1.0f)
     );
 
     // Calculate project matrix
@@ -196,6 +189,8 @@ int main(void)
         0.1f,
         100.0f
     );
+
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Set up for the render cycle
 
@@ -209,7 +204,23 @@ int main(void)
     glEnable(GL_DEPTH_TEST);
     error = glGetError();
 
+    double mouseXNow;
+    double mouseYNow;
+    double mouseXLast;
+    double mouseYLast;
+    double mouseXDelta;
+    double mouseYDelta;
+    glfwGetCursorPos(window, &mouseXNow, &mouseYNow);
+
+    double secondsNow = secondsSinceEpoch();
+    double secondsLast;
+    double secondsDelta;
+
     while(glfwWindowShouldClose(window) == GL_FALSE) {
+
+        secondsLast = secondsNow;
+        secondsNow = secondsSinceEpoch();
+        secondsDelta = secondsNow - secondsLast;
 
         glfwPollEvents();
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -217,12 +228,66 @@ int main(void)
             glfwSetWindowShouldClose(window, GL_TRUE);
         }
 
+        // Handle camera motion
+        glm::vec3 cameraDirection = glm::vec3(0.0f);
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        {
+            cameraDirection = cameraDirection + 
+                glm::vec3( 0.0f,  0.0f, -1.0f);
+        }
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        {
+            cameraDirection = cameraDirection + 
+                glm::vec3( 0.0f,  0.0f,  1.0f);
+        }
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        {
+            cameraDirection = cameraDirection + 
+                glm::vec3(-1.0f,  0.0f,  0.0f);
+        }
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        {
+            cameraDirection = cameraDirection + 
+                glm::vec3( 1.0f,  0.0f,  0.0f);
+        }
+        if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+        {
+            cameraDirection = cameraDirection + 
+                glm::vec3( 0.0f, -1.0f,  0.0f);
+        }
+        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        {
+            cameraDirection = cameraDirection + 
+                glm::vec3( 0.0f,  1.0f,  0.0f);
+        }
+        if (glm::length(cameraDirection) > 0.1)
+        {
+            cameraDirection = glm::normalize(cameraDirection);
+        }
+        cameraTransform.translate(
+            CAMERA_SPEED_TRANSLATION * secondsDelta,
+            cameraDirection,
+            Transform::Axes::Local
+        );
+
+        mouseXLast = mouseXNow;
+        mouseYLast = mouseYNow;
+        glfwGetCursorPos(window, &mouseXNow, &mouseYNow);
+        mouseXDelta = mouseXNow - mouseXLast;
+        mouseYDelta = mouseYNow - mouseYLast;
+        cameraTransform.rotate(
+            mouseYDelta * CAMERA_SENSITIVITY_PITCH * secondsDelta,
+            glm::vec3(-1.0f, 0.0f, 0.0f),
+            Transform::Axes::Local
+        );
+        cameraTransform.rotate(
+            mouseXDelta * CAMERA_SENSITIVITY_YAW * secondsDelta,
+            glm::vec3(0.0f, -1.0f, 0.0f),
+            Transform::Axes::Local
+        );
+
         // Calculate the view matrix
-        glm::mat4 matrixView = glm::identity<glm::mat4>();
-        matrixView = glm::mat4_cast(glm::inverse(orientationCamera)) * matrixView;
-        matrixView = glm::translate(matrixView, -positionCamera);
-        // Rotation is applied before translation because the view matrix is
-        // "backwards."
+        glm::mat4 matrixView = cameraTransform.getMatrixInv();
 
         glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -265,3 +330,9 @@ GLFWwindow* setupGl(void) {
 
 }
 
+double secondsSinceEpoch()
+{
+    auto now = std::chrono::system_clock::now();
+    std::chrono::duration<double> ds = now.time_since_epoch();
+    return ds.count();
+}
