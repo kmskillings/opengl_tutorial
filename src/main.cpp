@@ -80,6 +80,18 @@ public:
 
 };
 
+class Lightbulb
+{
+
+private:
+    glm::vec3 center;
+
+public:
+
+    Lightbulb(void);
+
+};
+
 int main(void)
 {
 
