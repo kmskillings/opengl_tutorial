@@ -32,6 +32,54 @@ extern "C" {
 GLFWwindow* setupGl(void);
 double secondsSinceEpoch(void);
 
+// A Cami Cube consists of a Transform and an angle and axis representing its
+// incremental rotation. It exposes a method to tick its rotation and one to
+// get its model matrix.
+class CamiCube
+{
+
+private:
+    Transform transform_;
+    float rate_;
+    glm::vec3 axis_;
+
+public:
+
+    CamiCube(void) {}
+
+    CamiCube(
+        const glm::vec3& position,
+        const float& orientationAngle,
+        const glm::vec3& orientationAxis,
+        const float& rotationRate,
+        const glm::vec3& rotationAxis,
+        const glm::vec3& scale
+    ) :
+        transform_(Transform(
+            position,
+            orientationAngle,
+            orientationAxis,
+            scale
+        )),
+        rate_(rotationRate),
+        axis_(rotationAxis)
+    {}
+
+    void update(const float& secondsDelta)
+    {
+        transform_.rotate(
+            rate_ * secondsDelta,
+            axis_
+        );
+    }
+
+    glm::mat4 getMatrix(void)
+    {
+        return transform_.getMatrix();
+    }
+
+};
+
 int main(void)
 {
 
@@ -151,7 +199,7 @@ int main(void)
         #include "cloud.txt"
     };
     constexpr uint countTransform = sizeof(dataTransform) / sizeof(float) / 11;
-    glm::mat4 matricesModel[countTransform];
+    CamiCube camiCubes[countTransform];
     for (int i = 0; i < countTransform; i++)
     {
         glm::vec3 position = glm::vec3(
@@ -160,15 +208,27 @@ int main(void)
             dataTransform[11 * i + 2]
         );
         position = position * CLOUD_RADIUS;
-        float angle = dataTransform[11 * i + 3];
-        glm::vec3 axis = glm::vec3(
+        float orientationAngle = dataTransform[11 * i + 3];
+        glm::vec3 orientationAxis = glm::vec3(
             dataTransform[11 * i + 4],
             dataTransform[11 * i + 5],
             dataTransform[11 * i + 6]
         );
+        float rotationRate = dataTransform[11 * i + 7] * CLOUD_ROTATION_RATE_MAX;
+        glm::vec3 rotationAxis = glm::vec3(
+            dataTransform[11 * i + 8],
+            dataTransform[11 * i + 9],
+            dataTransform[11 * i + 10]
+        );
         glm::vec3 scale = glm::vec3(0.5f);
-        Transform transform = Transform(position, angle, axis, scale);
-        matricesModel[i] = transform.getMatrix();
+        camiCubes[i] = CamiCube(
+            position,
+            orientationAngle,
+            orientationAxis,
+            rotationRate,
+            rotationAxis,
+            scale
+        );
     }
 
     // Just leave the camera at the origin for now, looking straight ahead.
@@ -308,11 +368,11 @@ int main(void)
         glClearColor(0.5f, 0.8f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
         for (int i = 0; i < countTransform; i++)
         {
             // Calculate the aggregate matrix
-            glm::mat4 matrix = matrixProject * matrixView * matricesModel[i];
+            camiCubes[i].update(secondsDelta);
+            glm::mat4 matrix = matrixProject * matrixView * camiCubes[i].getMatrix();
             glUniformMatrix4fv(
                 0,
                 1,
