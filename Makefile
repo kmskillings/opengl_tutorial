@@ -70,4 +70,4 @@ clean:
 
 .PHONY: wc
 wc:
-	wc -l ${srcs_cpp} ${srcs_c} ${headers} ./shaders/*.vert ./shaders/*.frag
+	wc -l ${srcs_cpp} ${srcs_c} ${headers} ${shaders}
