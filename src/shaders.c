@@ -5,13 +5,13 @@ void reportCompileStatus(GLuint shader);
 void reportLinkStatus(GLuint shaderProgram);
 
 const char vertexShaderSourceArray[] = {
-    #include "shaders/vertex.xxd"
+    #include "shaders/textured.vert.xxd"
     , 0x00
 };
 const char* shaderVertexSource = vertexShaderSourceArray;
 
 const char fragmentShaderSourceArray[] = {
-    #include "shaders/fragment.xxd"
+    #include "shaders/textured.frag.xxd"
     , 0x00
 };
 const char* shaderFragmentSource = fragmentShaderSourceArray;

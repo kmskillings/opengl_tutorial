@@ -20,11 +20,11 @@ headers := ${header_names:%=${src_dir}/%}
 
 shader_dir := ./src/shaders
 shader_names := \
-vertex.glsl \
-fragment.glsl
+textured.frag \
+textured.vert
 shaders := ${shader_names:%=${shader_dir}/%}
 
-shader_dumps := ${shaders:%.glsl=%.xxd}
+shader_dumps := ${shaders:%=%.xxd}
 
 object_names := ${src_cpp_names:%.cpp=%.cpp.o} ${src_c_names:%.c=%.c.o}
 objects := ${object_names:%=${dir_build}/%}
@@ -59,7 +59,7 @@ ${filter %.c.o,${objects}}: ${dir_build}/%.c.o: ${src_dir}/%.c
 ${dir_build}/shaders.c.o: ${src_dir}/shaders.c ${shader_dumps}
 
 # Create shader dumps
-${shader_dumps}: %.xxd: %.glsl
+${shader_dumps}: %.xxd: %
 	xxd -i < $< > $@
 
 .PHONY: clean
@@ -67,3 +67,7 @@ clean:
 	rm -f ${dir_build}/*.o
 	rm -f ${dir_build}/${program_name}
 	rm -f ${shader_dir}/*.xxd
+
+.PHONY: wc
+wc:
+	wc -l ${srcs_cpp} ${srcs_c} ${headers} ./shaders/*.vert ./shaders/*.frag
