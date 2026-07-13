@@ -7,6 +7,8 @@
 
 #include "transform.hpp"
 
+Transform::Transform(void) {}
+
 Transform::Transform(
     const glm::vec3& position,
     const glm::quat& orientation,
@@ -38,8 +40,8 @@ Transform::Transform(
 glm::mat4 Transform::getMatrix(void) const
 {
     glm::mat4 matrix = glm::mat4(1.0f);
-    matrix = glm::translate(matrix, position_);
-    matrix = matrix * glm::mat4_cast(orientation_);
+    matrix = glm::translate(matrix, getPosition());
+    matrix = matrix * glm::mat4_cast(getOrientation());
     matrix = glm::scale(matrix, scale_);
     return matrix;
 }
@@ -67,9 +69,9 @@ void Transform::translate(
     glm::vec3 offsetFixed = offset;
     if (axes == Axes::Local)
     {
-        offsetFixed = orientation_ * offsetFixed;
+        offsetFixed = getOrientation() * offsetFixed;
     }
-    position_ = position_ + offsetFixed;
+    setPosition(getPosition() + offsetFixed);
 }
 
 void Transform::translate(
@@ -89,7 +91,7 @@ glm::quat Transform::getOrientation(void) const
 
 void Transform::setOrientation(const glm::quat& orientation)
 {
-    orientation_ = orientation;
+    orientation_ = glm::normalize(orientation);
 }
 
 void Transform::setOrientation(const float& angle, const glm::vec3& axis)
@@ -104,11 +106,11 @@ void Transform::rotate(
 {
     if (axes == Axes::Fixed)
     {
-        orientation_ = rotation * orientation_;
+        setOrientation(rotation * getOrientation());
     }
     else
     {
-        orientation_ = orientation_ * rotation;
+        setOrientation(getOrientation() * rotation);
     }
 }
 

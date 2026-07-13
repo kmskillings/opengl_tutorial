@@ -24,6 +24,8 @@ public:
         Fixed   // Axes that remain fixed in the transform's containing space
     };
 
+    Transform(void);
+
     Transform(
         const glm::vec3& position,
         const glm::quat& orientation,
