@@ -73,7 +73,7 @@ public:
         );
     }
 
-    glm::mat4 getMatrix(void)
+    glm::mat4 getMatrix(void) const
     {
         return transform_.getMatrix();
     }
@@ -84,11 +84,54 @@ class Lightbulb
 {
 
 private:
-    glm::vec3 center;
+    glm::vec3 center_;
+    glm::vec3 radius_;
+    glm::vec3 axis_;
+    float rate_;
+    float angle_;
+    float scale_;
 
 public:
 
-    Lightbulb(void);
+    Lightbulb(void) :
+        center_(0.0f, 0.0f, 0.0f),
+        radius_(0.0f, 0.0f, 0.0f),
+        axis_(0.0f, 0.0f, 0.0f),
+        rate_(0.0f),
+        angle_(0.0f),
+        scale_(1.0f)
+    {}
+
+    Lightbulb(
+        const glm::vec3& center,
+        const glm::vec3& starting,
+        const glm::vec3& axis,
+        const float& rate,
+        const float& scale
+    ) :
+        center_(center),
+        radius_(starting - center),
+        axis_(glm::normalize(axis)),
+        rate_(rate),
+        angle_(0)
+    {}
+
+    void update(
+        const float& secondsDelta
+    )
+    {
+        angle_ = angle_ + rate_ * secondsDelta;
+    }
+
+    glm::mat4 getMatrix(void) const
+    {
+        glm::vec3 rotatedRadius = glm::angleAxis(angle_, axis_) * radius_;
+        glm::vec3 position = rotatedRadius + center_;
+        glm::mat4 matrix = glm::identity<glm::mat4>();
+        matrix = glm::translate(matrix, position);
+        matrix = glm::scale(matrix, glm::vec3(scale_));
+        return matrix;
+    }
 
 };
 
@@ -123,6 +166,7 @@ int main(void)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glBindTexture(GL_TEXTURE_2D, 0);
     error = glGetError();
 
     // Load Cube mesh
@@ -242,6 +286,37 @@ int main(void)
             scale
         );
     }
+
+    // Create one-pixel lightbulb texture
+    GLuint textureLightbulb;
+    glGenTextures(1, &textureLightbulb);
+    glBindTexture(GL_TEXTURE_2D, textureLightbulb);
+    glm::vec4 colorLightbulb = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA,
+        1,
+        1,
+        0,
+        GL_RGBA,
+        GL_FLOAT,
+        &colorLightbulb
+    );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    // Create a lightbulb
+    Lightbulb lightbulb = Lightbulb(
+        glm::vec3(6.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, -1.0f, 0.0f),
+        0.5f,
+        0.1f
+    );
 
     // Just leave the camera at the origin for now, looking straight ahead.
     glm::vec3 positionCamera = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -380,6 +455,7 @@ int main(void)
         glClearColor(0.5f, 0.8f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        glBindTexture(GL_TEXTURE_2D, textureCami);
         for (int i = 0; i < countTransform; i++)
         {
             // Calculate the aggregate matrix
@@ -400,6 +476,22 @@ int main(void)
             );
             error = glGetError();
         }
+
+        glBindTexture(GL_TEXTURE_2D, textureLightbulb);
+        lightbulb.update(secondsDelta);
+        glm::mat4 matrix = matrixProject * matrixView * lightbulb.getMatrix();
+        glUniformMatrix4fv(
+            0,
+            1,
+            GL_FALSE,
+            glm::value_ptr(matrix)
+        );
+        glDrawElements(
+            GL_TRIANGLES,
+            sizeof(cubeElements) / sizeof(cubeElements[0]),
+            GL_UNSIGNED_INT,
+            0
+        );
 
         glfwSwapBuffers(window);
     }
