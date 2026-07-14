@@ -14,7 +14,8 @@ srcs_c := ${src_c_names:%=${src_dir}/%}
 header_names := \
 shaders.h \
 textures.h \
-transform.hpp
+transform.hpp \
+camiCube.hpp
 
 headers := ${header_names:%=${src_dir}/%}
 

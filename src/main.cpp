@@ -14,6 +14,7 @@ extern "C" {
 }
 
 #include "transform.hpp"
+#include "camiCube.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -31,54 +32,6 @@ extern "C" {
 
 GLFWwindow* setupGl(void);
 double secondsSinceEpoch(void);
-
-// A Cami Cube consists of a Transform and an angle and axis representing its
-// incremental rotation. It exposes a method to tick its rotation and one to
-// get its model matrix.
-class CamiCube
-{
-
-private:
-    Transform transform_;
-    float rate_;
-    glm::vec3 axis_;
-
-public:
-
-    CamiCube(void) {}
-
-    CamiCube(
-        const glm::vec3& position,
-        const float& orientationAngle,
-        const glm::vec3& orientationAxis,
-        const float& rotationRate,
-        const glm::vec3& rotationAxis,
-        const glm::vec3& scale
-    ) :
-        transform_(Transform(
-            position,
-            orientationAngle,
-            orientationAxis,
-            scale
-        )),
-        rate_(rotationRate),
-        axis_(rotationAxis)
-    {}
-
-    void update(const float& secondsDelta)
-    {
-        transform_.rotate(
-            rate_ * secondsDelta,
-            axis_
-        );
-    }
-
-    glm::mat4 getMatrix(void) const
-    {
-        return transform_.getMatrix();
-    }
-
-};
 
 class Lightbulb
 {
@@ -255,7 +208,7 @@ int main(void)
         #include "cloud.txt"
     };
     constexpr uint countTransform = sizeof(dataTransform) / sizeof(float) / 11;
-    CamiCube camiCubes[countTransform];
+    CamiCubeSystem<countTransform> camiCubeSystem = CamiCubeSystem<countTransform>();
     for (int i = 0; i < countTransform; i++)
     {
         glm::vec3 position = glm::vec3(
@@ -270,22 +223,29 @@ int main(void)
             dataTransform[11 * i + 5],
             dataTransform[11 * i + 6]
         );
+        glm::quat orientation = glm::angleAxis(
+            orientationAngle,
+            orientationAxis
+        );
         float rotationRate = dataTransform[11 * i + 7] * CLOUD_ROTATION_RATE_MAX;
         glm::vec3 rotationAxis = glm::vec3(
             dataTransform[11 * i + 8],
             dataTransform[11 * i + 9],
             dataTransform[11 * i + 10]
         );
-        glm::vec3 scale = glm::vec3(0.5f);
-        camiCubes[i] = CamiCube(
+        float scale = 0.5f;
+        
+        camiCubeSystem.insert(
             position,
-            orientationAngle,
-            orientationAxis,
-            rotationRate,
+            orientation,
+            scale,
             rotationAxis,
-            scale
+            rotationRate
         );
     }
+
+    // Array of model matrices for CamiCubes
+    glm::mat4 camiCubeMatrices[countTransform];
 
     // Create one-pixel lightbulb texture
     GLuint textureLightbulb;
@@ -449,18 +409,25 @@ int main(void)
             Transform::Axes::Local
         );
 
+        camiCubeSystem.update(secondsDelta);
+
         // Calculate the view matrix
         glm::mat4 matrixView = cameraTransform.getMatrixInv();
+
+        uint camiCubeCount = camiCubeSystem.getMatrices(
+            camiCubeMatrices,
+            1,
+            camiCubeMatrices + 4
+        );
 
         glClearColor(0.5f, 0.8f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glBindTexture(GL_TEXTURE_2D, textureCami);
-        for (int i = 0; i < countTransform; i++)
+        for (int i = 0; i < camiCubeCount; i++)
         {
             // Calculate the aggregate matrix
-            camiCubes[i].update(secondsDelta);
-            glm::mat4 matrix = matrixProject * matrixView * camiCubes[i].getMatrix();
+            glm::mat4 matrix = matrixProject * matrixView * camiCubeMatrices[i];
             glUniformMatrix4fv(
                 0,
                 1,
@@ -492,6 +459,7 @@ int main(void)
             GL_UNSIGNED_INT,
             0
         );
+        error = glGetError();
 
         glfwSwapBuffers(window);
     }
