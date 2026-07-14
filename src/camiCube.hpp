@@ -36,16 +36,10 @@ private:
 
 public:
 
-    CamiCubeSystem(uint capacity) :
-        camiCubes_(new CamiCube[capacity]),
-        count_(0),
-        capacity_(capacity)
-    {}
+    CamiCubeSystem(uint capacity);
 
-    ~CamiCubeSystem(void)
-    {
-        delete[] camiCubes_;
-    }
+    ~CamiCubeSystem(void);
+    
 
     // Insert a new CamiCube with the given parameters. Returns whether it was
     // successfull inserted.
@@ -55,30 +49,12 @@ public:
         const float& scale,
         const glm::vec3& rotationAxis,
         const float& rotationRate
-    )
-    {
-        if (count_ == capacity_)
-        {
-            return false;
-        }
-
-        camiCubes_[count_].position = position;
-        camiCubes_[count_].orientation = orientation;
-        camiCubes_[count_].scale = scale;
-        camiCubes_[count_].rotationAxis = rotationAxis;
-        camiCubes_[count_].rotationRate = rotationRate;
-
-        count_ = count_ + 1;
-        return true;
-    }
+    );
 
     // Updates all CamiCubes in the system.
     void update(
         const float& secondsDelta
-    )
-    {
-        secondsElapsed_ = secondsElapsed_ + secondsDelta;
-    }
+    );
 
     // Gets the model matrices of the CamiCubes in the system. Writes them
     // to an array starting at the "start" pointer. The stride is the number
@@ -91,31 +67,7 @@ public:
         glm::mat4* start, 
         uint stride,
         uint maxCount
-    ) const
-    {
-        uint i;
-        glm::mat4 matrix;
-        for (i = 0; i < count_; i++)
-        {
-            if (i > maxCount)
-            {
-                return i;
-            }
-
-            glm::mat4 matrix = glm::identity<glm::mat4>();
-            matrix = glm::translate(matrix, camiCubes_[i].position);
-            matrix = glm::rotate(
-                matrix, 
-                camiCubes_[i].rotationRate * secondsElapsed_,
-                camiCubes_[i].rotationAxis
-            );
-            matrix = matrix * glm::mat4_cast(camiCubes_[i].orientation);
-            matrix = glm::scale(matrix, glm::vec3(camiCubes_[i].scale));
-            *(start + stride * i) = matrix;
-        }
-
-        return i;
-    }
+    ) const;
 
 };
 

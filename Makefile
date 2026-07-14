@@ -6,6 +6,7 @@ src_dir := ./src
 src_cpp_names := \
 main.cpp \
 transform.cpp \
+camiCube.cpp \
 randomGeneration.cpp
 
 srcs_cpp := ${src_cpp_names:%=${src_dir}/%}
