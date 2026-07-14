@@ -66,7 +66,8 @@ public:
         radius_(starting - center),
         axis_(glm::normalize(axis)),
         rate_(rate),
-        angle_(0)
+        angle_(0),
+        scale_(scale)
     {}
 
     void update(
