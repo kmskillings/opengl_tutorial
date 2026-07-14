@@ -15,12 +15,13 @@ extern "C" {
 
 #include "transform.hpp"
 #include "camiCube.hpp"
+#include "randomGeneration.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 #define WINDOW_TITLE "Cami Cube"
 
-#define CLOUD_RADIUS 10.0f
+#define CLOUD_RADIUS 80.0f
 #define CLOUD_ROTATION_RATE_MAX 1.0f
 
 #define CAMERA_SPEED_TRANSLATION 5.0f
@@ -28,10 +29,12 @@ extern "C" {
 #define CAMERA_SENSITIVITY_YAW   0.1f
 #define CAMERA_SPEED_ROLL        1.0f
 
-#define THROB_PERIOD_MILLIS 2000
+constexpr uint camiCubeCount = 100000;
 
 GLFWwindow* setupGl(void);
 double secondsSinceEpoch(void);
+
+GLuint createCubeMesh(void);
 
 class Lightbulb
 {
@@ -124,79 +127,7 @@ int main(void)
     error = glGetError();
 
     // Load Cube mesh
-    GLuint vaoCube;
-    GLuint vboCube;
-    GLuint eboCube;
-    glGenVertexArrays(1, &vaoCube);
-    glBindVertexArray(vaoCube);
-    glGenBuffers(1, &vboCube);
-    glBindBuffer(GL_ARRAY_BUFFER, vboCube);
-    float cubeVertices[] = 
-    {
-        -1.0f, -1.0f, -1.0f,    0.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,    1.0f, -1.0f,
-        -1.0f, -1.0f, -1.0f,   -1.0f,  0.0f,
-        -1.0f, -1.0f,  1.0f,    0.0f,  0.0f,
-         1.0f, -1.0f,  1.0f,    1.0f,  0.0f,
-         1.0f, -1.0f, -1.0f,    2.0f,  0.0f,
-        -1.0f, -1.0f, -1.0f,    3.0f,  0.0f,
-        -1.0f,  1.0f, -1.0f,   -1.0f,  1.0f,
-        -1.0f,  1.0f,  1.0f,    0.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,    1.0f,  1.0f,
-         1.0f,  1.0f, -1.0f,    2.0f,  1.0f,
-        -1.0f,  1.0f, -1.0f,    3.0f,  1.0f,
-        -1.0f,  1.0f, -1.0f,    0.0f,  2.0f,
-         1.0f,  1.0f, -1.0f,    1.0f,  2.0f
-    }; // Side length is hard-coded as 2 because we can always adjust it later
-       // in the model matrix.
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(cubeVertices),
-        cubeVertices,
-        GL_STATIC_DRAW
-    );
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(  // 3D world position in location 0
-        0,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        5 * sizeof(float),
-        (void*)0
-    );
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(  // 2D texture coordinate in location 1
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        5 * sizeof(float),
-        (void*)(3 * sizeof(float))
-    );
-    glGenBuffers(1, &eboCube);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboCube);
-    uint cubeElements[] = {
-        0, 1, 4,
-        4, 3, 0,
-        2, 3, 8,
-        8, 7, 2,
-        3, 4, 9,
-        9, 8, 3,
-        4, 5, 10,
-        10, 9, 4,
-        5, 6, 11,
-        11, 10, 5,
-        8, 9, 13,
-        13, 12, 8
-    };
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
-        sizeof(cubeElements),
-        cubeElements,
-        GL_STATIC_DRAW
-    );
-    glBindVertexArray(0);
-    error = glGetError();
+    GLuint vaoCube = createCubeMesh();
 
     // Load and configure shader
     GLuint shaderProgram = compileShader(
@@ -204,36 +135,16 @@ int main(void)
         &shaderFragmentSource, 1
     );
     
-    // Create array of model matrices
-    float dataTransform[] = {
-        #include "cloud.txt"
-    };
-    constexpr uint countTransform = sizeof(dataTransform) / sizeof(float) / 11;
-    CamiCubeSystem<countTransform> camiCubeSystem = CamiCubeSystem<countTransform>();
-    for (int i = 0; i < countTransform; i++)
+    RandomGenerator randomGenerator(11141997);
+    CamiCubeSystem camiCubeSystem(camiCubeCount);
+    for (int i = 0; i < camiCubeCount; i++)
     {
-        glm::vec3 position = glm::vec3(
-            dataTransform[11 * i + 0],
-            dataTransform[11 * i + 1],
-            dataTransform[11 * i + 2]
-        );
-        position = position * CLOUD_RADIUS;
-        float orientationAngle = dataTransform[11 * i + 3];
-        glm::vec3 orientationAxis = glm::vec3(
-            dataTransform[11 * i + 4],
-            dataTransform[11 * i + 5],
-            dataTransform[11 * i + 6]
-        );
-        glm::quat orientation = glm::angleAxis(
-            orientationAngle,
-            orientationAxis
-        );
-        float rotationRate = dataTransform[11 * i + 7] * CLOUD_ROTATION_RATE_MAX;
-        glm::vec3 rotationAxis = glm::vec3(
-            dataTransform[11 * i + 8],
-            dataTransform[11 * i + 9],
-            dataTransform[11 * i + 10]
-        );
+        glm::vec3 position = randomGenerator.getUnitBall() * CLOUD_RADIUS;
+        float orientationAngle = randomGenerator.getPositiveFloat() * M_PI;
+        glm::vec3 orientationAxis = randomGenerator.getUnitSphere();
+        glm::quat orientation = glm::angleAxis(orientationAngle, orientationAxis);
+        float rotationRate = randomGenerator.getPositiveFloat() * CLOUD_ROTATION_RATE_MAX;
+        glm::vec3 rotationAxis = randomGenerator.getUnitSphere();
         float scale = 0.5f;
         
         camiCubeSystem.insert(
@@ -246,7 +157,7 @@ int main(void)
     }
 
     // Array of model matrices for CamiCubes
-    glm::mat4 camiCubeMatrices[countTransform];
+    glm::mat4* camiCubeMatrices = new glm::mat4[camiCubeCount];
 
     // Create one-pixel lightbulb texture
     GLuint textureLightbulb;
@@ -296,7 +207,7 @@ int main(void)
         (float)(M_PI / 3.0f),
         (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT,
         0.1f,
-        100.0f
+        10000.0f
     );
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -415,10 +326,10 @@ int main(void)
         // Calculate the view matrix
         glm::mat4 matrixView = cameraTransform.getMatrixInv();
 
-        uint camiCubeCount = camiCubeSystem.getMatrices(
+        uint camiCubeMatrixCount = camiCubeSystem.getMatrices(
             camiCubeMatrices,
             1,
-            camiCubeMatrices + 4
+            camiCubeCount
         );
 
         glClearColor(0.5f, 0.8f, 1.0f, 1.0f);
@@ -438,7 +349,7 @@ int main(void)
 
             glDrawElements(
                 GL_TRIANGLES,
-                sizeof(cubeElements) / sizeof(cubeElements[0]),
+                36,
                 GL_UNSIGNED_INT,
                 0
             );
@@ -456,7 +367,7 @@ int main(void)
         );
         glDrawElements(
             GL_TRIANGLES,
-            sizeof(cubeElements) / sizeof(cubeElements[0]),
+            36,
             GL_UNSIGNED_INT,
             0
         );
@@ -476,6 +387,88 @@ GLFWwindow* setupGl(void) {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
     return glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, NULL, NULL);
+
+}
+
+// Creates and binds a cubical mesh with texture coordinates. Returns the
+// vao handle.
+GLuint createCubeMesh(void)
+{
+
+    GLuint vaoCube;
+    GLuint vboCube;
+    GLuint eboCube;
+    glGenVertexArrays(1, &vaoCube);
+    glBindVertexArray(vaoCube);
+    glGenBuffers(1, &vboCube);
+    glBindBuffer(GL_ARRAY_BUFFER, vboCube);
+    float cubeVertices[] = 
+    {
+        -1.0f, -1.0f, -1.0f,    0.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,    1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,   -1.0f,  0.0f,
+        -1.0f, -1.0f,  1.0f,    0.0f,  0.0f,
+         1.0f, -1.0f,  1.0f,    1.0f,  0.0f,
+         1.0f, -1.0f, -1.0f,    2.0f,  0.0f,
+        -1.0f, -1.0f, -1.0f,    3.0f,  0.0f,
+        -1.0f,  1.0f, -1.0f,   -1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,    0.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,    1.0f,  1.0f,
+         1.0f,  1.0f, -1.0f,    2.0f,  1.0f,
+        -1.0f,  1.0f, -1.0f,    3.0f,  1.0f,
+        -1.0f,  1.0f, -1.0f,    0.0f,  2.0f,
+         1.0f,  1.0f, -1.0f,    1.0f,  2.0f
+    }; // Side length is hard-coded as 2 because we can always adjust it later
+       // in the model matrix.
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(cubeVertices),
+        cubeVertices,
+        GL_STATIC_DRAW
+    );
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(  // 3D world position in location 0
+        0,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        5 * sizeof(float),
+        (void*)0
+    );
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(  // 2D texture coordinate in location 1
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        5 * sizeof(float),
+        (void*)(3 * sizeof(float))
+    );
+    glGenBuffers(1, &eboCube);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboCube);
+    uint cubeElements[] = {
+        0, 1, 4,
+        4, 3, 0,
+        2, 3, 8,
+        8, 7, 2,
+        3, 4, 9,
+        9, 8, 3,
+        4, 5, 10,
+        10, 9, 4,
+        5, 6, 11,
+        11, 10, 5,
+        8, 9, 13,
+        13, 12, 8
+    };
+    glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        sizeof(cubeElements),
+        cubeElements,
+        GL_STATIC_DRAW
+    );
+    glBindVertexArray(0);
+
+    return vaoCube;
 
 }
 

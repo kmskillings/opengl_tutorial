@@ -5,7 +5,8 @@ src_dir := ./src
 
 src_cpp_names := \
 main.cpp \
-transform.cpp
+transform.cpp \
+randomGeneration.cpp
 
 srcs_cpp := ${src_cpp_names:%=${src_dir}/%}
 src_c_names := shaders.c tex_cami.c
@@ -15,7 +16,8 @@ header_names := \
 shaders.h \
 textures.h \
 transform.hpp \
-camiCube.hpp
+camiCube.hpp \
+randomGeneration.hpp
 
 headers := ${header_names:%=${src_dir}/%}
 
@@ -48,9 +50,6 @@ ${dir_build}/${program_name}: ${objects}
 # Compile .cpp sources
 ${filter %.cpp.o,${objects}}: ${dir_build}/%.cpp.o: ${src_dir}/%.cpp ${headers}
 	g++ ${compile_options} -o $@ $<
-
-# main also depends on cloud.txt
-${dir_build}/main.cpp.o: ${src_dir}/main.cpp ${src_dir}/cloud.txt
 
 # Compile .c sources
 ${filter %.c.o,${objects}}: ${dir_build}/%.c.o: ${src_dir}/%.c

@@ -14,7 +14,6 @@
 // to track the rotation of all cubes. Then all Cami Cube data is read-only and
 // used only to create the model matrix.
 
-template <uint T>
 class CamiCubeSystem
 {
 
@@ -29,18 +28,24 @@ private:
         float rotationRate;
     };
 
-    CamiCube camiCubes_[T];
+    CamiCube* camiCubes_;
     uint count_;
+    uint capacity_;
 
     float secondsElapsed_;
 
 public:
 
-    CamiCubeSystem(void) :
+    CamiCubeSystem(uint capacity) :
+        camiCubes_(new CamiCube[capacity]),
         count_(0),
-        secondsElapsed_(0.0f)
+        capacity_(capacity)
     {}
 
+    ~CamiCubeSystem(void)
+    {
+        delete[] camiCubes_;
+    }
 
     // Insert a new CamiCube with the given parameters. Returns whether it was
     // successfull inserted.
@@ -52,7 +57,7 @@ public:
         const float& rotationRate
     )
     {
-        if (count_ == T)
+        if (count_ == capacity_)
         {
             return false;
         }
@@ -62,15 +67,6 @@ public:
         camiCubes_[count_].scale = scale;
         camiCubes_[count_].rotationAxis = rotationAxis;
         camiCubes_[count_].rotationRate = rotationRate;
-        /*
-        camiCubes_[count_] = {
-            .position(position),
-            .orientation(orientation),
-            .scale(scale),
-            .rotationAxis(rotationAxis),
-            .rotationRate(rotationRate)
-        };
-        */
 
         count_ = count_ + 1;
         return true;
@@ -94,14 +90,14 @@ public:
     uint getMatrices(
         glm::mat4* start, 
         uint stride,
-        glm::mat4* end
+        uint maxCount
     ) const
     {
         uint i;
         glm::mat4 matrix;
         for (i = 0; i < count_; i++)
         {
-            if (start + stride * i >= end)
+            if (i > maxCount)
             {
                 return i;
             }
