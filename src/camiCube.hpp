@@ -71,4 +71,33 @@ public:
 
 };
 
+class CamiCubeRenderer
+{
+
+private:
+    uint instanceCount_;
+    GLuint vao_;
+    GLuint vboVertices_;
+    GLuint ebo_;
+    GLuint vboInstances_;
+    GLuint texture_;
+    GLuint shader_;
+
+public:
+
+    CamiCubeRenderer(
+        uint instanceCount
+    );
+
+    void setInstanceMatrices(
+        uint count,
+        glm::mat4* data
+    );
+
+    void draw(
+        const glm::mat4& matrixProjView
+    );
+
+};
+
 #endif
