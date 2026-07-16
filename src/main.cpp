@@ -21,76 +21,35 @@ extern "C" {
 #define WINDOW_HEIGHT 600
 #define WINDOW_TITLE "Cami Cube"
 
-#define CLOUD_RADIUS 80.0f
+#define CLOUD_RADIUS 40.0f
 #define CLOUD_ROTATION_RATE_MAX 1.0f
 
-#define CAMERA_SPEED_TRANSLATION 5.0f
-#define CAMERA_SENSITIVITY_PITCH 0.1f
-#define CAMERA_SENSITIVITY_YAW   0.1f
-#define CAMERA_SPEED_ROLL        1.0f
+constexpr float cameraSpeedTranslation = 5.0f;
+constexpr float cameraSensitivityPitch = 0.005f;
+constexpr float cameraSensitivityYaw = 0.005f;
+constexpr float cameraSpeedRoll = 1.0f;
 
-constexpr uint camiCubeCount = 100000;
+constexpr uint camiCubeCountMax = 10000;
+
+constexpr int randomSeed = 11141997;
 
 GLFWwindow* setupGl(void);
 double secondsSinceEpoch(void);
 
 GLuint createCubeMesh(void);
 
-class Lightbulb
-{
+void populateCamiCubes(
+    CamiCubeSystem& system,
+    uint count
+);
 
-private:
-    glm::vec3 center_;
-    glm::vec3 radius_;
-    glm::vec3 axis_;
-    float rate_;
-    float angle_;
-    float scale_;
-
-public:
-
-    Lightbulb(void) :
-        center_(0.0f, 0.0f, 0.0f),
-        radius_(0.0f, 0.0f, 0.0f),
-        axis_(0.0f, 0.0f, 0.0f),
-        rate_(0.0f),
-        angle_(0.0f),
-        scale_(1.0f)
-    {}
-
-    Lightbulb(
-        const glm::vec3& center,
-        const glm::vec3& starting,
-        const glm::vec3& axis,
-        const float& rate,
-        const float& scale
-    ) :
-        center_(center),
-        radius_(starting - center),
-        axis_(glm::normalize(axis)),
-        rate_(rate),
-        angle_(0),
-        scale_(scale)
-    {}
-
-    void update(
-        const float& secondsDelta
-    )
-    {
-        angle_ = angle_ + rate_ * secondsDelta;
-    }
-
-    glm::mat4 getMatrix(void) const
-    {
-        glm::vec3 rotatedRadius = glm::angleAxis(angle_, axis_) * radius_;
-        glm::vec3 position = rotatedRadius + center_;
-        glm::mat4 matrix = glm::identity<glm::mat4>();
-        matrix = glm::translate(matrix, position);
-        matrix = glm::scale(matrix, glm::vec3(scale_));
-        return matrix;
-    }
-
-};
+void updatePlayerTransform(
+    Transform& transform,
+    GLFWwindow* window,
+    const float& secondsDelta,
+    const double& mouseXDelta,
+    const double& mouseYDelta
+);
 
 int main(void)
 {
@@ -135,60 +94,11 @@ int main(void)
         &shaderFragmentSource, 1
     );
     
-    RandomGenerator randomGenerator(11141997);
-    CamiCubeSystem camiCubeSystem(camiCubeCount);
-    for (int i = 0; i < camiCubeCount; i++)
-    {
-        glm::vec3 position = randomGenerator.getUnitBall() * CLOUD_RADIUS;
-        float orientationAngle = randomGenerator.getPositiveFloat() * M_PI;
-        glm::vec3 orientationAxis = randomGenerator.getUnitSphere();
-        glm::quat orientation = glm::angleAxis(orientationAngle, orientationAxis);
-        float rotationRate = randomGenerator.getPositiveFloat() * CLOUD_ROTATION_RATE_MAX;
-        glm::vec3 rotationAxis = randomGenerator.getUnitSphere();
-        float scale = 0.5f;
-        
-        camiCubeSystem.insert(
-            position,
-            orientation,
-            scale,
-            rotationAxis,
-            rotationRate
-        );
-    }
+    CamiCubeSystem camiCubeSystem(camiCubeCountMax);
+    populateCamiCubes(camiCubeSystem, camiCubeCountMax);
 
     // Array of model matrices for CamiCubes
-    glm::mat4* camiCubeMatrices = new glm::mat4[camiCubeCount];
-
-    // Create one-pixel lightbulb texture
-    GLuint textureLightbulb;
-    glGenTextures(1, &textureLightbulb);
-    glBindTexture(GL_TEXTURE_2D, textureLightbulb);
-    glm::vec4 colorLightbulb = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA,
-        1,
-        1,
-        0,
-        GL_RGBA,
-        GL_FLOAT,
-        &colorLightbulb
-    );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    // Create a lightbulb
-    Lightbulb lightbulb = Lightbulb(
-        glm::vec3(6.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, -1.0f, 0.0f),
-        0.5f,
-        0.1f
-    );
+    glm::mat4* camiCubeMatrices = new glm::mat4[camiCubeCountMax];
 
     // Just leave the camera at the origin for now, looking straight ahead.
     glm::vec3 positionCamera = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -248,77 +158,17 @@ int main(void)
             glfwSetWindowShouldClose(window, GL_TRUE);
         }
 
-        // Handle camera motion
-        glm::vec3 cameraDirection = glm::vec3(0.0f);
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        {
-            cameraDirection = cameraDirection + 
-                glm::vec3( 0.0f,  0.0f, -1.0f);
-        }
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        {
-            cameraDirection = cameraDirection + 
-                glm::vec3( 0.0f,  0.0f,  1.0f);
-        }
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        {
-            cameraDirection = cameraDirection + 
-                glm::vec3(-1.0f,  0.0f,  0.0f);
-        }
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        {
-            cameraDirection = cameraDirection + 
-                glm::vec3( 1.0f,  0.0f,  0.0f);
-        }
-        if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-        {
-            cameraDirection = cameraDirection + 
-                glm::vec3( 0.0f, -1.0f,  0.0f);
-        }
-        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-        {
-            cameraDirection = cameraDirection + 
-                glm::vec3( 0.0f,  1.0f,  0.0f);
-        }
-        if (glm::length(cameraDirection) > 0.1)
-        {
-            cameraDirection = glm::normalize(cameraDirection);
-        }
-        cameraTransform.translate(
-            CAMERA_SPEED_TRANSLATION * secondsDelta,
-            cameraDirection,
-            Transform::Axes::Local
-        );
-
         mouseXLast = mouseXNow;
         mouseYLast = mouseYNow;
         glfwGetCursorPos(window, &mouseXNow, &mouseYNow);
         mouseXDelta = mouseXNow - mouseXLast;
         mouseYDelta = mouseYNow - mouseYLast;
-        cameraTransform.rotate(
-            mouseYDelta * CAMERA_SENSITIVITY_PITCH * secondsDelta,
-            glm::vec3(-1.0f, 0.0f, 0.0f),
-            Transform::Axes::Local
-        );
-        cameraTransform.rotate(
-            mouseXDelta * CAMERA_SENSITIVITY_YAW * secondsDelta,
-            glm::vec3(0.0f, -1.0f, 0.0f),
-            Transform::Axes::Local
-        );
-
-        float rollRate = 0.0f;
-        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-        {
-            rollRate = rollRate + 1.0f;
-        }
-        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-        {
-            rollRate = rollRate - 1.0f;
-        }
-        cameraTransform.rotate(
-            rollRate * CAMERA_SPEED_ROLL * secondsDelta,
-            glm::vec3(0.0f, 0.0f, 1.0f),
-            Transform::Axes::Local
+        updatePlayerTransform(
+            cameraTransform,
+            window,
+            secondsDelta,
+            mouseXDelta,
+            mouseYDelta
         );
 
         camiCubeSystem.update(secondsDelta);
@@ -329,14 +179,14 @@ int main(void)
         uint camiCubeMatrixCount = camiCubeSystem.getMatrices(
             camiCubeMatrices,
             1,
-            camiCubeCount
+            camiCubeCountMax
         );
 
         glClearColor(0.5f, 0.8f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glBindTexture(GL_TEXTURE_2D, textureCami);
-        for (int i = 0; i < camiCubeCount; i++)
+        for (int i = 0; i < camiCubeCountMax; i++)
         {
             // Calculate the aggregate matrix
             glm::mat4 matrix = matrixProject * matrixView * camiCubeMatrices[i];
@@ -356,23 +206,6 @@ int main(void)
             error = glGetError();
         }
 
-        glBindTexture(GL_TEXTURE_2D, textureLightbulb);
-        lightbulb.update(secondsDelta);
-        glm::mat4 matrix = matrixProject * matrixView * lightbulb.getMatrix();
-        glUniformMatrix4fv(
-            0,
-            1,
-            GL_FALSE,
-            glm::value_ptr(matrix)
-        );
-        glDrawElements(
-            GL_TRIANGLES,
-            36,
-            GL_UNSIGNED_INT,
-            0
-        );
-        error = glGetError();
-
         glfwSwapBuffers(window);
     }
 
@@ -388,6 +221,108 @@ GLFWwindow* setupGl(void) {
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
     return glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, NULL, NULL);
 
+}
+
+void populateCamiCubes(
+    CamiCubeSystem& system,
+    uint count
+)
+{
+    RandomGenerator randomGenerator(11141997);
+    for (int i = 0; i < count; i++)
+    {
+        glm::vec3 position = randomGenerator.getUnitBall() * CLOUD_RADIUS;
+        float orientationAngle = randomGenerator.getPositiveFloat() * M_PI;
+        glm::vec3 orientationAxis = randomGenerator.getUnitSphere();
+        glm::quat orientation = glm::angleAxis(orientationAngle, orientationAxis);
+        float rotationRate = randomGenerator.getPositiveFloat() * CLOUD_ROTATION_RATE_MAX;
+        glm::vec3 rotationAxis = randomGenerator.getUnitSphere();
+        float scale = 0.5f;
+        
+        system.insert(
+            position,
+            orientation,
+            scale,
+            rotationAxis,
+            rotationRate
+        );
+    }
+}
+
+void updatePlayerTransform(
+    Transform& transform,
+    GLFWwindow* window,
+    const float& secondsDelta,
+    const double& mouseXDelta,
+    const double& mouseYDelta
+)
+{
+    glm::vec3 cameraDirection = glm::vec3(0.0f);
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    {
+        cameraDirection = cameraDirection + 
+            glm::vec3( 0.0f,  0.0f, -1.0f);
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    {
+        cameraDirection = cameraDirection + 
+            glm::vec3( 0.0f,  0.0f,  1.0f);
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    {
+        cameraDirection = cameraDirection + 
+            glm::vec3(-1.0f,  0.0f,  0.0f);
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    {
+        cameraDirection = cameraDirection + 
+            glm::vec3( 1.0f,  0.0f,  0.0f);
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+    {
+        cameraDirection = cameraDirection + 
+            glm::vec3( 0.0f, -1.0f,  0.0f);
+    }
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+    {
+        cameraDirection = cameraDirection + 
+            glm::vec3( 0.0f,  1.0f,  0.0f);
+    }
+    if (glm::length(cameraDirection) > 0.1)
+    {
+        cameraDirection = glm::normalize(cameraDirection);
+    }
+    transform.translate(
+        cameraSpeedTranslation * secondsDelta,
+        cameraDirection,
+        Transform::Axes::Local
+    );
+
+    transform.rotate(
+        mouseYDelta * cameraSensitivityPitch,
+        glm::vec3(-1.0f, 0.0f, 0.0f),
+        Transform::Axes::Local
+    );
+    transform.rotate(
+        mouseXDelta * cameraSensitivityYaw,
+        glm::vec3(0.0f, -1.0f, 0.0f),
+        Transform::Axes::Local
+    );
+
+    float rollRate = 0.0f;
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+    {
+        rollRate = rollRate + 1.0f;
+    }
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+    {
+        rollRate = rollRate - 1.0f;
+    }
+    transform.rotate(
+        rollRate * cameraSpeedRoll * secondsDelta,
+        glm::vec3(0.0f, 0.0f, 1.0f),
+        Transform::Axes::Local
+    );
 }
 
 // Creates and binds a cubical mesh with texture coordinates. Returns the
