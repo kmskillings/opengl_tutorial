@@ -139,15 +139,45 @@ CamiCubeRenderer::CamiCubeRenderer(
     glGenBuffers(1, &vboInstances_);
     glBindBuffer(GL_ARRAY_BUFFER, vboInstances_);
     glEnableVertexAttribArray(2);
+    glEnableVertexAttribArray(3);
+    glEnableVertexAttribArray(4);
+    glEnableVertexAttribArray(5);
     glVertexAttribPointer(
         2,
-        2,
+        4,
         GL_FLOAT,
         GL_FALSE,
-        16 * sizeof(GL_FLOAT),
+        16 * sizeof(float),
         (void*)0
     );
+    glVertexAttribPointer(
+        3,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        16 * sizeof(float),
+        (void*)16
+    );
+    glVertexAttribPointer(
+        4,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        16 * sizeof(float),
+        (void*)32
+    );
+    glVertexAttribPointer(
+        5,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        16 * sizeof(float),
+        (void*)48
+    );
     glVertexAttribDivisor(2, 1);
+    glVertexAttribDivisor(3, 1);
+    glVertexAttribDivisor(4, 1);
+    glVertexAttribDivisor(5, 1);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glGenBuffers(1, &ebo_);
@@ -207,66 +237,16 @@ void CamiCubeRenderer::setInstanceMatrices(
     glm::mat4* data
 )
 {
-    GLuint error;
     glBindVertexArray(vao_);
     glBindBuffer(GL_ARRAY_BUFFER, vboInstances_);
-    error = glGetError();
     glBufferData(
         GL_ARRAY_BUFFER,
         sizeof(glm::mat4) * count,
         data,
-        GL_STATIC_DRAW
+        GL_DYNAMIC_DRAW
     );
-    error = glGetError();
-    glEnableVertexAttribArray(2);
-    glEnableVertexAttribArray(3);
-    glEnableVertexAttribArray(4);
-    glEnableVertexAttribArray(5);
-    error = glGetError();
-    glVertexAttribPointer(
-        2,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        16 * sizeof(float),
-        (void*)0
-    );
-    error = glGetError();
-    glVertexAttribPointer(
-        3,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        16 * sizeof(float),
-        (void*)16
-    );
-    error = glGetError();
-    glVertexAttribPointer(
-        4,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        16 * sizeof(float),
-        (void*)32
-    );
-    error = glGetError();
-    glVertexAttribPointer(
-        5,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        16 * sizeof(float),
-        (void*)48
-    );
-    error = glGetError();
-    glVertexAttribDivisor(2, 1);
-    glVertexAttribDivisor(3, 1);
-    glVertexAttribDivisor(4, 1);
-    glVertexAttribDivisor(5, 1);
-    error = glGetError();
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-    error = glGetError();
     return;
 }
 
