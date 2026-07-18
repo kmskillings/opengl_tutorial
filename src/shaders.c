@@ -4,17 +4,17 @@
 void reportCompileStatus(GLuint shader);
 void reportLinkStatus(GLuint shaderProgram);
 
-const char vertexShaderSourceArray[] = {
-    #include "shaders/textured.vert.xxd"
+const char camiCubeVertexSourceArray[] = {
+    #include "shaders/camiCube.vert.xxd"
     , 0x00
 };
-const char* shaderVertexSource = vertexShaderSourceArray;
+const char* camiCubeVertexSource = camiCubeVertexSourceArray;
 
-const char fragmentShaderSourceArray[] = {
-    #include "shaders/textured.frag.xxd"
+const char camiCubeFragmentSourceArray[] = {
+    #include "shaders/camiCube.frag.xxd"
     , 0x00
 };
-const char* shaderFragmentSource = fragmentShaderSourceArray;
+const char* camiCubeFragmentSource = camiCubeFragmentSourceArray;
 
 unsigned int compileShader(
     const char** vertexShaderSources,

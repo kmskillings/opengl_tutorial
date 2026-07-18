@@ -26,8 +26,8 @@ headers := ${header_names:%=${src_dir}/%}
 
 shader_dir := ./src/shaders
 shader_names := \
-textured.frag \
-textured.vert
+camiCube.frag \
+camiCube.vert
 shaders := ${shader_names:%=${shader_dir}/%}
 
 shader_dumps := ${shaders:%=%.xxd}

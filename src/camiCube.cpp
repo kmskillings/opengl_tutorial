@@ -170,8 +170,8 @@ CamiCubeSystem::CamiCubeSystem(uint capacity) :
 
     // Set up shaders and textures
     shader_ = compileShader(
-        &shaderVertexSource, 1,
-        &shaderFragmentSource, 1
+        &camiCubeVertexSource, 1,
+        &camiCubeFragmentSource, 1
     );
 
     glGenTextures(1, &texture_);

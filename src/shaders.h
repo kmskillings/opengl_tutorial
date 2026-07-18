@@ -5,8 +5,8 @@
 #define GLEW_STATIC
 #include <glew.h>
 
-extern const char* shaderVertexSource;
-extern const char* shaderFragmentSource;
+extern const char* camiCubeVertexSource;
+extern const char* camiCubeFragmentSource;
 
 GLuint compileShader(
     const char** vertexShaderSources,
