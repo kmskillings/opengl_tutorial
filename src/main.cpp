@@ -16,12 +16,13 @@ extern "C" {
 #include "transform.hpp"
 #include "camiCube.hpp"
 #include "randomGeneration.hpp"
+#include "meshSphere.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 #define WINDOW_TITLE "Cami Cube"
 
-#define CLOUD_RADIUS 80.0f
+#define CLOUD_RADIUS 160.0f
 #define CLOUD_ROTATION_RATE_MAX 1.0f
 
 constexpr float cameraSpeedTranslation = 5.0f;
@@ -29,7 +30,7 @@ constexpr float cameraSensitivityPitch = 0.005f;
 constexpr float cameraSensitivityYaw = 0.005f;
 constexpr float cameraSpeedRoll = 1.0f;
 
-constexpr uint camiCubeCountMax = 100000;
+constexpr uint camiCubeCountMax = 1000000;
 
 constexpr int randomSeed = 11141997;
 
@@ -84,7 +85,7 @@ int main(void)
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glEnable(GL_DEPTH_TEST);
-    glfwSwapInterval(0);
+    glfwSwapInterval(1);
 
     double mouseXNow;
     double mouseYNow;
@@ -102,8 +103,6 @@ int main(void)
     uint frameCounter = 0;
 
     while(glfwWindowShouldClose(window) == GL_FALSE) {
-
-        error = glGetError();
 
         secondsLast = secondsNow;
         secondsNow = secondsSinceEpoch();
@@ -133,16 +132,12 @@ int main(void)
         glm::mat4 matrixProjView = matrixProject * matrixView;
 
         camiCubeSystem.setMatrixProjView(matrixProjView);
-        error = glGetError();
         camiCubeSystem.update(secondsDelta);
-        error = glGetError();
 
         glClearColor(0.5f, 0.8f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        error = glGetError();
 
         camiCubeSystem.draw();
-        error = glGetError();
 
         glfwSwapBuffers(window);
 

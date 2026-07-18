@@ -7,7 +7,8 @@ src_cpp_names := \
 main.cpp \
 transform.cpp \
 camiCube.cpp \
-randomGeneration.cpp
+randomGeneration.cpp \
+meshSphere.cpp
 
 srcs_cpp := ${src_cpp_names:%=${src_dir}/%}
 src_c_names := shaders.c tex_cami.c
@@ -18,7 +19,8 @@ shaders.h \
 textures.h \
 transform.hpp \
 camiCube.hpp \
-randomGeneration.hpp
+randomGeneration.hpp \
+meshSphere.hpp
 
 headers := ${header_names:%=${src_dir}/%}
 
