@@ -58,15 +58,9 @@ int main(void)
     GLFWwindow* window = setupGl();
     glfwMakeContextCurrent(window);
     glewInit();
-    error = glGetError();
-
-    CamiCubeRenderer camiCubeRenderer(camiCubeCountMax);
-    error = glGetError();
     
     CamiCubeSystem camiCubeSystem(camiCubeCountMax);
-    error = glGetError();
     populateCamiCubes(camiCubeSystem, camiCubeCountMax);
-    error = glGetError();
 
     // Just leave the camera at the origin for now, looking straight ahead.
     glm::vec3 positionCamera = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -88,15 +82,9 @@ int main(void)
         10000.0f
     );
 
-    glm::mat4* matrices = new glm::mat4[camiCubeCountMax];
-    camiCubeSystem.getMatrices(matrices, 1, camiCubeCountMax);
-    error = glGetError();
-    camiCubeRenderer.setInstanceMatrices(camiCubeCountMax, matrices);
-    error = glGetError();
-    //delete matrices;
-
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glEnable(GL_DEPTH_TEST);
+    glfwSwapInterval(0);
 
     double mouseXNow;
     double mouseYNow;
@@ -110,7 +98,12 @@ int main(void)
     double secondsLast;
     double secondsDelta;
 
+    double timer1Second = 0;
+    uint frameCounter = 0;
+
     while(glfwWindowShouldClose(window) == GL_FALSE) {
+
+        error = glGetError();
 
         secondsLast = secondsNow;
         secondsNow = secondsSinceEpoch();
@@ -135,19 +128,32 @@ int main(void)
             mouseYDelta
         );
 
-        camiCubeSystem.update(secondsDelta);
-
         // Calculate the view matrix
         glm::mat4 matrixView = cameraTransform.getMatrixInv();
         glm::mat4 matrixProjView = matrixProject * matrixView;
 
+        camiCubeSystem.setMatrixProjView(matrixProjView);
+        error = glGetError();
+        camiCubeSystem.update(secondsDelta);
+        error = glGetError();
+
         glClearColor(0.5f, 0.8f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        error = glGetError();
 
-        camiCubeRenderer.draw(matrixProjView);
+        camiCubeSystem.draw();
         error = glGetError();
 
         glfwSwapBuffers(window);
+
+        timer1Second = timer1Second + secondsDelta;
+        frameCounter = frameCounter + 1;
+        if (timer1Second >= 1)
+        {
+            timer1Second = 0;
+            printf("Frames in last 1 second:\t%i\n", frameCounter);
+            frameCounter = 0;
+        }
     }
 
 }
@@ -181,11 +187,12 @@ void populateCamiCubes(
         float scale = 0.5f;
         
         system.insert(
-            position,
-            orientation,
             scale,
+            orientationAngle,
+            orientationAxis,
+            rotationRate,
             rotationAxis,
-            rotationRate
+            position
         );
     }
 }

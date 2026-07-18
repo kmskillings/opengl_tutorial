@@ -21,11 +21,12 @@ private:
 
     struct CamiCube
     {
-        glm::vec3 position;
-        glm::quat orientation;
-        float scale;
-        glm::vec3 rotationAxis;
-        float rotationRate;
+        float       scale;
+        float       orientationAngle;
+        glm::vec3   orientationAxis;
+        float       rotationRate;
+        glm::vec3   rotationAxis;
+        glm::vec3   modelPosition;
     };
 
     CamiCube* camiCubes_;
@@ -33,6 +34,18 @@ private:
     uint capacity_;
 
     float secondsElapsed_;
+    glm::mat4 matrixProjView_;
+
+    GLuint vao_;
+    GLuint vboVertices_;
+    GLuint vboInstances_;
+    GLuint ebo_;
+
+    GLuint shader_;
+    GLuint texture_;
+
+    bool instancesDirty_;
+    bool matrixDirty_;
 
 public:
 
@@ -44,11 +57,16 @@ public:
     // Insert a new CamiCube with the given parameters. Returns whether it was
     // successfull inserted.
     bool insert(
-        const glm::vec3& position,
-        const glm::quat& orientation,
-        const float& scale,
-        const glm::vec3& rotationAxis,
-        const float& rotationRate
+        const float&        scale,
+        const float&        orientationAngle,
+        const glm::vec3&    orientationAxis,
+        const float&        rotationRate,
+        const glm::vec3&    rotationAxis,
+        const glm::vec3&    position
+    );
+
+    void setMatrixProjView(
+        const glm::mat4& matrixProjView
     );
 
     // Updates all CamiCubes in the system.
@@ -56,47 +74,7 @@ public:
         const float& secondsDelta
     );
 
-    // Gets the model matrices of the CamiCubes in the system. Writes them
-    // to an array starting at the "start" pointer. The stride is the number
-    // of mat4-sized blocks to skip between writes (1 to have the array be
-    // packed). End points to the first null element of the array. If this or
-    // any subsequent addresses would be written, no more are written and the
-    // function returns. The total number of matrices written is always
-    // returned.
-    uint getMatrices(
-        glm::mat4* start, 
-        uint stride,
-        uint maxCount
-    ) const;
-
-};
-
-class CamiCubeRenderer
-{
-
-private:
-    uint instanceCount_;
-    GLuint vao_;
-    GLuint vboVertices_;
-    GLuint ebo_;
-    GLuint vboInstances_;
-    GLuint texture_;
-    GLuint shader_;
-
-public:
-
-    CamiCubeRenderer(
-        uint instanceCount
-    );
-
-    void setInstanceMatrices(
-        uint count,
-        glm::mat4* data
-    );
-
-    void draw(
-        const glm::mat4& matrixProjView
-    );
+    void draw(void);
 
 };
 

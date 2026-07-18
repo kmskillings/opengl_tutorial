@@ -4,7 +4,7 @@ in vec2 TextureCoords;
 
 out vec4 outColor;
 
-layout(location = 1) uniform sampler2D textureMain;
+layout(location = 2) uniform sampler2D textureMain;
 
 void main()
 {

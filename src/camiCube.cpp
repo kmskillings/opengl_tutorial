@@ -12,90 +12,33 @@ extern "C"{
 #include "textures.h"
 }
 
+constexpr uint locationVertexPosition           = 0;
+constexpr uint locationTextureCoords            = 1;
+constexpr uint locationModelScale               = 2;
+constexpr uint locationModelOrientationAngle    = 3;
+constexpr uint locationModelOrienationAxis      = 4;
+constexpr uint locationModelRotationRate        = 5;
+constexpr uint locationModelRotationAxis        = 6;
+constexpr uint locationModelPosition            = 7;
+
 CamiCubeSystem::CamiCubeSystem(uint capacity) :
     camiCubes_(new CamiCube[capacity]),
     count_(0),
-    capacity_(capacity)
-{}
-
-CamiCubeSystem::~CamiCubeSystem(void)
-{
-    delete[] camiCubes_;
-}
-
-bool CamiCubeSystem::insert(
-    const glm::vec3& position,
-    const glm::quat& orientation,
-    const float& scale,
-    const glm::vec3& rotationAxis,
-    const float& rotationRate
-)
-{
-    if (count_ >= capacity_)
-    {
-        return false;
-    }
-
-    camiCubes_[count_].position = position;
-    camiCubes_[count_].orientation = orientation;
-    camiCubes_[count_].scale = scale;
-    camiCubes_[count_].rotationAxis = rotationAxis;
-    camiCubes_[count_].rotationRate = rotationRate;
-
-    count_ = count_ + 1;
-    return true;
-}
-
-void CamiCubeSystem::update(
-    const float& secondsDelta
-)
-{
-    secondsElapsed_ = secondsElapsed_ + secondsDelta;
-}
-
-uint CamiCubeSystem::getMatrices(
-    glm::mat4* start, 
-    uint stride,
-    uint maxCount
-) const
-{
-    uint i;
-    glm::mat4 matrix;
-    for (i = 0; i < count_; i++)
-    {
-        if (i > maxCount)
-        {
-            return i;
-        }
-
-        glm::mat4 matrix = glm::identity<glm::mat4>();
-        matrix = glm::translate(matrix, camiCubes_[i].position);
-        matrix = glm::rotate(
-            matrix, 
-            camiCubes_[i].rotationRate * secondsElapsed_,
-            camiCubes_[i].rotationAxis
-        );
-        matrix = matrix * glm::mat4_cast(camiCubes_[i].orientation);
-        matrix = glm::scale(matrix, glm::vec3(camiCubes_[i].scale));
-        *(start + stride * i) = matrix;
-    }
-
-    return i;
-}
-
-CamiCubeRenderer::CamiCubeRenderer(
-    uint instanceCount
-) :
-    instanceCount_(instanceCount)
+    capacity_(capacity),
+    secondsElapsed_(0),
+    matrixProjView_(glm::mat4(0.0f)),
+    instancesDirty_(false),
+    matrixDirty_(false)
 {
 
-    glGenVertexArrays(1, &vao_);
+    // Configure the VAO
+    glCreateVertexArrays(1, &vao_);
     glBindVertexArray(vao_);
-    
+
+    // Vertex array
     glGenBuffers(1, &vboVertices_);
     glBindBuffer(GL_ARRAY_BUFFER, vboVertices_);
-    float vertices[] =
-    {
+    float vertices[] = {
         -1.0f, -1.0f, -1.0f,    0.0f, -1.0f,
          1.0f, -1.0f, -1.0f,    1.0f, -1.0f,
         -1.0f, -1.0f, -1.0f,   -1.0f,  0.0f,
@@ -117,68 +60,88 @@ CamiCubeRenderer::CamiCubeRenderer(
         vertices,
         GL_STATIC_DRAW
     );
-    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(locationVertexPosition);
     glVertexAttribPointer(
-        0,
+        locationVertexPosition,
         3,
         GL_FLOAT,
         GL_FALSE,
-        5 * sizeof(float),
-        (void*)0
+        5 * sizeof(vertices[0]),
+        (void*)(sizeof(float) * 0)
     );
-    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(locationTextureCoords);
     glVertexAttribPointer(
-        1,
+        locationTextureCoords,
         2,
         GL_FLOAT,
         GL_FALSE,
-        5 * sizeof(float),
-        (void*)(3 * sizeof(float))
+        5 * sizeof(vertices[0]),
+        (float*)(sizeof(float) * 3)
     );
 
+    // Instance buffer
     glGenBuffers(1, &vboInstances_);
     glBindBuffer(GL_ARRAY_BUFFER, vboInstances_);
-    glEnableVertexAttribArray(2);
-    glEnableVertexAttribArray(3);
-    glEnableVertexAttribArray(4);
-    glEnableVertexAttribArray(5);
+    glEnableVertexAttribArray(locationModelScale);
     glVertexAttribPointer(
-        2,
-        4,
+        locationModelScale,
+        1,
         GL_FLOAT,
         GL_FALSE,
-        16 * sizeof(float),
-        (void*)0
+        sizeof(CamiCube),
+        (void*)offsetof(CamiCube, scale)
     );
+    glVertexAttribDivisor(locationModelScale, 1);
+    glEnableVertexAttribArray(locationModelOrientationAngle);
     glVertexAttribPointer(
+        locationModelOrientationAngle,
+        1,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(CamiCube),
+        (void*)offsetof(CamiCube, orientationAngle)
+    );
+    glVertexAttribDivisor(locationModelOrientationAngle, 1);
+    glEnableVertexAttribArray(locationModelOrienationAxis);
+    glVertexAttribPointer(
+        locationModelOrienationAxis,
         3,
-        4,
         GL_FLOAT,
         GL_FALSE,
-        16 * sizeof(float),
-        (void*)16
+        sizeof(CamiCube),
+        (void*)offsetof(CamiCube, orientationAxis)
     );
+    glVertexAttribDivisor(locationModelOrienationAxis, 1);
+    glEnableVertexAttribArray(locationModelRotationRate);
     glVertexAttribPointer(
-        4,
-        4,
+        locationModelRotationRate,
+        1,
         GL_FLOAT,
         GL_FALSE,
-        16 * sizeof(float),
-        (void*)32
+        sizeof(CamiCube),
+        (void*)offsetof(CamiCube, rotationRate)
     );
+    glVertexAttribDivisor(locationModelRotationRate, 1);
+    glEnableVertexAttribArray(locationModelRotationAxis);
     glVertexAttribPointer(
-        5,
-        4,
+        locationModelRotationAxis,
+        3,
         GL_FLOAT,
         GL_FALSE,
-        16 * sizeof(float),
-        (void*)48
+        sizeof(CamiCube),
+        (void*)offsetof(CamiCube, rotationAxis)
     );
-    glVertexAttribDivisor(2, 1);
-    glVertexAttribDivisor(3, 1);
-    glVertexAttribDivisor(4, 1);
-    glVertexAttribDivisor(5, 1);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glVertexAttribDivisor(locationModelRotationAxis, 1);
+    glEnableVertexAttribArray(locationModelPosition);
+    glVertexAttribPointer(
+        locationModelPosition,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(CamiCube),
+        (void*)offsetof(CamiCube, modelPosition)
+    );
+    glVertexAttribDivisor(locationModelPosition, 1);
 
     glGenBuffers(1, &ebo_);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
@@ -205,6 +168,7 @@ CamiCubeRenderer::CamiCubeRenderer(
 
     glBindVertexArray(0);
 
+    // Set up shaders and textures
     shader_ = compileShader(
         &shaderVertexSource, 1,
         &shaderFragmentSource, 1
@@ -232,49 +196,97 @@ CamiCubeRenderer::CamiCubeRenderer(
 
 }
 
-void CamiCubeRenderer::setInstanceMatrices(
-    uint count,
-    glm::mat4* data
-)
+CamiCubeSystem::~CamiCubeSystem(void)
 {
-    glBindVertexArray(vao_);
-    glBindBuffer(GL_ARRAY_BUFFER, vboInstances_);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(glm::mat4) * count,
-        data,
-        GL_DYNAMIC_DRAW
-    );
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-    return;
+    delete[] camiCubes_;
 }
 
-void CamiCubeRenderer::draw(
-    const glm::mat4& matrixProjView
+bool CamiCubeSystem::insert(
+    const float&        scale,
+    const float&        orientationAngle,
+    const glm::vec3&    orientationAxis,
+    const float&        rotationRate,
+    const glm::vec3&    rotationAxis,
+    const glm::vec3&    position
 )
 {
+    if (count_ >= capacity_)
+    {
+        return false;
+    }
+
+    camiCubes_[count_] = {
+        scale,
+        orientationAngle,
+        orientationAxis,
+        rotationRate,
+        rotationAxis,
+        position
+    };
+
+    count_ = count_ + 1;
+
+    instancesDirty_ = true;
+
+    return true;
+}
+
+void CamiCubeSystem::setMatrixProjView(
+    const glm::mat4& matrix
+)
+{
+    matrixProjView_ = matrix;
+}
+
+void CamiCubeSystem::update(
+    const float& secondsDelta
+)
+{   
+    secondsElapsed_ = secondsElapsed_ + secondsDelta;
+}
+
+void CamiCubeSystem::draw(void)
+{
     GLuint error = glGetError();
+    // Prepare and update shader / material
     glUseProgram(shader_);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture_);
-    glUniform1i(1, 0);
+    glUniform1i(2, 0);
     glUniformMatrix4fv(
         0,
         1,
         GL_FALSE,
-        glm::value_ptr(matrixProjView)
+        glm::value_ptr(matrixProjView_)
     );
+    glUniform1f(
+        1,
+        secondsElapsed_
+    );
+
+    // Prepare and update vao
     glBindVertexArray(vao_);
+    if (instancesDirty_)
+    {
+        glBindBuffer(GL_ARRAY_BUFFER, vboInstances_);
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            sizeof(CamiCube) * count_,
+            camiCubes_,
+            GL_DYNAMIC_DRAW
+        );
+        instancesDirty_ = false;
+    }
+
+    error = glGetError();
 
     glDrawElementsInstanced(
         GL_TRIANGLES,
         36,
         GL_UNSIGNED_INT,
         (void*)0,
-        instanceCount_
+        count_
     );
-    error = glGetError();
 
     glUseProgram(0);
     glBindTexture(GL_TEXTURE_2D, 0);
