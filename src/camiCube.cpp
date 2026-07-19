@@ -26,11 +26,12 @@ CamiCubeSystem::CamiCubeSystem(uint capacity) :
     count_(0),
     capacity_(capacity),
     secondsElapsed_(0),
-    matrixProjView_(glm::mat4(0.0f)),
+    matrixProj_(glm::mat4(0.0f)),
+    matrixView_(glm::mat4(0.0f)),
     spherePosition_(0.0f, 0.0f, 0.0f),
     sphereRadius_(0.0f),
     instancesDirty_(false),
-    matrixDirty_(false),
+    matricesDirty_(false),
     sphereDirty_(false)
 {
 
@@ -234,12 +235,14 @@ bool CamiCubeSystem::insert(
     return true;
 }
 
-void CamiCubeSystem::setMatrixProjView(
-    const glm::mat4& matrix
+void CamiCubeSystem::setMatrices(
+    const glm::mat4& matrixProj,
+    const glm::mat4& matrixView
 )
 {
-    matrixProjView_ = matrix;
-    matrixDirty_ = true;
+    matrixProj_ = matrixProj;
+    matrixView_ = matrixView;
+    matricesDirty_ = true;
 }
 
 void CamiCubeSystem::setCutoutSphere(
@@ -266,32 +269,38 @@ void CamiCubeSystem::draw(void)
     glUseProgram(shader_);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture_);
-    glUniform1i(2, 0);
-    if (matrixDirty_)
+    glUniform1i(3, 0);
+    if (matricesDirty_)
     {
         glUniformMatrix4fv(
             0,
             1,
             GL_FALSE,
-            glm::value_ptr(matrixProjView_)
+            glm::value_ptr(matrixProj_)
         );
-        matrixDirty_ = false;
+        glUniformMatrix4fv(
+            1,
+            1,
+            GL_FALSE,
+            glm::value_ptr(matrixView_)
+        );
+        matricesDirty_ = false;
     }
     if (sphereDirty_)
     {
         glUniform3fv(
-            3,
+            4,
             1,
             glm::value_ptr(spherePosition_)
         );
         glUniform1f(
-            4,
+            5,
             sphereRadius_
         );
         sphereDirty_ = false;
     }
     glUniform1f(
-        1,
+        2,
         secondsElapsed_
     );
 

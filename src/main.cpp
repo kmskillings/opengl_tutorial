@@ -203,17 +203,15 @@ int main(void)
             matrixRotate * 
             matrixStandoff
         );
-        
-        glm::mat4 matrixProjView = matrixProject * matrixView;
 
-        camiCubeSystem.setMatrixProjView(matrixProjView);
+        camiCubeSystem.setMatrices(matrixProject, matrixView);
         camiCubeSystem.setCutoutSphere(
             spherePosition,
             0.5f
         );
         camiCubeSystem.update(secondsDelta);
 
-        glm::mat4 matrixSphere = matrixProjView * matrixPosition;
+        glm::mat4 matrixSphere = matrixProject * matrixView * matrixPosition;
 
         glClearColor(0.5f, 0.8f, 1.0f, 1.0f);
         glClearStencil(0);
@@ -229,29 +227,9 @@ int main(void)
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
         glDisable(GL_STENCIL_TEST);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
+        // glEnable(GL_CULL_FACE);
+        // glCullFace(GL_BACK);
         camiCubeSystem.draw();
-
-        // Select the pixels showing interior fragments
-        glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-        glDepthMask(GL_FALSE);
-        glEnable(GL_STENCIL_TEST);
-        glStencilFunc(GL_ALWAYS, 1, 0xFF);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
-        glCullFace(GL_FRONT);
-        camiCubeSystem.draw();
-
-        // Draw the highlight on the selected pixels
-        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-        glDisable(GL_DEPTH_TEST);
-        glStencilFunc(GL_LEQUAL, 1, 0xFF);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-        glCullFace(GL_BACK);
-        glBindVertexArray(highlightVao);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, highlightEbo);
-        glUseProgram(highlightShader);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
 
         // Draw the wireframe sphere over everything else
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -259,8 +237,8 @@ int main(void)
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
         glDisable(GL_STENCIL_TEST);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
+        // glEnable(GL_CULL_FACE);
+        // glCullFace(GL_BACK);
         glUseProgram(sphereShader);
         glUniformMatrix4fv(
             0,

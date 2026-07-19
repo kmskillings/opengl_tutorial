@@ -34,7 +34,8 @@ private:
     uint capacity_;
 
     float secondsElapsed_;
-    glm::mat4 matrixProjView_;
+    glm::mat4 matrixProj_;
+    glm::mat4 matrixView_;
     glm::vec3 spherePosition_;
     float sphereRadius_;
 
@@ -47,7 +48,7 @@ private:
     GLuint texture_;
 
     bool instancesDirty_;
-    bool matrixDirty_;
+    bool matricesDirty_;
     bool sphereDirty_;
 
 public:
@@ -68,8 +69,9 @@ public:
         const glm::vec3&    position
     );
 
-    void setMatrixProjView(
-        const glm::mat4& matrixProjView
+    void setMatrices(
+        const glm::mat4& matrixProj,
+        const glm::mat4& matrixView
     );
 
     void setCutoutSphere(
