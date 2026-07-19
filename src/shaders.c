@@ -16,6 +16,18 @@ const char camiCubeFragmentSourceArray[] = {
 };
 const char* camiCubeFragmentSource = camiCubeFragmentSourceArray;
 
+const char sphereVertexSourceArray[] = {
+    #include "shaders/sphere.vert.xxd"
+    , 0x00
+};
+const char* sphereVertexSource = sphereVertexSourceArray;
+
+const char sphereFragmentSourceArray[] = {
+    #include "shaders/sphere.frag.xxd"
+    , 0x00
+};
+const char* sphereFragmentSource = sphereFragmentSourceArray;
+
 unsigned int compileShader(
     const char** vertexShaderSources,
     GLuint vertexShaderCount,

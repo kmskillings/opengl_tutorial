@@ -7,6 +7,8 @@
 
 extern const char* camiCubeVertexSource;
 extern const char* camiCubeFragmentSource;
+extern const char* sphereVertexSource;
+extern const char* sphereFragmentSource;
 
 GLuint compileShader(
     const char** vertexShaderSources,

@@ -75,6 +75,12 @@ int main(void)
         glm::vec3(1.0f)
     );
 
+    GLuint sphereShader = compileShader(
+        &sphereVertexSource, 1,
+        &sphereFragmentSource, 1
+    );
+    MeshSphere meshSphere(16, 32, 1.0f);
+
     // Calculate project matrix
     glm::mat4 matrixProject = glm::perspective(
         (float)(M_PI / 3.0f),
@@ -138,6 +144,20 @@ int main(void)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         camiCubeSystem.draw();
+
+        glUseProgram(sphereShader);
+        glUniformMatrix4fv(
+            0,
+            1,
+            GL_FALSE,
+            glm::value_ptr(matrixProjView)
+        );
+        glBindVertexArray(meshSphere.getVao());
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshSphere.getEboLines());
+        glDrawElements(GL_LINES, 3 * meshSphere.getCountLines(), GL_UNSIGNED_INT, (void*)0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+        glUseProgram(0);
 
         glfwSwapBuffers(window);
 
