@@ -22,7 +22,7 @@ extern "C" {
 #define WINDOW_HEIGHT 600
 #define WINDOW_TITLE "Cami Cube"
 
-#define CLOUD_RADIUS 160.0f
+#define CLOUD_RADIUS 40.0f
 #define CLOUD_ROTATION_RATE_MAX 1.0f
 
 constexpr float cameraSpeedTranslation = 5.0f;
@@ -31,7 +31,7 @@ constexpr float cameraSensitivityYaw = 0.005f;
 constexpr float cameraSpeedRoll = 1.0f;
 constexpr float cameraStandoff = 2.0f;
 
-constexpr uint camiCubeCountMax = 1000000;
+constexpr uint camiCubeCountMax = 10000;
 
 constexpr int randomSeed = 11141997;
 
@@ -209,16 +209,33 @@ int main(void)
         camiCubeSystem.setMatrixProjView(matrixProjView);
         camiCubeSystem.update(secondsDelta);
 
-        glClearColor(0.5f, 0.8f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glm::mat4 matrixSphere = matrixProjView * matrixPosition;
 
+        glClearColor(0.5f, 0.8f, 1.0f, 1.0f);
+        glClear(
+            GL_COLOR_BUFFER_BIT | 
+            GL_DEPTH_BUFFER_BIT | 
+            GL_STENCIL_BUFFER_BIT
+        );
+
+        // Draw the Cami cubes
+        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
         glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_TRUE);
+        glDepthFunc(GL_LESS);
+        glDisable(GL_STENCIL_TEST);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
-
         camiCubeSystem.draw();
 
-        glm::mat4 matrixSphere = matrixProjView * matrixPosition;
+        // Stencil in the fragments inside the sphere
+        glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+        glDepthMask(GL_FALSE);
+        glDepthFunc(GL_GREATER);
+        glEnable(GL_STENCIL_TEST);
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
+        glCullFace(GL_FRONT);
         glUseProgram(sphereShader);
         glUniformMatrix4fv(
             0,
@@ -227,16 +244,34 @@ int main(void)
             glm::value_ptr(matrixSphere)
         );
         glBindVertexArray(meshSphere.getVao());
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshSphere.getEboLines());
-        glDrawElements(GL_LINES, 2 * meshSphere.getCountLines(), GL_UNSIGNED_INT, (void*)0);
-        
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshSphere.getEboTriangles());
+        glDrawElements(GL_TRIANGLES, 3 * meshSphere.getCountTriangles(), GL_UNSIGNED_INT, (void*)0);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_DECR);
+        glCullFace(GL_BACK);
+        glDrawElements(GL_TRIANGLES, 3 * meshSphere.getCountTriangles(), GL_UNSIGNED_INT, (void*)0);
+
+        // Draw the highlight in the stencil
+        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
         glDisable(GL_DEPTH_TEST);
+        glStencilFunc(GL_EQUAL, 1, 0xFF);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
         glBindVertexArray(highlightVao);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, highlightEbo);
         glUseProgram(highlightShader);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
+
+        // Draw the wireframe sphere over everything else
+        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_TRUE);
+        glDepthFunc(GL_LESS);
+        glDisable(GL_STENCIL_TEST);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        glUseProgram(sphereShader);
+        glBindVertexArray(meshSphere.getVao());
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshSphere.getEboLines());
+        glDrawElements(GL_LINES, 2 * meshSphere.getCountLines(), GL_UNSIGNED_INT, (void*)0);
 
         glfwSwapBuffers(window);
 
