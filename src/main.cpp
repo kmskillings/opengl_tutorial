@@ -93,6 +93,8 @@ int main(void)
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
     glfwSwapInterval(1);
 
     double mouseXNow;
@@ -177,7 +179,7 @@ int main(void)
         );
         glBindVertexArray(meshSphere.getVao());
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshSphere.getEboLines());
-        glDrawElements(GL_LINES, 3 * meshSphere.getCountLines(), GL_UNSIGNED_INT, (void*)0);
+        glDrawElements(GL_LINES, 2 * meshSphere.getCountLines(), GL_UNSIGNED_INT, (void*)0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
         glUseProgram(0);

@@ -106,11 +106,11 @@ MeshSphere::MeshSphere(
         {
             uint quadIndex = segmentsHorizontal * i + j;
             triangles[6 * quadIndex + 0] = (segmentsHorizontal + 1) * (i + 0) + (j + 0);
-            triangles[6 * quadIndex + 1] = (segmentsHorizontal + 1) * (i + 1) + (j + 0);
-            triangles[6 * quadIndex + 2] = (segmentsHorizontal + 1) * (i + 1) + (j + 1);
+            triangles[6 * quadIndex + 1] = (segmentsHorizontal + 1) * (i + 1) + (j + 1);
+            triangles[6 * quadIndex + 2] = (segmentsHorizontal + 1) * (i + 1) + (j + 0);
             triangles[6 * quadIndex + 3] = (segmentsHorizontal + 1) * (i + 1) + (j + 1);
-            triangles[6 * quadIndex + 4] = (segmentsHorizontal + 1) * (i + 0) + (j + 1);
-            triangles[6 * quadIndex + 5] = (segmentsHorizontal + 1) * (i + 0) + (j + 0);
+            triangles[6 * quadIndex + 4] = (segmentsHorizontal + 1) * (i + 0) + (j + 0);
+            triangles[6 * quadIndex + 5] = (segmentsHorizontal + 1) * (i + 0) + (j + 1);
         }
     }
     glBufferData(
