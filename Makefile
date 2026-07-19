@@ -29,7 +29,9 @@ shader_names := \
 camiCube.frag \
 camiCube.vert \
 sphere.frag \
-sphere.vert
+sphere.vert \
+highlight.frag \
+highlight.vert
 shaders := ${shader_names:%=${shader_dir}/%}
 
 shader_dumps := ${shaders:%=%.xxd}

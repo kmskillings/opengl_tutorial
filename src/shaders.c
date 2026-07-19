@@ -28,6 +28,18 @@ const char sphereFragmentSourceArray[] = {
 };
 const char* sphereFragmentSource = sphereFragmentSourceArray;
 
+const char highlightVertexSourceArray[] = {
+    #include "shaders/highlight.vert.xxd"
+    , 0x00
+};
+const char* highlightVertexSource = highlightVertexSourceArray;
+
+const char highlightFragmentSourceArray[] = {
+    #include "shaders/highlight.frag.xxd"
+    , 0x00
+};
+const char* highlightFragmentSource = highlightFragmentSourceArray;
+
 unsigned int compileShader(
     const char** vertexShaderSources,
     GLuint vertexShaderCount,
