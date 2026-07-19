@@ -9,6 +9,7 @@ layout(location = 5) in float modelRotationRate;
 layout(location = 6) in vec3 modelRotationAxis;
 layout(location = 7) in vec3 modelPosition;
 
+out vec3 Position;
 out vec2 TextureCoords;
 
 layout(location = 0) uniform mat4 matrixProjView;
@@ -44,5 +45,6 @@ void main()
     vec4 outPos4 = matrixProjView * vec4(outPos, 1.0f);
 
     gl_Position = outPos4;
+    Position = outPos;
     TextureCoords = textureCoords;
 }

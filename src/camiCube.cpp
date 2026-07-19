@@ -27,8 +27,11 @@ CamiCubeSystem::CamiCubeSystem(uint capacity) :
     capacity_(capacity),
     secondsElapsed_(0),
     matrixProjView_(glm::mat4(0.0f)),
+    spherePosition_(0.0f, 0.0f, 0.0f),
+    sphereRadius_(0.0f),
     instancesDirty_(false),
-    matrixDirty_(false)
+    matrixDirty_(false),
+    sphereDirty_(false)
 {
 
     // Configure the VAO
@@ -236,6 +239,17 @@ void CamiCubeSystem::setMatrixProjView(
 )
 {
     matrixProjView_ = matrix;
+    matrixDirty_ = true;
+}
+
+void CamiCubeSystem::setCutoutSphere(
+    const glm::vec3& position,
+    const float& radius
+)
+{
+    spherePosition_ = position;
+    sphereRadius_ = radius;
+    sphereDirty_ = true;
 }
 
 void CamiCubeSystem::update(
@@ -253,12 +267,29 @@ void CamiCubeSystem::draw(void)
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture_);
     glUniform1i(2, 0);
-    glUniformMatrix4fv(
-        0,
-        1,
-        GL_FALSE,
-        glm::value_ptr(matrixProjView_)
-    );
+    if (matrixDirty_)
+    {
+        glUniformMatrix4fv(
+            0,
+            1,
+            GL_FALSE,
+            glm::value_ptr(matrixProjView_)
+        );
+        matrixDirty_ = false;
+    }
+    if (sphereDirty_)
+    {
+        glUniform3fv(
+            3,
+            1,
+            glm::value_ptr(spherePosition_)
+        );
+        glUniform1f(
+            4,
+            sphereRadius_
+        );
+        sphereDirty_ = false;
+    }
     glUniform1f(
         1,
         secondsElapsed_

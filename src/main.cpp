@@ -207,11 +207,16 @@ int main(void)
         glm::mat4 matrixProjView = matrixProject * matrixView;
 
         camiCubeSystem.setMatrixProjView(matrixProjView);
+        camiCubeSystem.setCutoutSphere(
+            spherePosition,
+            0.5f
+        );
         camiCubeSystem.update(secondsDelta);
 
         glm::mat4 matrixSphere = matrixProjView * matrixPosition;
 
         glClearColor(0.5f, 0.8f, 1.0f, 1.0f);
+        glClearStencil(0);
         glClear(
             GL_COLOR_BUFFER_BIT | 
             GL_DEPTH_BUFFER_BIT | 
@@ -228,33 +233,21 @@ int main(void)
         glCullFace(GL_BACK);
         camiCubeSystem.draw();
 
-        // Stencil in the fragments inside the sphere
+        // Select the pixels showing interior fragments
         glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
         glDepthMask(GL_FALSE);
-        glDepthFunc(GL_GREATER);
         glEnable(GL_STENCIL_TEST);
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
         glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
         glCullFace(GL_FRONT);
-        glUseProgram(sphereShader);
-        glUniformMatrix4fv(
-            0,
-            1,
-            GL_FALSE,
-            glm::value_ptr(matrixSphere)
-        );
-        glBindVertexArray(meshSphere.getVao());
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshSphere.getEboTriangles());
-        glDrawElements(GL_TRIANGLES, 3 * meshSphere.getCountTriangles(), GL_UNSIGNED_INT, (void*)0);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_DECR);
-        glCullFace(GL_BACK);
-        glDrawElements(GL_TRIANGLES, 3 * meshSphere.getCountTriangles(), GL_UNSIGNED_INT, (void*)0);
+        camiCubeSystem.draw();
 
-        // Draw the highlight in the stencil
+        // Draw the highlight on the selected pixels
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
         glDisable(GL_DEPTH_TEST);
-        glStencilFunc(GL_EQUAL, 1, 0xFF);
+        glStencilFunc(GL_LEQUAL, 1, 0xFF);
         glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+        glCullFace(GL_BACK);
         glBindVertexArray(highlightVao);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, highlightEbo);
         glUseProgram(highlightShader);
@@ -269,6 +262,12 @@ int main(void)
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
         glUseProgram(sphereShader);
+        glUniformMatrix4fv(
+            0,
+            1,
+            GL_FALSE,
+            glm::value_ptr(matrixSphere)
+        );
         glBindVertexArray(meshSphere.getVao());
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshSphere.getEboLines());
         glDrawElements(GL_LINES, 2 * meshSphere.getCountLines(), GL_UNSIGNED_INT, (void*)0);

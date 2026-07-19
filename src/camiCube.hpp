@@ -35,6 +35,8 @@ private:
 
     float secondsElapsed_;
     glm::mat4 matrixProjView_;
+    glm::vec3 spherePosition_;
+    float sphereRadius_;
 
     GLuint vao_;
     GLuint vboVertices_;
@@ -46,6 +48,7 @@ private:
 
     bool instancesDirty_;
     bool matrixDirty_;
+    bool sphereDirty_;
 
 public:
 
@@ -67,6 +70,11 @@ public:
 
     void setMatrixProjView(
         const glm::mat4& matrixProjView
+    );
+
+    void setCutoutSphere(
+        const glm::vec3& position,
+        const float& radius
     );
 
     // Updates all CamiCubes in the system.
