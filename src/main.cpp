@@ -83,6 +83,54 @@ int main(void)
     );
     MeshSphere meshSphere(16, 32, 0.5f);
 
+    GLuint highlightVao;
+    glGenVertexArrays(1, &highlightVao);
+    GLuint highlightVbo;
+    glGenBuffers(1, &highlightVbo);
+    glBindVertexArray(highlightVao);
+    glBindBuffer(GL_ARRAY_BUFFER, highlightVbo);
+    float highlightVertices[] = {
+        -1.0f, -1.0f,
+         1.0f, -1.0f,
+        -1.0f,  1.0f,
+         1.0f,  1.0f
+    };
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        8 * sizeof(float),
+        highlightVertices,
+        GL_STATIC_DRAW
+    );
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(
+        0,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        2 * sizeof(float),
+        (void*)0
+    );
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    GLuint highlightEbo;
+    glGenBuffers(1, &highlightEbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, highlightEbo);
+    uint highlightTriangles[] = {
+        0, 1, 2,
+        2, 1, 3
+    };
+    glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        6 * sizeof(uint),
+        highlightTriangles,
+        GL_STATIC_DRAW
+    );
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    GLuint highlightShader = compileShader(
+        &highlightVertexSource, 1,
+        &highlightFragmentSource, 1
+    );
+
     // Calculate project matrix
     glm::mat4 matrixProject = glm::perspective(
         (float)(M_PI / 3.0f),
@@ -92,9 +140,6 @@ int main(void)
     );
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
     glfwSwapInterval(1);
 
     double mouseXNow;
@@ -167,6 +212,10 @@ int main(void)
         glClearColor(0.5f, 0.8f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+
         camiCubeSystem.draw();
 
         glm::mat4 matrixSphere = matrixProjView * matrixPosition;
@@ -180,9 +229,14 @@ int main(void)
         glBindVertexArray(meshSphere.getVao());
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshSphere.getEboLines());
         glDrawElements(GL_LINES, 2 * meshSphere.getCountLines(), GL_UNSIGNED_INT, (void*)0);
+        
+        glDisable(GL_DEPTH_TEST);
+        glBindVertexArray(highlightVao);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, highlightEbo);
+        glUseProgram(highlightShader);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
-        glUseProgram(0);
 
         glfwSwapBuffers(window);
 
