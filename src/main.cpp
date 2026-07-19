@@ -29,6 +29,7 @@ constexpr float cameraSpeedTranslation = 5.0f;
 constexpr float cameraSensitivityPitch = 0.005f;
 constexpr float cameraSensitivityYaw = 0.005f;
 constexpr float cameraSpeedRoll = 1.0f;
+constexpr float cameraStandoff = 2.0f;
 
 constexpr uint camiCubeCountMax = 1000000;
 
@@ -42,12 +43,19 @@ void populateCamiCubes(
     uint count
 );
 
-void updatePlayerTransform(
-    Transform& transform,
+glm::quat updatePlayerOrientation(
+    const glm::quat& playerOrientation,
     GLFWwindow* window,
     const float& secondsDelta,
     const double& mouseXDelta,
     const double& mouseYDelta
+);
+
+glm::vec3 updatePlayerPosition(
+    const glm::vec3& position,
+    const glm::quat& orientation,
+    GLFWwindow* window,
+    const float& secondsDelta
 );
 
 int main(void)
@@ -63,23 +71,17 @@ int main(void)
     CamiCubeSystem camiCubeSystem(camiCubeCountMax);
     populateCamiCubes(camiCubeSystem, camiCubeCountMax);
 
-    // Just leave the camera at the origin for now, looking straight ahead.
-    glm::vec3 positionCamera = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::quat orientationCamera = glm::angleAxis(
-        0.0f,
+    glm::quat cameraOrientation = glm::angleAxis(
+        0.0f, 
         glm::vec3(1.0f, 0.0f, 0.0f)
     );
-    Transform cameraTransform = Transform(
-        positionCamera, 
-        orientationCamera, 
-        glm::vec3(1.0f)
-    );
+    glm::vec3 spherePosition = glm::vec3(0.0f, 0.0f, 0.0f);
 
     GLuint sphereShader = compileShader(
         &sphereVertexSource, 1,
         &sphereFragmentSource, 1
     );
-    MeshSphere meshSphere(16, 32, 1.0f);
+    MeshSphere meshSphere(16, 32, 0.5f);
 
     // Calculate project matrix
     glm::mat4 matrixProject = glm::perspective(
@@ -125,16 +127,36 @@ int main(void)
         glfwGetCursorPos(window, &mouseXNow, &mouseYNow);
         mouseXDelta = mouseXNow - mouseXLast;
         mouseYDelta = mouseYNow - mouseYLast;
-        updatePlayerTransform(
-            cameraTransform,
+        cameraOrientation = updatePlayerOrientation(
+            cameraOrientation,
             window,
             secondsDelta,
             mouseXDelta,
             mouseYDelta
         );
+        spherePosition = updatePlayerPosition(
+            spherePosition,
+            cameraOrientation,
+            window,
+            secondsDelta
+        );
 
         // Calculate the view matrix
-        glm::mat4 matrixView = cameraTransform.getMatrixInv();
+        glm::mat4 matrixRotate = glm::mat4_cast(cameraOrientation);
+        glm::mat4 matrixStandoff = glm::translate(
+            glm::mat4(1.0f), 
+            glm::vec3(0.0f, 0.0f, cameraStandoff)
+        );
+        glm::mat4 matrixPosition = glm::translate(
+            glm::mat4(1.0f),
+            spherePosition
+        );
+        glm::mat4 matrixView = glm::inverse(
+            matrixPosition * 
+            matrixRotate * 
+            matrixStandoff
+        );
+        
         glm::mat4 matrixProjView = matrixProject * matrixView;
 
         camiCubeSystem.setMatrixProjView(matrixProjView);
@@ -145,12 +167,13 @@ int main(void)
 
         camiCubeSystem.draw();
 
+        glm::mat4 matrixSphere = matrixProjView * matrixPosition;
         glUseProgram(sphereShader);
         glUniformMatrix4fv(
             0,
             1,
             GL_FALSE,
-            glm::value_ptr(matrixProjView)
+            glm::value_ptr(matrixSphere)
         );
         glBindVertexArray(meshSphere.getVao());
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshSphere.getEboLines());
@@ -212,12 +235,46 @@ void populateCamiCubes(
     }
 }
 
-void updatePlayerTransform(
-    Transform& transform,
+glm::quat updatePlayerOrientation(
+    const glm::quat& playerOrientation,
     GLFWwindow* window,
     const float& secondsDelta,
     const double& mouseXDelta,
     const double& mouseYDelta
+)
+{
+    glm::quat pitch = glm::angleAxis(
+        (float)mouseYDelta * cameraSensitivityPitch,
+        glm::vec3(-1.0f, 0.0f, 0.0f)
+    );
+
+    glm::quat yaw = glm::angleAxis(
+        (float)mouseXDelta * cameraSensitivityYaw,
+        glm::vec3(0.0f, -1.0f, 0.0f)
+    );
+
+    float rollRate = 0.0f;
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+    {
+        rollRate = rollRate + 1.0f;
+    }
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+    {
+        rollRate = rollRate - 1.0f;
+    }
+    glm::quat roll = glm::angleAxis(
+        rollRate * cameraSpeedRoll * secondsDelta,
+        glm::vec3(0.0f, 0.0f, 1.0f)
+    );
+
+    return playerOrientation * pitch * yaw * roll;
+}
+
+glm::vec3 updatePlayerPosition(
+    const glm::vec3& position,
+    const glm::quat& orientation,
+    GLFWwindow* window,
+    const float& secondsDelta
 )
 {
     glm::vec3 cameraDirection = glm::vec3(0.0f);
@@ -255,37 +312,8 @@ void updatePlayerTransform(
     {
         cameraDirection = glm::normalize(cameraDirection);
     }
-    transform.translate(
-        cameraSpeedTranslation * secondsDelta,
-        cameraDirection,
-        Transform::Axes::Local
-    );
-
-    transform.rotate(
-        mouseYDelta * cameraSensitivityPitch,
-        glm::vec3(-1.0f, 0.0f, 0.0f),
-        Transform::Axes::Local
-    );
-    transform.rotate(
-        mouseXDelta * cameraSensitivityYaw,
-        glm::vec3(0.0f, -1.0f, 0.0f),
-        Transform::Axes::Local
-    );
-
-    float rollRate = 0.0f;
-    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-    {
-        rollRate = rollRate + 1.0f;
-    }
-    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-    {
-        rollRate = rollRate - 1.0f;
-    }
-    transform.rotate(
-        rollRate * cameraSpeedRoll * secondsDelta,
-        glm::vec3(0.0f, 0.0f, 1.0f),
-        Transform::Axes::Local
-    );
+    cameraDirection = orientation * cameraDirection;
+    return glm::vec3(position) + cameraDirection * cameraSpeedTranslation * secondsDelta;
 }
 
 double secondsSinceEpoch()
