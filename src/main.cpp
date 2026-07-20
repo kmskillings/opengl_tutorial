@@ -81,7 +81,7 @@ int main(void)
         &sphereVertexSource, 1,
         &sphereFragmentSource, 1
     );
-    MeshSphere meshSphere(16, 32, 0.5f);
+    MeshSphere meshSphere(3, 6, 0.01f);
 
     GLuint highlightVao;
     glGenVertexArrays(1, &highlightVao);
