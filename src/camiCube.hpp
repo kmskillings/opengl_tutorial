@@ -27,6 +27,7 @@ private:
         float       rotationRate;
         glm::vec3   rotationAxis;
         glm::vec3   modelPosition;
+        glm::vec3   color;
     };
 
     CamiCube* camiCubes_;
@@ -49,6 +50,13 @@ private:
 
 public:
 
+    typedef uint Id;
+
+    struct Collision
+    {
+        Id id;
+    };
+
     CamiCubeSystem(uint capacity);
 
     ~CamiCubeSystem(void);
@@ -62,11 +70,28 @@ public:
         const glm::vec3&    orientationAxis,
         const float&        rotationRate,
         const glm::vec3&    rotationAxis,
-        const glm::vec3&    position
+        const glm::vec3&    position,
+        const glm::vec3&    color
+    );
+
+    // Get an array of collisions with the given point. The collisions are
+    // placed in the given array. Only up to the given maximum collisions will
+    // be detected; no guarantees are made about which ones these will be if
+    // more collisions actually exist. Returns the actual number of collisions
+    // detected.
+    uint getCollisionsPoint(
+        const glm::vec3& point,
+        Collision* collisionArray,
+        const uint& maxCollisionCount
     );
 
     void setMatrix(
         const glm::mat4& matrixProjView
+    );
+
+    bool setColor(
+        const Id& id, 
+        const glm::vec3& color
     );
 
     // Updates all CamiCubes in the system.

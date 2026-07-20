@@ -22,7 +22,7 @@ extern "C" {
 #define WINDOW_HEIGHT 600
 #define WINDOW_TITLE "Cami Cube"
 
-#define CLOUD_RADIUS 40.0f
+#define CLOUD_RADIUS 5.0f
 #define CLOUD_ROTATION_RATE_MAX 1.0f
 
 constexpr float cameraSpeedTranslation = 5.0f;
@@ -31,7 +31,11 @@ constexpr float cameraSensitivityYaw = 0.005f;
 constexpr float cameraSpeedRoll = 1.0f;
 constexpr float cameraStandoff = 2.0f;
 
-constexpr uint camiCubeCountMax = 10000;
+constexpr uint maxCollisions = 10;
+
+constexpr float throbPeriod = 1.0f;
+
+constexpr uint camiCubeCountMax = 10;
 
 constexpr int randomSeed = 11141997;
 
@@ -139,7 +143,10 @@ int main(void)
         10000.0f
     );
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    CamiCubeSystem::Collision* collisions 
+        = new CamiCubeSystem::Collision[maxCollisions];
+
+    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSwapInterval(1);
 
     double mouseXNow;
@@ -153,15 +160,14 @@ int main(void)
     double secondsNow = secondsSinceEpoch();
     double secondsLast;
     double secondsDelta;
-
-    double timer1Second = 0;
-    uint frameCounter = 0;
+    double secondsElapsed = 0;
 
     while(glfwWindowShouldClose(window) == GL_FALSE) {
 
         secondsLast = secondsNow;
         secondsNow = secondsSinceEpoch();
         secondsDelta = secondsNow - secondsLast;
+        secondsElapsed = secondsElapsed + secondsDelta;
 
         glfwPollEvents();
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -207,7 +213,26 @@ int main(void)
         glm::mat4 matrixProjView = matrixProject * matrixView;
 
         camiCubeSystem.setMatrix(matrixProjView);
+        float throbAmount = (1 + cos(2 * M_PI * secondsElapsed / throbPeriod)) * 0.5;
+        glm::vec3 throbYellow = glm::vec3(
+            1.0f,
+            1.0f,
+            throbAmount
+        );
         camiCubeSystem.update(secondsDelta);
+        uint collisionsDetected = camiCubeSystem.getCollisionsPoint(
+            spherePosition,
+            collisions,
+            maxCollisions
+        );
+        for (int i = 0; i < collisionsDetected; i++)
+        {
+            CamiCubeSystem::Collision collision = collisions[i];
+            camiCubeSystem.setColor(
+                collision.id,
+                throbYellow
+            );
+        }
 
         glm::mat4 matrixSphere = matrixProject * matrixView * matrixPosition;
 
@@ -249,15 +274,6 @@ int main(void)
         glDrawElements(GL_LINES, 2 * meshSphere.getCountLines(), GL_UNSIGNED_INT, (void*)0);
 
         glfwSwapBuffers(window);
-
-        timer1Second = timer1Second + secondsDelta;
-        frameCounter = frameCounter + 1;
-        if (timer1Second >= 1)
-        {
-            timer1Second = 0;
-            printf("Frames in last 1 second:\t%i\n", frameCounter);
-            frameCounter = 0;
-        }
     }
 
 }
@@ -296,7 +312,8 @@ void populateCamiCubes(
             orientationAxis,
             rotationRate,
             rotationAxis,
-            position
+            position,
+            glm::vec3(1.0f)
         );
     }
 }

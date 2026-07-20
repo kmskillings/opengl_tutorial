@@ -20,6 +20,7 @@ constexpr uint locationModelOrienationAxis      = 4;
 constexpr uint locationModelRotationRate        = 5;
 constexpr uint locationModelRotationAxis        = 6;
 constexpr uint locationModelPosition            = 7;
+constexpr uint locationColor                    = 8;
 
 CamiCubeSystem::CamiCubeSystem(uint capacity) :
     camiCubes_(new CamiCube[capacity]),
@@ -142,6 +143,16 @@ CamiCubeSystem::CamiCubeSystem(uint capacity) :
         (void*)offsetof(CamiCube, modelPosition)
     );
     glVertexAttribDivisor(locationModelPosition, 1);
+    glEnableVertexAttribArray(locationColor);
+    glVertexAttribPointer(
+        locationColor,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(CamiCube),
+        (void*)offsetof(CamiCube, color)
+    );
+    glVertexAttribDivisor(locationColor, 1);
 
     glGenBuffers(1, &ebo_);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
@@ -207,7 +218,8 @@ bool CamiCubeSystem::insert(
     const glm::vec3&    orientationAxis,
     const float&        rotationRate,
     const glm::vec3&    rotationAxis,
-    const glm::vec3&    position
+    const glm::vec3&    position,
+    const glm::vec3&    color
 )
 {
     if (count_ >= capacity_)
@@ -221,7 +233,8 @@ bool CamiCubeSystem::insert(
         orientationAxis,
         rotationRate,
         rotationAxis,
-        position
+        position,
+        color
     };
 
     count_ = count_ + 1;
@@ -231,12 +244,88 @@ bool CamiCubeSystem::insert(
     return true;
 }
 
+uint CamiCubeSystem::getCollisionsPoint(
+    const glm::vec3& point,
+    Collision* collisionArray,
+    const uint& maxCollisionCount
+)
+{
+    float maxCubeRadius = sqrt(3.0);
+    uint nextCollisionIndex = 0;
+    for (Id id = 0; id < count_; id++)
+    {
+        if (nextCollisionIndex >= maxCollisionCount)
+        {
+            return nextCollisionIndex;
+        }
+
+        CamiCube cube = camiCubes_[id];
+
+        // Perform broad-phase spherical collision detection
+        float distance = glm::length(point - cube.modelPosition);
+        if (distance < maxCubeRadius * cube.scale)
+        {
+            // Perform narrow-phase cubical collision detection
+            // Transform point into the cube's model space
+            glm::mat4 modelMatrix = glm::mat4(1.0f);
+            modelMatrix = glm::scale(modelMatrix, glm::vec3(cube.scale));
+            modelMatrix = glm::rotate(modelMatrix, cube.orientationAngle, cube.orientationAxis);
+            modelMatrix = glm::rotate(modelMatrix, cube.rotationRate * secondsElapsed_, cube.rotationAxis);
+            modelMatrix = glm::translate(modelMatrix, cube.modelPosition);
+            glm::mat4 modelMatrixInv = glm::inverse(modelMatrix);
+            glm::vec3 pointModel = glm::vec3(modelMatrixInv * glm::vec4(point, 1.0f));
+            if (
+                (pointModel.x < 1.0f && pointModel.x > -1.0f) &&
+                (pointModel.y < 1.0f && pointModel.y > -1.0f) &&
+                (pointModel.z < 1.0f && pointModel.z > -1.0f)
+            )
+            {
+                // A collision has been detected
+                collisionArray[id] = {
+                    id
+                };
+                nextCollisionIndex = nextCollisionIndex + 1;
+            }
+        }
+    }
+
+    return nextCollisionIndex;
+}
+
 void CamiCubeSystem::setMatrix(
     const glm::mat4& matrixProjView
 )
 {
     matrixProjView_ = matrixProjView;
     matrixDirty_ = true;
+}
+
+bool CamiCubeSystem::setColor(
+    const CamiCubeSystem::Id& id,
+    const glm::vec3& color
+)
+{
+    if (id > count_)
+    {
+        return false;
+    }
+
+    // Write the new color in the local array
+    camiCubes_[id].color = color;
+
+    // Write the new color in the instance buffer
+    glBindVertexArray(vao_);
+    glBindBuffer(GL_ARRAY_BUFFER, vboInstances_);
+    glBufferSubData(
+        GL_ARRAY_BUFFER,
+        id * sizeof(CamiCube) + offsetof(CamiCube, color),
+        sizeof(glm::vec3),
+        glm::value_ptr(color)
+    );
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    return true;
 }
 
 void CamiCubeSystem::update(
