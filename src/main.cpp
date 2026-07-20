@@ -146,7 +146,7 @@ int main(void)
     CamiCubeSystem::Collision* collisions 
         = new CamiCubeSystem::Collision[maxCollisions];
 
-    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSwapInterval(1);
 
     double mouseXNow;

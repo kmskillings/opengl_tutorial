@@ -267,13 +267,10 @@ uint CamiCubeSystem::getCollisionsPoint(
         {
             // Perform narrow-phase cubical collision detection
             // Transform point into the cube's model space
-            glm::mat4 modelMatrix = glm::mat4(1.0f);
-            modelMatrix = glm::scale(modelMatrix, glm::vec3(cube.scale));
-            modelMatrix = glm::rotate(modelMatrix, cube.orientationAngle, cube.orientationAxis);
-            modelMatrix = glm::rotate(modelMatrix, cube.rotationRate * secondsElapsed_, cube.rotationAxis);
-            modelMatrix = glm::translate(modelMatrix, cube.modelPosition);
-            glm::mat4 modelMatrixInv = glm::inverse(modelMatrix);
-            glm::vec3 pointModel = glm::vec3(modelMatrixInv * glm::vec4(point, 1.0f));
+            glm::vec3 pointModel = point - cube.modelPosition;
+            pointModel = glm::angleAxis(-cube.rotationRate * secondsElapsed_, cube.rotationAxis) * pointModel;
+            pointModel = glm::angleAxis(-cube.orientationAngle, cube.orientationAxis) * pointModel;
+            pointModel = pointModel / cube.scale;
             if (
                 (pointModel.x < 1.0f && pointModel.x > -1.0f) &&
                 (pointModel.y < 1.0f && pointModel.y > -1.0f) &&
@@ -281,7 +278,7 @@ uint CamiCubeSystem::getCollisionsPoint(
             )
             {
                 // A collision has been detected
-                collisionArray[id] = {
+                collisionArray[nextCollisionIndex] = {
                     id
                 };
                 nextCollisionIndex = nextCollisionIndex + 1;
