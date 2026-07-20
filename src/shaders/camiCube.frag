@@ -58,7 +58,8 @@ void main()
                     // Determine the screen-space depth of the intersection point
                     vec4 intersectionClip = matrixProj * vec4(intersectionView, 1.0);
                     float depthNdc = intersectionClip.z / intersectionClip.w;
-                    gl_FragDepth = ((gl_DepthRange.diff * depthNdc) + gl_DepthRange.near + gl_DepthRange.far) / 2.0;
+                    // gl_FragDepth = ((gl_DepthRange.diff * depthNdc) + gl_DepthRange.near + gl_DepthRange.far) / 2.0;
+                    gl_FragDepth = gl_FragCoord.z;
                 }       
             }
         }

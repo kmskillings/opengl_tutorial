@@ -227,8 +227,8 @@ int main(void)
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
         glDisable(GL_STENCIL_TEST);
-        // glEnable(GL_CULL_FACE);
-        // glCullFace(GL_BACK);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
         camiCubeSystem.draw();
 
         // Draw the wireframe sphere over everything else
@@ -237,8 +237,8 @@ int main(void)
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
         glDisable(GL_STENCIL_TEST);
-        // glEnable(GL_CULL_FACE);
-        // glCullFace(GL_BACK);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
         glUseProgram(sphereShader);
         glUniformMatrix4fv(
             0,
