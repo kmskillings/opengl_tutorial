@@ -9,12 +9,10 @@ layout(location = 5) in float modelRotationRate;
 layout(location = 6) in vec3 modelRotationAxis;
 layout(location = 7) in vec3 modelPosition;
 
-out vec3 Position;
 out vec2 TextureCoords;
 
-layout(location = 0) uniform mat4 matrixProj;
-layout(location = 1) uniform mat4 matrixView;
-layout(location = 2) uniform float secondsElapsed;
+layout(location = 0) uniform mat4 matrixProjView;
+layout(location = 1) uniform float secondsElapsed;
 
 vec3 rotateAngleAxis(vec3 v, float th, vec3 k)
 {
@@ -30,22 +28,19 @@ vec3 rotateAngleAxis(vec3 v, float th, vec3 k)
 void main()
 {
     float modelRotationAngle = modelRotationRate * secondsElapsed;
-    vec3 outPos = position * modelScale;
-    outPos = rotateAngleAxis(
-        outPos,
+    vec3 worldPos = position * modelScale;
+    worldPos = rotateAngleAxis(
+        worldPos,
         modelOrientationAngle,
         modelOrientationAxis
     );
-    outPos = rotateAngleAxis(
-        outPos,
+    worldPos = rotateAngleAxis(
+        worldPos,
         modelRotationAngle,
         modelRotationAxis
     );
-    outPos = outPos + modelPosition;
+    worldPos = worldPos + modelPosition;
 
-    Position = (matrixView * vec4(outPos, 1.0f)).xyz;
-    vec4 outPos4 = matrixProj * matrixView * vec4(outPos, 1.0f);
-
-    gl_Position = outPos4;
+    gl_Position = matrixProjView * vec4(worldPos, 1.0f);
     TextureCoords = textureCoords;
 }

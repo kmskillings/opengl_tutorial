@@ -34,10 +34,7 @@ private:
     uint capacity_;
 
     float secondsElapsed_;
-    glm::mat4 matrixProj_;
-    glm::mat4 matrixView_;
-    glm::vec3 spherePosition_;
-    float sphereRadius_;
+    glm::mat4 matrixProjView_;
 
     GLuint vao_;
     GLuint vboVertices_;
@@ -48,8 +45,7 @@ private:
     GLuint texture_;
 
     bool instancesDirty_;
-    bool matricesDirty_;
-    bool sphereDirty_;
+    bool matrixDirty_;
 
 public:
 
@@ -69,14 +65,8 @@ public:
         const glm::vec3&    position
     );
 
-    void setMatrices(
-        const glm::mat4& matrixProj,
-        const glm::mat4& matrixView
-    );
-
-    void setCutoutSphere(
-        const glm::vec3& position,
-        const float& radius
+    void setMatrix(
+        const glm::mat4& matrixProjView
     );
 
     // Updates all CamiCubes in the system.

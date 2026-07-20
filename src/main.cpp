@@ -204,11 +204,9 @@ int main(void)
             matrixStandoff
         );
 
-        camiCubeSystem.setMatrices(matrixProject, matrixView);
-        camiCubeSystem.setCutoutSphere(
-            spherePosition,
-            0.5f
-        );
+        glm::mat4 matrixProjView = matrixProject * matrixView;
+
+        camiCubeSystem.setMatrix(matrixProjView);
         camiCubeSystem.update(secondsDelta);
 
         glm::mat4 matrixSphere = matrixProject * matrixView * matrixPosition;

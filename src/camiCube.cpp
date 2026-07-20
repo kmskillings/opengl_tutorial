@@ -26,13 +26,9 @@ CamiCubeSystem::CamiCubeSystem(uint capacity) :
     count_(0),
     capacity_(capacity),
     secondsElapsed_(0),
-    matrixProj_(glm::mat4(0.0f)),
-    matrixView_(glm::mat4(0.0f)),
-    spherePosition_(0.0f, 0.0f, 0.0f),
-    sphereRadius_(0.0f),
+    matrixProjView_(glm::mat4(0.0f)),
     instancesDirty_(false),
-    matricesDirty_(false),
-    sphereDirty_(false)
+    matrixDirty_(false)
 {
 
     // Configure the VAO
@@ -235,24 +231,12 @@ bool CamiCubeSystem::insert(
     return true;
 }
 
-void CamiCubeSystem::setMatrices(
-    const glm::mat4& matrixProj,
-    const glm::mat4& matrixView
+void CamiCubeSystem::setMatrix(
+    const glm::mat4& matrixProjView
 )
 {
-    matrixProj_ = matrixProj;
-    matrixView_ = matrixView;
-    matricesDirty_ = true;
-}
-
-void CamiCubeSystem::setCutoutSphere(
-    const glm::vec3& position,
-    const float& radius
-)
-{
-    spherePosition_ = position;
-    sphereRadius_ = radius;
-    sphereDirty_ = true;
+    matrixProjView_ = matrixProjView;
+    matrixDirty_ = true;
 }
 
 void CamiCubeSystem::update(
@@ -269,38 +253,19 @@ void CamiCubeSystem::draw(void)
     glUseProgram(shader_);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture_);
-    glUniform1i(3, 0);
-    if (matricesDirty_)
+    glUniform1i(2, 0);
+    if (matrixDirty_)
     {
         glUniformMatrix4fv(
             0,
             1,
             GL_FALSE,
-            glm::value_ptr(matrixProj_)
+            glm::value_ptr(matrixProjView_)
         );
-        glUniformMatrix4fv(
-            1,
-            1,
-            GL_FALSE,
-            glm::value_ptr(matrixView_)
-        );
-        matricesDirty_ = false;
-    }
-    if (sphereDirty_)
-    {
-        glUniform3fv(
-            4,
-            1,
-            glm::value_ptr(spherePosition_)
-        );
-        glUniform1f(
-            5,
-            sphereRadius_
-        );
-        sphereDirty_ = false;
+        matrixDirty_ = false;
     }
     glUniform1f(
-        2,
+        1,
         secondsElapsed_
     );
 
