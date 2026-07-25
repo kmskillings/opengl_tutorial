@@ -18,7 +18,8 @@ World::World(
 ) :
     camiCubeCount_(camiCubeCount),
     camiCubePositions_(new glm::vec3[camiCubeCount]),
-    camiCubeOrientations_(new CamiCubeOrientation[camiCubeCount])
+    camiCubeOrientations_(new CamiCubeOrientation[camiCubeCount]),
+    spherePosition_(glm::vec3(0.0f, 0.0f, 0.0f))
 {
 
     // Based on the number of CamiCubes and the size of the ball, create the
@@ -26,17 +27,14 @@ World::World(
     float sphereVolume = 4.0f * M_PI / 3.0f * radius * radius * radius;
     float chunkVolume = ((float)averageCubesPerChunk) / ((float)camiCubeCount) * sphereVolume;
     float chunkSideLength = cbrt(chunkVolume);
-    ChunkingStrategy chunkingStrategy(chunkSideLength);
-
-    // Based on the chunk side length, allocate the chunks array
-    uint radiusChunks = static_cast<uint>(ceil(radius / chunkSideLength));
-    sizeChunks_ = glm::ivec3(
-        2 * radiusChunks,
-        2 * radiusChunks,
-        2 * radiusChunks
+    chunkingStrategy_ = std::make_unique<ChunkingStrategy>(
+        chunkSideLength,
+        glm::vec3(-radius, -radius, -radius),
+        glm::vec3(radius, radius, radius)
     );
-    chunkCount_ = 8 * radiusChunks * radiusChunks * radiusChunks;
-    chunks_ = new Chunk[chunkCount_];
+
+    chunks_ = new Chunk[chunkingStrategy_->getChunkCount()];
+    printf("Generating world with %i chunks, each with a side length of %f\n.", chunkingStrategy_->getChunkCount(), chunkSideLength);
 
     // Generate the cubes. They're not sorted yet, but set up to do so later.
     struct CamiCubeGenerator
@@ -55,15 +53,20 @@ World::World(
         glm::quat orientation = glm::angleAxis(orientationAngle, orientationAxis);
         float rotationRate = randomGenerator.getPositiveFloat();
         glm::vec3 rotationAxis = randomGenerator.getUnitSphere();
-        uint chunk = chunkingStrategy.getChunkIndex(
-            chunkingStrategy.getChunk(
-                position,
-                glm::vec3(-radius, -radius, -radius)
-            ),
-            sizeChunks_
+        std::optional<uint> chunk = chunkingStrategy_->getChunkIndex(
+            chunkingStrategy_->getChunk(position)
         );
+        if (!chunk)
+        {
+            printf(
+                "Error: Tried generating a cube outside the chubk grid at (%f, %f, %f).\n",
+                position.x,
+                position.y,
+                position.z
+            );
+        }
         camiCubeGenerators[i] = {
-            chunk,
+            chunk.value_or(0),
             position,
             {
                 orientationAngle,
@@ -74,12 +77,12 @@ World::World(
         };
 
         // Increment the appropriate chunk's count
-        chunks_[chunk].count = chunks_[chunk].count + 1;
+        chunks_[chunk.value_or(0)].count = chunks_[chunk.value_or(0)].count + 1;
     }
 
     // Go through and set each chunk's start appropriately
     uint cumulativeCount = 0;
-    for(int i = 0; i < chunkCount_; i++)
+    for(int i = 0; i < chunkingStrategy_->getChunkCount(); i++)
     {
         chunks_[i].start = cumulativeCount;
         cumulativeCount = cumulativeCount + chunks_[i].count;
@@ -127,4 +130,14 @@ glm::vec3* World::getCamiCubePositions(void) const
 World::CamiCubeOrientation* World::getCamiCubeOrientations(void) const
 {
     return camiCubeOrientations_;
+}
+
+glm::vec3 World::getSpherePosition(void) const
+{
+    return spherePosition_;
+}
+
+void World::setSpherePosition(const glm::vec3& v)
+{
+    spherePosition_ = v;
 }

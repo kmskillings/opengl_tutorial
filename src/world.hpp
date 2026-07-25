@@ -8,6 +8,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <memory>
+
+class ChunkingStrategy;
+
 // World
 //
 // A World contains all the state-based data needed to process the game
@@ -41,13 +45,15 @@ public:
 
 private:
 
-    uint chunkCount_;
-    glm::ivec3 sizeChunks_;
+    
     Chunk* chunks_;
+    std::unique_ptr<ChunkingStrategy> chunkingStrategy_;
 
     uint camiCubeCount_;
     glm::vec3* camiCubePositions_;
     CamiCubeOrientation* camiCubeOrientations_;
+
+    glm::vec3 spherePosition_;
     
 
 public:
@@ -65,6 +71,9 @@ public:
     glm::vec3* getCamiCubePositions(void) const;
 
     CamiCubeOrientation* getCamiCubeOrientations(void) const;
+
+    glm::vec3 getSpherePosition(void) const;
+    void setSpherePosition(const glm::vec3& v);
 
 };
 

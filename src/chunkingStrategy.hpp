@@ -8,6 +8,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <optional>
+
 // Chunking Strategy
 //
 // A Chunking Strategy contains information and provides functions relating
@@ -21,23 +23,33 @@ private:
     // The side length of each cubical chunk
     float chunkSideLength_;
 
+    // The offset between the negative-most corner of the (0, 0, 0) chunk and
+    // the origin of the world. Alternatively, the position of the negative-
+    // most corner of the chunk grid.
+    glm::vec3 chunkOffset_;
+
+    // The number of chunks that cover each dimension
+    glm::ivec3 chunkCount_;
+
 public:
 
     ChunkingStrategy(
-        const float& chunkSideLength
+        const float& chunkSideLength,
+        const glm::vec3& bottomLeftRear,
+        const glm::vec3& topRightFront
     );
 
     ~ChunkingStrategy(void);
 
     glm::ivec3 getChunk(
-        const glm::vec3& position,
-        const glm::vec3& origin = glm::vec3(0.0f, 0.0f, 0.0f) // The negative-most corner of the world
+        const glm::vec3& position
     ) const;
 
-    uint getChunkIndex(
-        const glm::ivec3 chunk,
-        const glm::ivec3& worldSizeChunks
+    std::optional<uint> getChunkIndex(
+        const glm::ivec3 chunk
     ) const;
+
+    uint getChunkCount(void) const;
 
 };
 

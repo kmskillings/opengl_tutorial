@@ -15,12 +15,13 @@ extern "C" {
 
 #include "world.hpp"
 #include "camiCubeVao.hpp"
+#include "meshSphere.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 #define WINDOW_TITLE "Cami Cube"
 
-constexpr float cloudRadius = 5.0f;
+constexpr float cloudRadius = 40.0f;
 #define CLOUD_ROTATION_RATE_MAX 1.0f
 constexpr uint averageCamiCubesPerChunk = 10;
 
@@ -34,7 +35,7 @@ constexpr uint maxCollisions = 10;
 
 constexpr float throbPeriod = 1.0f;
 
-constexpr uint camiCubeCountMax = 10;
+constexpr uint camiCubeCountMax = 10000;
 
 constexpr int randomSeed = 11141997;
 
@@ -78,9 +79,16 @@ int main(void)
         world.getCamiCubeOrientations()
     );
 
+    MeshSphere meshSphere(16, 32, 0.5f);
+
     GLuint camiCubeShader = compileShader(
         &camiCubeVertexSource, 1,
         &camiCubeFragmentSource, 1
+    );
+
+    GLuint sphereShader = compileShader(
+        &sphereVertexSource, 1,
+        &sphereFragmentSource, 1
     );
     
     GLuint camiCubeTexture;
@@ -108,7 +116,6 @@ int main(void)
         0.0f, 
         glm::vec3(1.0f, 0.0f, 0.0f)
     );
-    glm::vec3 spherePosition = glm::vec3(0.0f, 0.0f, 0.0f);
 
     // Calculate project matrix
     glm::mat4 matrixProject = glm::perspective(
@@ -159,12 +166,12 @@ int main(void)
             mouseXDelta,
             mouseYDelta
         );
-        spherePosition = updatePlayerPosition(
-            spherePosition,
+        world.setSpherePosition(updatePlayerPosition(
+            world.getSpherePosition(),
             cameraOrientation,
             window,
             secondsDelta
-        );
+        ));
 
         // Calculate the view matrix
         glm::mat4 matrixRotate = glm::mat4_cast(cameraOrientation);
@@ -174,7 +181,7 @@ int main(void)
         );
         glm::mat4 matrixPosition = glm::translate(
             glm::mat4(1.0f),
-            spherePosition
+            world.getSpherePosition()
         );
         glm::mat4 matrixView = glm::inverse(
             matrixPosition * 
@@ -183,6 +190,9 @@ int main(void)
         );
 
         glm::mat4 matrixProjView = matrixProject * matrixView;
+
+        glm::mat4 matrixSpherePosition = glm::translate(glm::mat4(1.0f), world.getSpherePosition());
+        glm::mat4 matrixSphere = matrixProjView * matrixSpherePosition;
 
         // Rendering
         // Clear the buffer
@@ -224,7 +234,24 @@ int main(void)
             camiCubeVao.getInstanceCount()
         );
 
-        error = glGetError();
+        // Draw the sphere
+
+        glUseProgram(sphereShader);
+        glUniformMatrix4fv(
+            0,
+            1,
+            GL_FALSE,
+            glm::value_ptr(matrixSphere)
+        );
+        glBindVertexArray(meshSphere.getVao());
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshSphere.getEboLines());
+        glDrawElements(
+            GL_LINES,
+            2 * meshSphere.getCountLines(),
+            GL_UNSIGNED_INT,
+            (void*)0
+        );
+
         glfwSwapBuffers(window);
     }
 
