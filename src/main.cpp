@@ -13,17 +13,16 @@ extern "C" {
 #include "shaders.h"
 }
 
-#include "transform.hpp"
-#include "camiCube.hpp"
-#include "randomGeneration.hpp"
-#include "meshSphere.hpp"
+#include "world.hpp"
+#include "camiCubeVao.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 #define WINDOW_TITLE "Cami Cube"
 
-#define CLOUD_RADIUS 5.0f
+constexpr float cloudRadius = 5.0f;
 #define CLOUD_ROTATION_RATE_MAX 1.0f
+constexpr uint averageCamiCubesPerChunk = 10;
 
 constexpr float cameraSpeedTranslation = 5.0f;
 constexpr float cameraSensitivityPitch = 0.005f;
@@ -41,11 +40,6 @@ constexpr int randomSeed = 11141997;
 
 GLFWwindow* setupGl(void);
 double secondsSinceEpoch(void);
-
-void populateCamiCubes(
-    CamiCubeSystem& system,
-    uint count
-);
 
 glm::quat updatePlayerOrientation(
     const glm::quat& playerOrientation,
@@ -71,69 +65,50 @@ int main(void)
     GLFWwindow* window = setupGl();
     glfwMakeContextCurrent(window);
     glewInit();
+
+    World world(
+        camiCubeCountMax,
+        cloudRadius,
+        averageCamiCubesPerChunk
+    );
+
+    CamiCubeVao camiCubeVao(
+        world.getCamiCubeCount(),
+        world.getCamiCubePositions(),
+        world.getCamiCubeOrientations()
+    );
+
+    GLuint camiCubeShader = compileShader(
+        &camiCubeVertexSource, 1,
+        &camiCubeFragmentSource, 1
+    );
     
-    CamiCubeSystem camiCubeSystem(camiCubeCountMax);
-    populateCamiCubes(camiCubeSystem, camiCubeCountMax);
+    GLuint camiCubeTexture;
+    glGenTextures(1, &camiCubeTexture);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, camiCubeTexture);
+    glTexImage2D(
+        GL_TEXTURE_2D, 
+        0, 
+        GL_BGRA, 
+        camiTextureWidth, 
+        camiTextureHeight, 
+        0, 
+        GL_BGRA, 
+        GL_UNSIGNED_BYTE, 
+        camiTextureBytes
+    );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     glm::quat cameraOrientation = glm::angleAxis(
         0.0f, 
         glm::vec3(1.0f, 0.0f, 0.0f)
     );
     glm::vec3 spherePosition = glm::vec3(0.0f, 0.0f, 0.0f);
-
-    GLuint sphereShader = compileShader(
-        &sphereVertexSource, 1,
-        &sphereFragmentSource, 1
-    );
-    MeshSphere meshSphere(3, 6, 0.01f);
-
-    GLuint highlightVao;
-    glGenVertexArrays(1, &highlightVao);
-    GLuint highlightVbo;
-    glGenBuffers(1, &highlightVbo);
-    glBindVertexArray(highlightVao);
-    glBindBuffer(GL_ARRAY_BUFFER, highlightVbo);
-    float highlightVertices[] = {
-        -1.0f, -1.0f,
-         1.0f, -1.0f,
-        -1.0f,  1.0f,
-         1.0f,  1.0f
-    };
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        8 * sizeof(float),
-        highlightVertices,
-        GL_STATIC_DRAW
-    );
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(
-        0,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        2 * sizeof(float),
-        (void*)0
-    );
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    GLuint highlightEbo;
-    glGenBuffers(1, &highlightEbo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, highlightEbo);
-    uint highlightTriangles[] = {
-        0, 1, 2,
-        2, 1, 3
-    };
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
-        6 * sizeof(uint),
-        highlightTriangles,
-        GL_STATIC_DRAW
-    );
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-    GLuint highlightShader = compileShader(
-        &highlightVertexSource, 1,
-        &highlightFragmentSource, 1
-    );
 
     // Calculate project matrix
     glm::mat4 matrixProject = glm::perspective(
@@ -142,9 +117,6 @@ int main(void)
         0.1f,
         10000.0f
     );
-
-    CamiCubeSystem::Collision* collisions 
-        = new CamiCubeSystem::Collision[maxCollisions];
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSwapInterval(1);
@@ -212,66 +184,45 @@ int main(void)
 
         glm::mat4 matrixProjView = matrixProject * matrixView;
 
-        camiCubeSystem.setMatrix(matrixProjView);
-        float throbAmount = (1 + cos(2 * M_PI * secondsElapsed / throbPeriod)) * 0.5;
-        glm::vec3 throbYellow = glm::vec3(
-            1.0f,
-            1.0f,
-            throbAmount
-        );
-        camiCubeSystem.update(secondsDelta);
-        uint collisionsDetected = camiCubeSystem.getCollisionsPoint(
-            spherePosition,
-            collisions,
-            maxCollisions
-        );
-        for (int i = 0; i < collisionsDetected; i++)
-        {
-            CamiCubeSystem::Collision collision = collisions[i];
-            camiCubeSystem.setColor(
-                collision.id,
-                throbYellow
-            );
-        }
-
-        glm::mat4 matrixSphere = matrixProject * matrixView * matrixPosition;
-
+        // Rendering
+        // Clear the buffer
         glClearColor(0.5f, 0.8f, 1.0f, 1.0f);
-        glClearStencil(0);
         glClear(
-            GL_COLOR_BUFFER_BIT | 
-            GL_DEPTH_BUFFER_BIT | 
-            GL_STENCIL_BUFFER_BIT
+            GL_COLOR_BUFFER_BIT |
+            GL_DEPTH_BUFFER_BIT
         );
 
-        // Draw the Cami cubes
-        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-        glEnable(GL_DEPTH_TEST);
-        glDepthMask(GL_TRUE);
-        glDepthFunc(GL_LESS);
-        glDisable(GL_STENCIL_TEST);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-        camiCubeSystem.draw();
+        // Draw the Cami Cubes
 
-        // Draw the wireframe sphere over everything else
-        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-        glEnable(GL_DEPTH_TEST);
-        glDepthMask(GL_TRUE);
-        glDepthFunc(GL_LESS);
-        glDisable(GL_STENCIL_TEST);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-        glUseProgram(sphereShader);
+        glUseProgram(camiCubeShader);
         glUniformMatrix4fv(
             0,
             1,
             GL_FALSE,
-            glm::value_ptr(matrixSphere)
+            glm::value_ptr(matrixProjView)
         );
-        glBindVertexArray(meshSphere.getVao());
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshSphere.getEboLines());
-        glDrawElements(GL_LINES, 2 * meshSphere.getCountLines(), GL_UNSIGNED_INT, (void*)0);
+        glUniform1f(
+            1,
+            secondsElapsed
+        );
+        glUniform1i(
+            2,
+            0
+        );
+        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_TRUE);
+        glDepthFunc(GL_LESS);
+        glDisable(GL_STENCIL_TEST);
+        glBindVertexArray(camiCubeVao.getVao());
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, camiCubeVao.getEbo());
+        glDrawElementsInstanced(
+            GL_TRIANGLES,
+            3 * camiCubeVao.getTriangleCount(),
+            GL_UNSIGNED_INT,
+            (void*)0,
+            camiCubeVao.getInstanceCount()
+        );
 
         glfwSwapBuffers(window);
     }
@@ -288,34 +239,6 @@ GLFWwindow* setupGl(void) {
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
     return glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, NULL, NULL);
 
-}
-
-void populateCamiCubes(
-    CamiCubeSystem& system,
-    uint count
-)
-{
-    RandomGenerator randomGenerator(11141997);
-    for (int i = 0; i < count; i++)
-    {
-        glm::vec3 position = randomGenerator.getUnitBall() * CLOUD_RADIUS;
-        float orientationAngle = randomGenerator.getPositiveFloat() * M_PI;
-        glm::vec3 orientationAxis = randomGenerator.getUnitSphere();
-        glm::quat orientation = glm::angleAxis(orientationAngle, orientationAxis);
-        float rotationRate = randomGenerator.getPositiveFloat() * CLOUD_ROTATION_RATE_MAX;
-        glm::vec3 rotationAxis = randomGenerator.getUnitSphere();
-        float scale = 0.5f;
-        
-        system.insert(
-            scale,
-            orientationAngle,
-            orientationAxis,
-            rotationRate,
-            rotationAxis,
-            position,
-            glm::vec3(1.0f)
-        );
-    }
 }
 
 glm::quat updatePlayerOrientation(

@@ -8,6 +8,13 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+template<
+    class T,
+    unsigned int C, 
+    unsigned int S
+>
+class Chunk;
+
 // Cami Cubes are simple cubes textured with Cami's face. They float in 3D
 // space and rotate around a fixed axis at a fixed rate.
 // Because the cubes rotate at a fixed rate, a global time counter can be used
@@ -30,9 +37,9 @@ private:
         glm::vec3   color;
     };
 
-    CamiCube* camiCubes_;
-    uint count_;
-    uint capacity_;
+    Chunk<CamiCube, 20, 5>* chunks_;
+    uint chunkCount_;
+    uint chunkCapacity_;
 
     float secondsElapsed_;
     glm::mat4 matrixProjView_;
@@ -57,7 +64,9 @@ public:
         Id id;
     };
 
-    CamiCubeSystem(uint capacity);
+    CamiCubeSystem(
+        uint capacity
+    );
 
     ~CamiCubeSystem(void);
     
@@ -74,15 +83,10 @@ public:
         const glm::vec3&    color
     );
 
-    // Get an array of collisions with the given point. The collisions are
-    // placed in the given array. Only up to the given maximum collisions will
-    // be detected; no guarantees are made about which ones these will be if
-    // more collisions actually exist. Returns the actual number of collisions
-    // detected.
-    uint getCollisionsPoint(
-        const glm::vec3& point,
-        Collision* collisionArray,
-        const uint& maxCollisionCount
+    template<unsigned int C>
+    uint writeTransformsIntoChunks(
+        Chunk<C>* chunkArray,
+        uint chunkCount
     );
 
     void setMatrix(
@@ -102,5 +106,14 @@ public:
     void draw(void);
 
 };
+
+template<unsigned int C>
+uint CamiCubeSystem::writeTransformsIntoChunks(
+    Chunk<C>* chunkArray,
+    uint chunkCount
+)
+{
+
+}
 
 #endif

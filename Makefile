@@ -5,10 +5,10 @@ src_dir := ./src
 
 src_cpp_names := \
 main.cpp \
-transform.cpp \
-camiCube.cpp \
 randomGeneration.cpp \
-meshSphere.cpp
+camiCubeVao.cpp \
+chunkingStrategy.cpp \
+world.cpp
 
 srcs_cpp := ${src_cpp_names:%=${src_dir}/%}
 src_c_names := shaders.c tex_cami.c
@@ -17,10 +17,10 @@ srcs_c := ${src_c_names:%=${src_dir}/%}
 header_names := \
 shaders.h \
 textures.h \
-transform.hpp \
-camiCube.hpp \
 randomGeneration.hpp \
-meshSphere.hpp
+camiCubeVao.hpp \
+chunkingStrategy.hpp \
+world.hpp
 
 headers := ${header_names:%=${src_dir}/%}
 
