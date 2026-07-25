@@ -87,7 +87,7 @@ CamiCubeVao::CamiCubeVao(
     }
     glBufferData(
         GL_ARRAY_BUFFER,
-        sizeof(instanceData),
+        sizeof(CamiCubeInstance) * instanceCount_,
         instanceData,
         GL_DYNAMIC_DRAW
     );
