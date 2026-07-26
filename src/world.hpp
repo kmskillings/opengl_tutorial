@@ -9,8 +9,12 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <memory>
+#include <optional>
+
+#include "fixedPackedArray.hpp"
 
 class ChunkingStrategy;
+struct Chunk;
 
 // World
 //
@@ -23,18 +27,6 @@ class World
 
 public:
 
-    struct Chunk
-    {
-        // Where this chunk's contents start in a chunked array. Alternatively,
-        // the cumulative count of chunks preceding this one.
-        uint start;
-
-        // How many items are in this chunk.
-        uint count;
-
-        Chunk() : start(0), count(0) {}
-    };
-
     struct CamiCubeOrientation
     {
         float orientationAngle;
@@ -43,20 +35,14 @@ public:
         glm::vec3 rotationAxis;
     };
 
-private:
+    FixedPackedArray<Chunk> chunks;
+    FixedPackedArray<glm::vec3> camiCubePositions;
+    FixedPackedArray<CamiCubeOrientation> camiCubeOrientations;
 
-    
-    Chunk* chunks_;
-    std::unique_ptr<ChunkingStrategy> chunkingStrategy_;
+    std::unique_ptr<ChunkingStrategy> chunkingStrategy;
 
-    uint camiCubeCount_;
-    glm::vec3* camiCubePositions_;
-    CamiCubeOrientation* camiCubeOrientations_;
-
-    glm::vec3 spherePosition_;
-    
-
-public:
+    glm::vec3 spherePosition = glm::vec3(0.0f);
+    std::optional<uint> sphereChunkIndex;
 
     World(
         const uint& camiCubeCount,
@@ -65,15 +51,6 @@ public:
     );
 
     ~World(void);
-
-    uint getCamiCubeCount(void) const;
-
-    glm::vec3* getCamiCubePositions(void) const;
-
-    CamiCubeOrientation* getCamiCubeOrientations(void) const;
-
-    glm::vec3 getSpherePosition(void) const;
-    void setSpherePosition(const glm::vec3& v);
 
 };
 

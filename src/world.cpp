@@ -10,31 +10,35 @@
 #include "world.hpp"
 #include "chunkingStrategy.hpp"
 #include "randomGeneration.hpp"
+#include "chunk.hpp"
 
 World::World(
     const uint& camiCubeCount,
     const float& radius,
     const uint& averageCubesPerChunk
-) :
-    camiCubeCount_(camiCubeCount),
-    camiCubePositions_(new glm::vec3[camiCubeCount]),
-    camiCubeOrientations_(new CamiCubeOrientation[camiCubeCount]),
-    spherePosition_(glm::vec3(0.0f, 0.0f, 0.0f))
+)
 {
+
+    camiCubePositions.allocate(camiCubeCount);
+    camiCubeOrientations.allocate(camiCubeCount);
 
     // Based on the number of CamiCubes and the size of the ball, create the
     // chunking strategy.
     float sphereVolume = 4.0f * M_PI / 3.0f * radius * radius * radius;
     float chunkVolume = ((float)averageCubesPerChunk) / ((float)camiCubeCount) * sphereVolume;
     float chunkSideLength = cbrt(chunkVolume);
-    chunkingStrategy_ = std::make_unique<ChunkingStrategy>(
+    chunkingStrategy = std::make_unique<ChunkingStrategy>(
         chunkSideLength,
         glm::vec3(-radius, -radius, -radius),
         glm::vec3(radius, radius, radius)
     );
 
-    chunks_ = new Chunk[chunkingStrategy_->getChunkCount()];
-    printf("Generating world with %i chunks, each with a side length of %f\n.", chunkingStrategy_->getChunkCount(), chunkSideLength);
+    chunks.allocate(chunkingStrategy->getChunkCount());
+    printf("Generating world with %i chunks, each with a side length of %f\n.", chunks.capacity, chunkSideLength);
+    for(int i = 0; i < chunks.capacity; i++)
+    {
+        chunks.push(Chunk());
+    }
 
     // Generate the cubes. They're not sorted yet, but set up to do so later.
     struct CamiCubeGenerator
@@ -53,13 +57,13 @@ World::World(
         glm::quat orientation = glm::angleAxis(orientationAngle, orientationAxis);
         float rotationRate = randomGenerator.getPositiveFloat();
         glm::vec3 rotationAxis = randomGenerator.getUnitSphere();
-        std::optional<uint> chunk = chunkingStrategy_->getChunkIndex(
-            chunkingStrategy_->getChunk(position)
+        std::optional<uint> chunk = chunkingStrategy->getChunkIndex(
+            chunkingStrategy->getChunk(position)
         );
         if (!chunk)
         {
             printf(
-                "Error: Tried generating a cube outside the chubk grid at (%f, %f, %f).\n",
+                "Error: Tried generating a cube outside the chunk grid at (%f, %f, %f).\n",
                 position.x,
                 position.y,
                 position.z
@@ -77,21 +81,21 @@ World::World(
         };
 
         // Increment the appropriate chunk's count
-        chunks_[chunk.value_or(0)].count = chunks_[chunk.value_or(0)].count + 1;
+        chunks[chunk.value_or(0)].count = chunks[chunk.value_or(0)].count + 1;
     }
 
     // Go through and set each chunk's start appropriately
     uint cumulativeCount = 0;
-    for(int i = 0; i < chunkingStrategy_->getChunkCount(); i++)
+    for(int i = 0; i < chunks.count; i++)
     {
-        chunks_[i].start = cumulativeCount;
-        cumulativeCount = cumulativeCount + chunks_[i].count;
+        chunks[i].start = cumulativeCount;
+        cumulativeCount = cumulativeCount + chunks[i].count;
     }
 
     // Sort the CamiCubeGenerators and parcel them out into the chunked arrays
     std::sort(
         camiCubeGenerators, 
-        camiCubeGenerators + camiCubeCount_,
+        camiCubeGenerators + camiCubeCount,
         [](const CamiCubeGenerator& a, const CamiCubeGenerator& b)
         {
             if (a.chunk == b.chunk)
@@ -101,10 +105,10 @@ World::World(
             return a.chunk < b.chunk;
         }
     );
-    for (int i = 0; i < camiCubeCount_; i++)
+    for (int i = 0; i < camiCubeCount; i++)
     {
-        camiCubePositions_[i] = camiCubeGenerators[i].position;
-        camiCubeOrientations_[i] = camiCubeGenerators[i].orientation;
+        camiCubePositions.push(camiCubeGenerators[i].position);
+        camiCubeOrientations.push(camiCubeGenerators[i].orientation);
     }
 
     delete camiCubeGenerators;
@@ -112,32 +116,7 @@ World::World(
 
 World::~World(void)
 {
-    delete chunks_;
-    delete camiCubePositions_;
-    delete camiCubeOrientations_;
-}
-
-uint World::getCamiCubeCount(void) const
-{
-    return camiCubeCount_;
-}
-
-glm::vec3* World::getCamiCubePositions(void) const
-{
-    return camiCubePositions_;
-}
-
-World::CamiCubeOrientation* World::getCamiCubeOrientations(void) const
-{
-    return camiCubeOrientations_;
-}
-
-glm::vec3 World::getSpherePosition(void) const
-{
-    return spherePosition_;
-}
-
-void World::setSpherePosition(const glm::vec3& v)
-{
-    spherePosition_ = v;
+    chunks.deallocate();
+    camiCubeOrientations.deallocate();
+    camiCubePositions.deallocate();
 }

@@ -7,6 +7,7 @@
 
 #include <cmath>
 #include <chrono>
+#include <stdio.h>
 
 extern "C" {
 #include "textures.h"
@@ -16,6 +17,8 @@ extern "C" {
 #include "world.hpp"
 #include "camiCubeVao.hpp"
 #include "meshSphere.hpp"
+#include "chunkingStrategy.hpp"
+#include "highlightSystem.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -74,10 +77,14 @@ int main(void)
     );
 
     CamiCubeVao camiCubeVao(
-        world.getCamiCubeCount(),
-        world.getCamiCubePositions(),
-        world.getCamiCubeOrientations()
+        world.camiCubePositions.count,
+        world.camiCubePositions.data,
+        world.camiCubeOrientations.data
     );
+
+    HighlightSystem highlightSystem;
+    FixedPackedArray<uint> highlightedIndices;
+    highlightedIndices.allocate(100);
 
     MeshSphere meshSphere(16, 32, 0.5f);
 
@@ -166,12 +173,55 @@ int main(void)
             mouseXDelta,
             mouseYDelta
         );
-        world.setSpherePosition(updatePlayerPosition(
-            world.getSpherePosition(),
+        world.spherePosition = updatePlayerPosition(
+            world.spherePosition,
             cameraOrientation,
             window,
             secondsDelta
-        ));
+        );
+        std::optional<uint> sphereChunkIndexLast = world.sphereChunkIndex;
+        world.sphereChunkIndex = world.chunkingStrategy->getChunkIndex(
+            world.chunkingStrategy->getChunk(world.spherePosition)
+        );
+        if (sphereChunkIndexLast != world.sphereChunkIndex)
+        {
+            highlightedIndices.clear();
+            highlightSystem.getHighlights(
+                world.spherePosition,
+                world.sphereChunkIndex,
+                *world.chunkingStrategy,
+                world.chunks,
+                highlightedIndices
+            );
+            if (sphereChunkIndexLast && !world.sphereChunkIndex)
+            {
+                printf(
+                    "Sphere moved from chunk index %i to outside the chunk grid.\n",
+                    sphereChunkIndexLast.value()
+                );
+            }
+            else if (!sphereChunkIndexLast && world.sphereChunkIndex)
+            {
+                printf(
+                    "Sphere moved from outside the chunk grid to chunk index %i.\n",
+                    world.sphereChunkIndex.value()
+                );
+            }
+            else
+            {
+                printf(
+                    "Sphere moved from chunk index %i to chunk index %i.\n",
+                    sphereChunkIndexLast.value(),
+                    world.sphereChunkIndex.value()
+                );
+            }
+            printf("The following cubes are now highlighted: ");
+            for (int i = 0; i < highlightedIndices.count; i++)
+            {
+                printf("%i, ", highlightedIndices[i]);
+            }
+            printf(".\n");
+        }
 
         // Calculate the view matrix
         glm::mat4 matrixRotate = glm::mat4_cast(cameraOrientation);
@@ -181,7 +231,7 @@ int main(void)
         );
         glm::mat4 matrixPosition = glm::translate(
             glm::mat4(1.0f),
-            world.getSpherePosition()
+            world.spherePosition
         );
         glm::mat4 matrixView = glm::inverse(
             matrixPosition * 
@@ -191,7 +241,7 @@ int main(void)
 
         glm::mat4 matrixProjView = matrixProject * matrixView;
 
-        glm::mat4 matrixSpherePosition = glm::translate(glm::mat4(1.0f), world.getSpherePosition());
+        glm::mat4 matrixSpherePosition = glm::translate(glm::mat4(1.0f), world.spherePosition);
         glm::mat4 matrixSphere = matrixProjView * matrixSpherePosition;
 
         // Rendering

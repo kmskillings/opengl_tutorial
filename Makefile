@@ -9,7 +9,8 @@ randomGeneration.cpp \
 camiCubeVao.cpp \
 chunkingStrategy.cpp \
 world.cpp \
-meshSphere.cpp
+meshSphere.cpp \
+highlightSystem.cpp
 
 srcs_cpp := ${src_cpp_names:%=${src_dir}/%}
 src_c_names := shaders.c tex_cami.c
@@ -22,7 +23,10 @@ randomGeneration.hpp \
 camiCubeVao.hpp \
 chunkingStrategy.hpp \
 world.hpp \
-meshSphere.hpp
+meshSphere.hpp \
+fixedPackedArray.hpp \
+highlightSystem.hpp \
+chunk.hpp
 
 headers := ${header_names:%=${src_dir}/%}
 
