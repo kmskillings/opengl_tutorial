@@ -10,7 +10,8 @@ camiCubeVao.cpp \
 chunkingStrategy.cpp \
 world.cpp \
 meshSphere.cpp \
-collisionSystem.cpp
+collisionSystem.cpp \
+inputSystem.cpp
 
 srcs_cpp := ${src_cpp_names:%=${src_dir}/%}
 src_c_names := shaders.c tex_cami.c
@@ -26,7 +27,9 @@ world.hpp \
 meshSphere.hpp \
 fixedPackedArray.hpp \
 collisionSystem.hpp \
-chunk.hpp
+chunk.hpp \
+inputEvent.hpp \
+inputSystem.hpp
 
 headers := ${header_names:%=${src_dir}/%}
 

@@ -19,6 +19,8 @@ extern "C" {
 #include "meshSphere.hpp"
 #include "chunkingStrategy.hpp"
 #include "collisionSystem.hpp"
+#include "inputEvent.hpp"
+#include "inputSystem.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -85,6 +87,9 @@ int main(void)
     CollisionSystem highlightSystem;
     FixedPackedArray<uint> highlightedIndices;
     highlightedIndices.allocate(100);
+
+    InputSystem inputSystem;
+    inputSystem.init(window);
 
     MeshSphere meshSphere(16, 32, 0.5f);
 
@@ -155,30 +160,28 @@ int main(void)
         secondsDelta = secondsNow - secondsLast;
         secondsElapsed = secondsElapsed + secondsDelta;
 
-        glfwPollEvents();
-        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        inputSystem.getInputs(world.inputEvents);
+        if (world.inputEvents.count > 0)
         {
-            glfwSetWindowShouldClose(window, GL_TRUE);
+            printf(
+                "The following %i input events were detected: ",
+                world.inputEvents.count
+            );
+            for (int i = 0; i < world.inputEvents.count; i++)
+            {
+                printf(
+                    "keycode %i, action %i; ", 
+                    world.inputEvents[i].key,
+                    world.inputEvents[i].action
+                );
+                if (world.inputEvents[i].key == GLFW_KEY_ESCAPE)
+                {
+                    glfwSetWindowShouldClose(window, GLFW_TRUE);
+                }
+            }
+            printf("\n");
         }
 
-        mouseXLast = mouseXNow;
-        mouseYLast = mouseYNow;
-        glfwGetCursorPos(window, &mouseXNow, &mouseYNow);
-        mouseXDelta = mouseXNow - mouseXLast;
-        mouseYDelta = mouseYNow - mouseYLast;
-        cameraOrientation = updatePlayerOrientation(
-            cameraOrientation,
-            window,
-            secondsDelta,
-            mouseXDelta,
-            mouseYDelta
-        );
-        world.spherePosition = updatePlayerPosition(
-            world.spherePosition,
-            cameraOrientation,
-            window,
-            secondsDelta
-        );
         std::optional<uint> sphereChunkIndexLast = world.sphereChunkIndex;
         world.sphereChunkIndex = world.chunkingStrategy->getChunkIndex(
             world.chunkingStrategy->getChunk(world.spherePosition)

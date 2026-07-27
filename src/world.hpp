@@ -15,6 +15,7 @@
 
 class ChunkingStrategy;
 struct Chunk;
+struct InputEvent;
 
 // World
 //
@@ -43,6 +44,8 @@ public:
 
     glm::vec3 spherePosition = glm::vec3(0.0f);
     std::optional<uint> sphereChunkIndex;
+
+    FixedPackedArray<InputEvent> inputEvents;
 
     World(
         const uint& camiCubeCount,

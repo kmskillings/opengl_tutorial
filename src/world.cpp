@@ -11,6 +11,7 @@
 #include "chunkingStrategy.hpp"
 #include "randomGeneration.hpp"
 #include "chunk.hpp"
+#include "inputEvent.hpp"
 
 World::World(
     const uint& camiCubeCount,
@@ -112,6 +113,8 @@ World::World(
     }
 
     delete camiCubeGenerators;
+
+    inputEvents.allocate(10);
 }
 
 World::~World(void)
