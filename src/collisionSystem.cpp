@@ -5,14 +5,14 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "highlightSystem.hpp"
+#include "collisionSystem.hpp"
 
 #include "chunkingStrategy.hpp"
 #include "world.hpp"
 #include "fixedPackedArray.hpp"
 #include "chunk.hpp"
 
-void HighlightSystem::getHighlights(
+void CollisionSystem::getHighlights(
     const glm::vec3& spherePosition,
     const std::optional<uint>& sphereChunkIndex,
     const ChunkingStrategy& chunkingStrategy,

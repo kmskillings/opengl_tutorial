@@ -18,7 +18,7 @@ extern "C" {
 #include "camiCubeVao.hpp"
 #include "meshSphere.hpp"
 #include "chunkingStrategy.hpp"
-#include "highlightSystem.hpp"
+#include "collisionSystem.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -82,7 +82,7 @@ int main(void)
         world.camiCubeOrientations.data
     );
 
-    HighlightSystem highlightSystem;
+    CollisionSystem highlightSystem;
     FixedPackedArray<uint> highlightedIndices;
     highlightedIndices.allocate(100);
 

@@ -1,5 +1,5 @@
-#ifndef _HIGHLIGHT_SYSTEM_HPP
-#define _HIGHLIGHT_SYSTEM_HPP
+#ifndef _COLLISION_SYSTEM_HPP
+#define _COLLISION_SYSTEM_HPP
 
 #define GLEW_NO_GLU
 #define GLEW_STATIC
@@ -15,7 +15,7 @@ template<typename T>
 struct FixedPackedArray;
 struct Chunk;
 
-class HighlightSystem
+class CollisionSystem
 {
 
 private:
