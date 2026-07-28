@@ -12,6 +12,7 @@
 #include <optional>
 
 #include "fixedPackedArray.hpp"
+#include "playerControlState.hpp"
 
 class ChunkingStrategy;
 struct Chunk;
@@ -44,8 +45,11 @@ public:
 
     glm::vec3 spherePosition = glm::vec3(0.0f);
     std::optional<uint> sphereChunkIndex;
+    glm::quat sphereOrientation = glm::quat(glm::vec3(0.0f));
 
     FixedPackedArray<InputEvent> inputEvents;
+
+    PlayerControlState playerControlState;
 
     World(
         const uint& camiCubeCount,

@@ -21,6 +21,9 @@ extern "C" {
 #include "collisionSystem.hpp"
 #include "inputEvent.hpp"
 #include "inputSystem.hpp"
+#include "playerControlState.hpp"
+#include "playerControlSystem.hpp"
+#include "playerMovementSystem.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -84,9 +87,12 @@ int main(void)
         world.camiCubeOrientations.data
     );
 
-    CollisionSystem highlightSystem;
-    FixedPackedArray<uint> highlightedIndices;
-    highlightedIndices.allocate(100);
+    PlayerControlSystem PlayerControlSystem;
+
+    PlayerMovementSystem PlayerMovementSystem(
+        cameraSpeedTranslation,
+        cameraSensitivityPitch
+    );
 
     InputSystem inputSystem;
     inputSystem.init(window);
@@ -137,7 +143,7 @@ int main(void)
         10000.0f
     );
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSwapInterval(1);
 
     double mouseXNow;
@@ -161,73 +167,19 @@ int main(void)
         secondsElapsed = secondsElapsed + secondsDelta;
 
         inputSystem.getInputs(world.inputEvents);
-        if (world.inputEvents.count > 0)
-        {
-            printf(
-                "The following %i input events were detected: ",
-                world.inputEvents.count
-            );
-            for (int i = 0; i < world.inputEvents.count; i++)
-            {
-                printf(
-                    "keycode %i, action %i; ", 
-                    world.inputEvents[i].key,
-                    world.inputEvents[i].action
-                );
-                if (world.inputEvents[i].key == GLFW_KEY_ESCAPE)
-                {
-                    glfwSetWindowShouldClose(window, GLFW_TRUE);
-                }
-            }
-            printf("\n");
-        }
-
-        std::optional<uint> sphereChunkIndexLast = world.sphereChunkIndex;
-        world.sphereChunkIndex = world.chunkingStrategy->getChunkIndex(
-            world.chunkingStrategy->getChunk(world.spherePosition)
+        PlayerControlSystem.update(
+            world.inputEvents,
+            world.playerControlState
         );
-        if (sphereChunkIndexLast != world.sphereChunkIndex)
-        {
-            highlightedIndices.clear();
-            highlightSystem.getHighlights(
-                world.spherePosition,
-                world.sphereChunkIndex,
-                *world.chunkingStrategy,
-                world.chunks,
-                highlightedIndices
-            );
-            if (sphereChunkIndexLast && !world.sphereChunkIndex)
-            {
-                printf(
-                    "Sphere moved from chunk index %i to outside the chunk grid.\n",
-                    sphereChunkIndexLast.value()
-                );
-            }
-            else if (!sphereChunkIndexLast && world.sphereChunkIndex)
-            {
-                printf(
-                    "Sphere moved from outside the chunk grid to chunk index %i.\n",
-                    world.sphereChunkIndex.value()
-                );
-            }
-            else
-            {
-                printf(
-                    "Sphere moved from chunk index %i to chunk index %i.\n",
-                    sphereChunkIndexLast.value(),
-                    world.sphereChunkIndex.value()
-                );
-            }
-            printf("The following cubes are now highlighted: ");
-            for (int i = 0; i < highlightedIndices.count; i++)
-            {
-                printf("%i, ", highlightedIndices[i]);
-            }
-            printf(".\n");
-        }
+        PlayerMovementSystem.update(
+            secondsDelta,
+            world.playerControlState,
+            world.spherePosition,
+            world.sphereOrientation
+        );
 
         // Calculate the view matrix
-        glm::mat4 matrixRotate = glm::mat4_cast(cameraOrientation);
+        glm::mat4 matrixRotate = glm::mat4_cast(world.sphereOrientation);
         glm::mat4 matrixStandoff = glm::translate(
             glm::mat4(1.0f), 
             glm::vec3(0.0f, 0.0f, cameraStandoff)

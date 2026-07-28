@@ -11,7 +11,9 @@ chunkingStrategy.cpp \
 world.cpp \
 meshSphere.cpp \
 collisionSystem.cpp \
-inputSystem.cpp
+inputSystem.cpp \
+playerControlSystem.cpp \
+playerMovementSystem.cpp
 
 srcs_cpp := ${src_cpp_names:%=${src_dir}/%}
 src_c_names := shaders.c tex_cami.c
@@ -29,7 +31,10 @@ fixedPackedArray.hpp \
 collisionSystem.hpp \
 chunk.hpp \
 inputEvent.hpp \
-inputSystem.hpp
+inputSystem.hpp \
+playerControlState.hpp \
+playerControlSystem.hpp \
+playerMovementSystem.hpp
 
 headers := ${header_names:%=${src_dir}/%}
 
