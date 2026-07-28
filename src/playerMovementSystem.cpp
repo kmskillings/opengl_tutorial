@@ -64,10 +64,10 @@ void PlayerMovementSystem::update(
     }
     else
     {
-        glm::vec3 playerVelocity = glm::normalize(glm::vec3(
-            playerControlState.right,
-            playerControlState.up,
-            -playerControlState.forward
+        playerVelocity = glm::normalize(glm::vec3(
+            static_cast<float>(playerControlState.right),
+            static_cast<float>(playerControlState.up),
+            static_cast<float>(-playerControlState.forward)
         )) * movementSpeed_;
     }
     playerPosition = playerPosition + playerVelocity * secondsDelta;
