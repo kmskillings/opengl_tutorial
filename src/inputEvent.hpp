@@ -17,12 +17,15 @@ struct InputEvent
 
     enum class Kind
     {
-        Key
+        Key,
+        Mouse
     };
 
     Kind kind;
     int key;
     int action;
+    double mouseX = 0.0;
+    double mouseY = 0.0;
 
 };
 

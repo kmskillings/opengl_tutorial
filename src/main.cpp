@@ -143,7 +143,7 @@ int main(void)
         10000.0f
     );
 
-    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSwapInterval(1);
 
     double mouseXNow;
@@ -272,41 +272,6 @@ GLFWwindow* setupGl(void) {
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
     return glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, NULL, NULL);
 
-}
-
-glm::quat updatePlayerOrientation(
-    const glm::quat& playerOrientation,
-    GLFWwindow* window,
-    const float& secondsDelta,
-    const double& mouseXDelta,
-    const double& mouseYDelta
-)
-{
-    glm::quat pitch = glm::angleAxis(
-        (float)mouseYDelta * cameraSensitivityPitch,
-        glm::vec3(-1.0f, 0.0f, 0.0f)
-    );
-
-    glm::quat yaw = glm::angleAxis(
-        (float)mouseXDelta * cameraSensitivityYaw,
-        glm::vec3(0.0f, -1.0f, 0.0f)
-    );
-
-    float rollRate = 0.0f;
-    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-    {
-        rollRate = rollRate + 1.0f;
-    }
-    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-    {
-        rollRate = rollRate - 1.0f;
-    }
-    glm::quat roll = glm::angleAxis(
-        rollRate * cameraSpeedRoll * secondsDelta,
-        glm::vec3(0.0f, 0.0f, 1.0f)
-    );
-
-    return playerOrientation * pitch * yaw * roll;
 }
 
 double secondsSinceEpoch()

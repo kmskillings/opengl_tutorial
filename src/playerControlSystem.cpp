@@ -24,6 +24,8 @@ void PlayerControlSystem::update(
     PlayerControlState& playerControlState
 )
 {
+    playerControlState.mouseXLast = playerControlState.mouseXNow;
+    playerControlState.mouseYLast = playerControlState.mouseYNow;
     for (int i = 0; i < inputEvents.count; i++)
     {
         const InputEvent& inputEvent = inputEvents[i];
@@ -45,6 +47,18 @@ void PlayerControlSystem::update(
             GLFW_KEY_SPACE,
             GLFW_KEY_LEFT_SHIFT
         );
+
+        if (inputEvent.kind == InputEvent::Kind::Mouse)
+        {
+            if (playerControlState.cursorInitialized == false)
+            {
+                playerControlState.cursorInitialized = true;
+                playerControlState.mouseXLast = inputEvent.mouseX;
+                playerControlState.mouseYLast = inputEvent.mouseY;
+            }
+            playerControlState.mouseXNow = inputEvent.mouseX;
+            playerControlState.mouseYNow = inputEvent.mouseY;
+        }
     }
     playerControlState.normalize();
 }
@@ -56,6 +70,11 @@ void setAxis(
     const int& negativeKey
 )
 {
+    if (inputEvent.kind != InputEvent::Kind::Key)
+    {
+        return;
+    }
+
     if (inputEvent.key == positiveKey)
     {
         if (inputEvent.action == GLFW_PRESS)

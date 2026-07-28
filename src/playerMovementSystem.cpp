@@ -53,22 +53,33 @@ void PlayerMovementSystem::update(
     glm::quat& playerOrientation
 )
 {
-    glm::vec3 playerVelocity;
+    float mouseXDelta = static_cast<float>(playerControlState.mouseXNow - playerControlState.mouseXLast);
+    float mouseYDelta = static_cast<float>(playerControlState.mouseYNow - playerControlState.mouseYLast);
+
+    float yaw = mouseXDelta * lookSensitivity_;
+    float pitch = mouseYDelta * lookSensitivity_;
+    
+    glm::quat yawQuat = glm::angleAxis(yaw, glm::vec3(0.0f, -1.0f, 0.0f));
+    glm::quat pitchQuat = glm::angleAxis(pitch, glm::vec3(-1.0f, 0.0f, 0.0f));
+    playerOrientation = playerOrientation * yawQuat * pitchQuat;
+
+    glm::vec3 playerVelocityLocal;
     if (
         playerControlState.right == 0 &&
         playerControlState.up == 0 &&
         playerControlState.forward == 0
     )
     {
-        playerVelocity = glm::vec3(0.0f);
+        playerVelocityLocal = glm::vec3(0.0f);
     }
     else
     {
-        playerVelocity = glm::normalize(glm::vec3(
+        playerVelocityLocal = glm::normalize(glm::vec3(
             static_cast<float>(playerControlState.right),
             static_cast<float>(playerControlState.up),
             static_cast<float>(-playerControlState.forward)
         )) * movementSpeed_;
     }
+    glm::vec3 playerVelocity = playerOrientation * playerVelocityLocal;
     playerPosition = playerPosition + playerVelocity * secondsDelta;
 }

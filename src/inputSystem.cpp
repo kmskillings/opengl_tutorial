@@ -18,12 +18,19 @@ void handleKeyEvent(
     int mods
 );
 
+void handleMouseEvent(
+    GLFWwindow* window,
+    double x,
+    double y
+);
+
 void InputSystem::init(
     GLFWwindow* window
 )
 {
     window_ = window;
     glfwSetKeyCallback(window_, handleKeyEvent);
+    glfwSetCursorPosCallback(window_, handleMouseEvent);
 }
 
 void InputSystem::getInputs(
@@ -52,5 +59,22 @@ void handleKeyEvent(
         InputEvent::Kind::Key,
         key,
         action
+    });
+}
+
+void handleMouseEvent(
+    GLFWwindow* window,
+    double x,
+    double y
+)
+{
+    FixedPackedArray<InputEvent>& inputArray = 
+        *static_cast<FixedPackedArray<InputEvent>*>(glfwGetWindowUserPointer(window));
+    inputArray.push({
+        InputEvent::Kind::Mouse,
+        0,
+        0,
+        x,
+        y
     });
 }
