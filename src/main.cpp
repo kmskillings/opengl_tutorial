@@ -309,52 +309,6 @@ glm::quat updatePlayerOrientation(
     return playerOrientation * pitch * yaw * roll;
 }
 
-glm::vec3 updatePlayerPosition(
-    const glm::vec3& position,
-    const glm::quat& orientation,
-    GLFWwindow* window,
-    const float& secondsDelta
-)
-{
-    glm::vec3 cameraDirection = glm::vec3(0.0f);
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-    {
-        cameraDirection = cameraDirection + 
-            glm::vec3( 0.0f,  0.0f, -1.0f);
-    }
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-    {
-        cameraDirection = cameraDirection + 
-            glm::vec3( 0.0f,  0.0f,  1.0f);
-    }
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-    {
-        cameraDirection = cameraDirection + 
-            glm::vec3(-1.0f,  0.0f,  0.0f);
-    }
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-    {
-        cameraDirection = cameraDirection + 
-            glm::vec3( 1.0f,  0.0f,  0.0f);
-    }
-    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-    {
-        cameraDirection = cameraDirection + 
-            glm::vec3( 0.0f, -1.0f,  0.0f);
-    }
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-    {
-        cameraDirection = cameraDirection + 
-            glm::vec3( 0.0f,  1.0f,  0.0f);
-    }
-    if (glm::length(cameraDirection) > 0.1)
-    {
-        cameraDirection = glm::normalize(cameraDirection);
-    }
-    cameraDirection = orientation * cameraDirection;
-    return glm::vec3(position) + cameraDirection * cameraSpeedTranslation * secondsDelta;
-}
-
 double secondsSinceEpoch()
 {
     auto now = std::chrono::system_clock::now();
