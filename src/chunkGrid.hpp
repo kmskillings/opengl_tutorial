@@ -35,9 +35,9 @@ struct ChunkGrid
         this->negativeCorner = negativeCorner;
         this->chunkAxesCounts = chunkAxesCounts;
         this->chunkSize = glm::vec3(
-            positiveCorner.x - negativeCorner.x / chunkAxesCounts.x,
-            positiveCorner.y - negativeCorner.y / chunkAxesCounts.y,
-            positiveCorner.z - negativeCorner.z / chunkAxesCounts.z
+            (positiveCorner.x - negativeCorner.x) / chunkAxesCounts.x,
+            (positiveCorner.y - negativeCorner.y) / chunkAxesCounts.y,
+            (positiveCorner.z - negativeCorner.z) / chunkAxesCounts.z
         );
     }
 
@@ -48,8 +48,8 @@ struct ChunkGrid
         glm::vec3 positionGrid = position - negativeCorner;
         if (
             positionGrid.x < 0 || positionGrid.x > chunkAxesCounts.x * chunkSize.x ||
-            positionGrid.x < 0 || positionGrid.y > chunkAxesCounts.y * chunkSize.y ||
-            positionGrid.x < 0 || positionGrid.z > chunkAxesCounts.z * chunkSize.z
+            positionGrid.y < 0 || positionGrid.y > chunkAxesCounts.y * chunkSize.y ||
+            positionGrid.z < 0 || positionGrid.z > chunkAxesCounts.z * chunkSize.z
         )
         {
             return std::nullopt;
@@ -60,8 +60,8 @@ struct ChunkGrid
             uint32_t chunkY = static_cast<uint32_t>(floor(positionGrid.y / chunkSize.y));
             uint32_t chunkZ = static_cast<uint32_t>(floor(positionGrid.z / chunkSize.z));
             return 
-                chunkZ * chunkSize.y * chunkSize.x +
-                chunkY * chunkSize.x +
+                chunkZ * chunkAxesCounts.y * chunkAxesCounts.x +
+                chunkY * chunkAxesCounts.x +
                 chunkX
             ;
         }
@@ -69,7 +69,7 @@ struct ChunkGrid
 
     uint32_t getCount(void) const
     {
-        return chunkSize.x * chunkSize.y * chunkSize.z;
+        return chunkAxesCounts.x * chunkAxesCounts.y * chunkAxesCounts.z;
     }
 
 };

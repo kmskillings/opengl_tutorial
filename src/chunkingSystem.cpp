@@ -10,6 +10,7 @@
 #include "chunkingSystem.hpp"
 
 #include <optional>
+#include <algorithm>
 
 void ChunkingSystem::init(
     uint32_t chunkedArraySize,
@@ -31,13 +32,18 @@ void ChunkingSystem::calculateChunks(
     const FixedPackedArray<glm::vec3>& positions
 )
 {
+    chunks.count = std::min(chunks.capacity, chunkGrid.getCount());
+    chunkCursors_.count = std::min(chunkCursors_.capacity, positions.count);
+    permutationMap_.count = std::min(permutationMap_.capacity, positions.count);
+
+    // Pass 1: initialize the chunks array
     for (int i = 0; i < chunks.count; i++)
     {
         chunks[i].count = 0;
         chunkCursors_[i] = 0;
     }
 
-    for (int i = 0; i < positions.count; i++)
+    for (int i = 0; i < permutationMap_.count; i++)
     {
         // This will totally break if any objects exit the chunk grid.
         // Fix this later.

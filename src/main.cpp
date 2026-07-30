@@ -31,7 +31,8 @@ extern "C" {
 #define WINDOW_TITLE "Cami Cube"
 
 constexpr float cloudRadius = 40.0f;
-constexpr uint32_t chunkCountAxis = static_cast<int>(ceil(cloudRadius / 5));
+constexpr float chunkSideLength = 5.0f;
+constexpr uint32_t chunkCountAxis = 2 * static_cast<int>(ceil(cloudRadius / chunkSideLength));
 #define CLOUD_ROTATION_RATE_MAX 1.0f
 constexpr uint averageCamiCubesPerChunk = 10;
 
