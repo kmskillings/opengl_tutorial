@@ -9,10 +9,14 @@
 
 #include <random>
 
-RandomGenerator::RandomGenerator(int seed) :
-    engine_(seed),
+RandomGenerator::RandomGenerator() :
     dist_(-1.0f, 1.0f)
 {}
+
+void RandomGenerator::init(int seed)
+{
+    engine_.seed(seed);
+}
 
 glm::vec3 RandomGenerator::getUnitBall(void)
 {

@@ -20,7 +20,9 @@ private:
 
 public:
 
-    RandomGenerator(int seed);
+    RandomGenerator();
+
+    void init(int seed);
 
     glm::vec3 getUnitBall(void);
 

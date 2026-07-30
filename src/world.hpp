@@ -13,10 +13,11 @@
 
 #include "fixedPackedArray.hpp"
 #include "playerControlState.hpp"
-
-class ChunkingStrategy;
-struct Chunk;
-struct InputEvent;
+#include "chunkGrid.hpp"
+#include "chunk.hpp"
+#include "doubleBuffer.hpp"
+#include "camiCubeOrientation.hpp"
+#include "inputEvent.hpp"
 
 // World
 //
@@ -29,19 +30,10 @@ class World
 
 public:
 
-    struct CamiCubeOrientation
-    {
-        float orientationAngle;
-        glm::vec3 orientationAxis;
-        float rotationRate;
-        glm::vec3 rotationAxis;
-    };
-
+    ChunkGrid chunkGrid;
     FixedPackedArray<Chunk> chunks;
-    FixedPackedArray<glm::vec3> camiCubePositions;
-    FixedPackedArray<CamiCubeOrientation> camiCubeOrientations;
-
-    std::unique_ptr<ChunkingStrategy> chunkingStrategy;
+    DoubleBuffer<FixedPackedArray<glm::vec3>> camiCubePositions;
+    DoubleBuffer<FixedPackedArray<CamiCubeOrientation>> camiCubeOrientations;
 
     glm::vec3 spherePosition = glm::vec3(0.0f);
     std::optional<uint> sphereChunkIndex;
@@ -51,13 +43,38 @@ public:
 
     PlayerControlState playerControlState;
 
-    World(
-        const uint& camiCubeCount,
-        const float& radius,
-        const uint& averageCubesPerChunk
-    );
+    void init(
+        uint32_t camiCubeCount,
+        float cloudRadius,
+        uint32_t chunkCountAxis,
+        uint32_t inputEventCountMax
+    )
+    {
+        chunkGrid.init(
+            glm::vec3(-cloudRadius, -cloudRadius, -cloudRadius),
+            glm::vec3(cloudRadius, cloudRadius, cloudRadius),
+            glm::ivec3(chunkCountAxis, chunkCountAxis, chunkCountAxis)
+        );
 
-    ~World(void);
+        chunks.allocate(chunkCountAxis * chunkCountAxis * chunkCountAxis);
+
+        camiCubePositions.a.allocate(camiCubeCount);
+        camiCubePositions.b.allocate(camiCubeCount);
+        camiCubeOrientations.a.allocate(camiCubeCount);
+        camiCubeOrientations.b.allocate(camiCubeCount);
+
+        inputEvents.allocate(inputEventCountMax);
+    }
+
+    void shutdown(void)
+    {
+        chunks.deallocate();
+        camiCubePositions.a.deallocate();
+        camiCubePositions.b.deallocate();
+        camiCubeOrientations.a.deallocate();
+        camiCubeOrientations.b.deallocate();
+        inputEvents.deallocate();
+    }
 
 };
 

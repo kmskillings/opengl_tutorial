@@ -18,18 +18,20 @@ extern "C" {
 #include "camiCubeVao.hpp"
 #include "meshSphere.hpp"
 #include "chunkingStrategy.hpp"
-#include "collisionSystem.hpp"
 #include "inputEvent.hpp"
 #include "inputSystem.hpp"
 #include "playerControlState.hpp"
 #include "playerControlSystem.hpp"
 #include "playerMovementSystem.hpp"
+#include "camiCubeSystem.hpp"
+#include "chunkingSystem.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 #define WINDOW_TITLE "Cami Cube"
 
 constexpr float cloudRadius = 40.0f;
+constexpr uint32_t chunkCountAxis = static_cast<int>(ceil(cloudRadius / 5));
 #define CLOUD_ROTATION_RATE_MAX 1.0f
 constexpr uint averageCamiCubesPerChunk = 10;
 
@@ -38,8 +40,6 @@ constexpr float cameraSensitivityPitch = 0.005f;
 constexpr float cameraSensitivityYaw = 0.005f;
 constexpr float cameraSpeedRoll = 1.0f;
 constexpr float cameraStandoff = 2.0f;
-
-constexpr uint maxCollisions = 10;
 
 constexpr float throbPeriod = 1.0f;
 
@@ -75,27 +75,54 @@ int main(void)
     glfwMakeContextCurrent(window);
     glewInit();
 
-    World world(
-        camiCubeCountMax,
-        cloudRadius,
-        averageCamiCubesPerChunk
-    );
-
-    CamiCubeVao camiCubeVao(
-        world.camiCubePositions.count,
-        world.camiCubePositions.data,
-        world.camiCubeOrientations.data
-    );
-
-    PlayerControlSystem PlayerControlSystem;
-
-    PlayerMovementSystem PlayerMovementSystem(
+    World world;
+    ChunkingSystem chunkingSystem;
+    CamiCubeSystem camiCubeSystem;
+    PlayerControlSystem playerControlSystem;
+    PlayerMovementSystem playerMovementSystem(
         cameraSpeedTranslation,
         cameraSensitivityPitch
     );
-
     InputSystem inputSystem;
+
+    world.init(
+        camiCubeCountMax,
+        cloudRadius,
+        chunkCountAxis,
+        128
+    );
+    chunkingSystem.init(
+        camiCubeCountMax,
+        world.chunks.capacity
+    );
+    camiCubeSystem.init(randomSeed);
     inputSystem.init(window);
+
+    camiCubeSystem.populateCamiCubes(
+        camiCubeCountMax,
+        cloudRadius,
+        1.0f,
+        world.camiCubePositions.now(),
+        world.camiCubeOrientations.now()
+    );
+
+    chunkingSystem.calculateChunks(
+        world.chunkGrid,
+        world.chunks,
+        world.camiCubePositions.now()
+    );
+    chunkingSystem.chunkArray(
+        world.camiCubePositions
+    );
+    chunkingSystem.chunkArray(
+        world.camiCubeOrientations
+    );
+
+    CamiCubeVao camiCubeVao(
+        camiCubeCountMax,
+        world.camiCubePositions.now().data,
+        world.camiCubeOrientations.now().data
+    );
 
     MeshSphere meshSphere(16, 32, 0.5f);
 
@@ -167,11 +194,11 @@ int main(void)
         secondsElapsed = secondsElapsed + secondsDelta;
 
         inputSystem.getInputs(world.inputEvents);
-        PlayerControlSystem.update(
+        playerControlSystem.update(
             world.inputEvents,
             world.playerControlState
         );
-        PlayerMovementSystem.update(
+        playerMovementSystem.update(
             secondsDelta,
             world.playerControlState,
             world.spherePosition,

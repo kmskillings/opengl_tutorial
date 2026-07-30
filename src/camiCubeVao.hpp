@@ -46,7 +46,7 @@ public:
     CamiCubeVao(
         uint instanceCount,
         glm::vec3* instancePositions,
-        World::CamiCubeOrientation* instanceOrientations
+        CamiCubeOrientation* instanceOrientations
     );
 
     ~CamiCubeVao(

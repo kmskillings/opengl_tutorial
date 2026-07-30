@@ -22,13 +22,9 @@ private:
 
 public:
 
-    void getHighlights(
-        const glm::vec3& spherePosition,
-        const std::optional<uint>& sphereChunkIndex,
-        const ChunkingStrategy& chunkingStrategy,
-        const FixedPackedArray<Chunk>& chunks,
-        FixedPackedArray<uint>& highlightedIndices
-    );
+    void update(
+        
+    ) const;
 
 };
 

@@ -20,7 +20,7 @@ constexpr uint locationColor                    = 8;
 CamiCubeVao::CamiCubeVao(
     uint instanceCount,
     glm::vec3* instancePositions,
-    World::CamiCubeOrientation* instanceOrientations
+    CamiCubeOrientation* instanceOrientations
 ) :
     instanceCount_(instanceCount)
 {

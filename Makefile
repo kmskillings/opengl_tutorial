@@ -4,37 +4,39 @@ program_name := program
 src_dir := ./src
 
 src_cpp_names := \
-main.cpp \
-randomGeneration.cpp \
+camiCubeSystem.cpp \
 camiCubeVao.cpp \
-chunkingStrategy.cpp \
-world.cpp \
+chunkingSystem.cpp \
 meshSphere.cpp \
-collisionSystem.cpp \
 inputSystem.cpp \
 playerControlSystem.cpp \
-playerMovementSystem.cpp
+playerMovementSystem.cpp \
+randomGeneration.cpp \
+main.cpp
 
 srcs_cpp := ${src_cpp_names:%=${src_dir}/%}
 src_c_names := shaders.c tex_cami.c
 srcs_c := ${src_c_names:%=${src_dir}/%}
 
 header_names := \
-shaders.h \
-textures.h \
-randomGeneration.hpp \
+arraySlice.hpp \
+camiCubeSystem.hpp \
 camiCubeVao.hpp \
-chunkingStrategy.hpp \
-world.hpp \
-meshSphere.hpp \
-fixedPackedArray.hpp \
-collisionSystem.hpp \
+camiCubeOrientation.hpp \
 chunk.hpp \
+chunkGrid.hpp \
+chunkingSystem.hpp \
+doubleBuffer.hpp \
+fixedPackedArray.hpp \
+meshSphere.hpp \
 inputEvent.hpp \
 inputSystem.hpp \
 playerControlState.hpp \
 playerControlSystem.hpp \
-playerMovementSystem.hpp
+playerMovementSystem.hpp \
+randomGeneration.hpp \
+shaders.h \
+textures.h
 
 headers := ${header_names:%=${src_dir}/%}
 

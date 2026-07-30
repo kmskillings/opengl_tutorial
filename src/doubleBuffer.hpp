@@ -1,3 +1,6 @@
+#ifndef _DOUBLE_BUFFER_H
+#define _DOUBLE_BUFFER_H
+
 #define GLEW_NO_GLU
 #define GLEW_STATIC
 #include <glew.h>
@@ -38,3 +41,5 @@ public:
     }
 
 };
+
+#endif
