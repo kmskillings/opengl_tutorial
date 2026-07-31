@@ -44,6 +44,8 @@ public:
     PlayerControlState playerControlState;
 
     DoubleBuffer<FixedPackedArray<Collision>> collisionsBroad;
+    FixedPackedArray<Collision> appearedCollisions;
+    FixedPackedArray<Collision> disappearedCollisions;
 
     void init(
         uint32_t camiCubeCount,
@@ -70,6 +72,8 @@ public:
 
         collisionsBroad.a.allocate(collisionsBroadCountMax);
         collisionsBroad.b.allocate(collisionsBroadCountMax);
+        appearedCollisions.allocate(collisionsBroadCountMax);
+        disappearedCollisions.allocate(collisionsBroadCountMax);
     }
 
     void shutdown(void)

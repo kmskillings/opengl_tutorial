@@ -30,6 +30,7 @@ chunkingSystem.hpp \
 collision.hpp \
 collisionBroadSystem.hpp \
 doubleBuffer.hpp \
+edgeDetectorSystem.hpp \
 fixedPackedArray.hpp \
 meshSphere.hpp \
 inputEvent.hpp \
