@@ -39,7 +39,8 @@ playerControlSystem.hpp \
 playerMovementSystem.hpp \
 randomGeneration.hpp \
 shaders.h \
-textures.h
+textures.h \
+world.hpp
 
 headers := ${header_names:%=${src_dir}/%}
 

@@ -43,7 +43,7 @@ public:
 
     PlayerControlState playerControlState;
 
-    FixedPackedArray<Collision> collisionsBroad;
+    DoubleBuffer<FixedPackedArray<Collision>> collisionsBroad;
 
     void init(
         uint32_t camiCubeCount,
@@ -68,7 +68,8 @@ public:
 
         inputEvents.allocate(inputEventCountMax);
 
-        collisionsBroad.allocate(collisionsBroadCountMax);
+        collisionsBroad.a.allocate(collisionsBroadCountMax);
+        collisionsBroad.b.allocate(collisionsBroadCountMax);
     }
 
     void shutdown(void)

@@ -210,11 +210,12 @@ int main(void)
             world.spherePosition,
             world.sphereOrientation
         );
+        world.collisionsBroad.swap();
         collisionBroadSystem.detectCollisions(
             world.spherePosition,
             world.chunkGrid,
             world.chunks,
-            world.collisionsBroad
+            world.collisionsBroad.now()
         );
 
         // Calculate the view matrix
