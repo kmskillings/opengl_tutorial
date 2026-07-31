@@ -19,6 +19,31 @@ struct Collision
         camiCubeIndex(camiCubeIndex)
     {}
 
+    bool operator<(const Collision& other) const
+    {
+        return camiCubeIndex < other.camiCubeIndex;
+    }
+
+    bool operator>(const Collision& other) const
+    {
+        return other < *this;
+    }
+
+    bool operator<=(const Collision& other) const
+    {
+        return !(*this > other);
+    }
+
+    bool operator>=(const Collision& other) const
+    {
+        return !(*this < other);
+    }
+
+    bool operator==(const Collision& other) const
+    {
+        return (*this <= other) && (*this >= other);
+    }
+
 };
 
 #endif
