@@ -18,6 +18,7 @@
 #include "doubleBuffer.hpp"
 #include "camiCubeOrientation.hpp"
 #include "inputEvent.hpp"
+#include "collision.hpp"
 
 // World
 //
@@ -36,18 +37,20 @@ public:
     DoubleBuffer<FixedPackedArray<CamiCubeOrientation>> camiCubeOrientations;
 
     glm::vec3 spherePosition = glm::vec3(0.0f);
-    std::optional<uint> sphereChunkIndex;
     glm::quat sphereOrientation = glm::quat(glm::vec3(0.0f));
 
     FixedPackedArray<InputEvent> inputEvents;
 
     PlayerControlState playerControlState;
 
+    FixedPackedArray<Collision> collisionsBroad;
+
     void init(
         uint32_t camiCubeCount,
         float cloudRadius,
         uint32_t chunkCountAxis,
-        uint32_t inputEventCountMax
+        uint32_t inputEventCountMax,
+        uint32_t collisionsBroadCountMax
     )
     {
         chunkGrid.init(
@@ -64,6 +67,8 @@ public:
         camiCubeOrientations.b.allocate(camiCubeCount);
 
         inputEvents.allocate(inputEventCountMax);
+
+        collisionsBroad.allocate(collisionsBroadCountMax);
     }
 
     void shutdown(void)

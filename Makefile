@@ -7,6 +7,7 @@ src_cpp_names := \
 camiCubeSystem.cpp \
 camiCubeVao.cpp \
 chunkingSystem.cpp \
+collisionBroadSystem.cpp \
 meshSphere.cpp \
 inputSystem.cpp \
 playerControlSystem.cpp \
@@ -26,6 +27,8 @@ camiCubeOrientation.hpp \
 chunk.hpp \
 chunkGrid.hpp \
 chunkingSystem.hpp \
+collision.hpp \
+collisionBroadSystem.hpp \
 doubleBuffer.hpp \
 fixedPackedArray.hpp \
 meshSphere.hpp \

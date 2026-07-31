@@ -45,26 +45,40 @@ struct ChunkGrid
         const glm::vec3& position
     ) const
     {
-        glm::vec3 positionGrid = position - negativeCorner;
+        glm::ivec3 chunkCoord = getChunkCoordContaining(position);
+        return getChunkIndex(chunkCoord);
+    }
+
+    std::optional<uint32_t> getChunkIndex(
+        const glm::ivec3 chunkCoord
+    ) const
+    {
+        
         if (
-            positionGrid.x < 0 || positionGrid.x > chunkAxesCounts.x * chunkSize.x ||
-            positionGrid.y < 0 || positionGrid.y > chunkAxesCounts.y * chunkSize.y ||
-            positionGrid.z < 0 || positionGrid.z > chunkAxesCounts.z * chunkSize.z
+            chunkCoord.x < 0 || chunkCoord.x > chunkAxesCounts.x ||
+            chunkCoord.y < 0 || chunkCoord.y > chunkAxesCounts.y ||
+            chunkCoord.z < 0 || chunkCoord.z > chunkAxesCounts.z
         )
         {
             return std::nullopt;
         }
-        else
-        {
-            uint32_t chunkX = static_cast<uint32_t>(floor(positionGrid.x / chunkSize.x));
-            uint32_t chunkY = static_cast<uint32_t>(floor(positionGrid.y / chunkSize.y));
-            uint32_t chunkZ = static_cast<uint32_t>(floor(positionGrid.z / chunkSize.z));
-            return 
-                chunkZ * chunkAxesCounts.y * chunkAxesCounts.x +
-                chunkY * chunkAxesCounts.x +
-                chunkX
-            ;
-        }
+        
+        return 
+            chunkCoord.z * chunkAxesCounts.y * chunkAxesCounts.x +
+            chunkCoord.y * chunkAxesCounts.x +
+            chunkCoord.x
+        ;
+    }
+
+    glm::ivec3 getChunkCoordContaining(
+        const glm::vec3 position
+    ) const
+    {
+        glm::vec3 positionGrid = position - negativeCorner;
+        int32_t chunkX = static_cast<int32_t>(floor(positionGrid.x / chunkSize.x));
+        int32_t chunkY = static_cast<int32_t>(floor(positionGrid.y / chunkSize.y));
+        int32_t chunkZ = static_cast<int32_t>(floor(positionGrid.z / chunkSize.z));
+        return glm::ivec3(chunkX, chunkY, chunkZ);
     }
 
     uint32_t getCount(void) const

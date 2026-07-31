@@ -25,6 +25,8 @@ extern "C" {
 #include "playerMovementSystem.hpp"
 #include "camiCubeSystem.hpp"
 #include "chunkingSystem.hpp"
+#include "collision.hpp"
+#include "collisionBroadSystem.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -45,6 +47,7 @@ constexpr float cameraStandoff = 2.0f;
 constexpr float throbPeriod = 1.0f;
 
 constexpr uint camiCubeCountMax = 10000;
+constexpr uint32_t collisionsBroadCountMax = 256;
 
 constexpr int randomSeed = 11141997;
 
@@ -85,12 +88,14 @@ int main(void)
         cameraSensitivityPitch
     );
     InputSystem inputSystem;
+    CollisionBroadSystem collisionBroadSystem;
 
     world.init(
         camiCubeCountMax,
         cloudRadius,
         chunkCountAxis,
-        128
+        128,
+        collisionsBroadCountMax
     );
     chunkingSystem.init(
         camiCubeCountMax,
@@ -171,7 +176,7 @@ int main(void)
         10000.0f
     );
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSwapInterval(1);
 
     double mouseXNow;
@@ -204,6 +209,12 @@ int main(void)
             world.playerControlState,
             world.spherePosition,
             world.sphereOrientation
+        );
+        collisionBroadSystem.detectCollisions(
+            world.spherePosition,
+            world.chunkGrid,
+            world.chunks,
+            world.collisionsBroad
         );
 
         // Calculate the view matrix
