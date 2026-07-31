@@ -28,7 +28,17 @@ public:
         return *nowPtr;
     }
 
+    const T& now(void) const
+    {
+        return *nowPtr;
+    }
+
     T& last(void)
+    {
+        return *lastPtr;
+    }
+
+    const T& last(void) const
     {
         return *lastPtr;
     }
