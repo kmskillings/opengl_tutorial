@@ -44,7 +44,8 @@ public:
 
     PlayerControlState playerControlState;
 
-    DoubleBuffer<FixedPackedArray<Collision>> collisionsBroad;
+    FixedPackedArray<Collision> collisionsBroad;
+    DoubleBuffer<FixedPackedArray<Collision>> collisionsMedium;
     FixedPackedArray<Collision> appearedCollisions;
     FixedPackedArray<Collision> disappearedCollisions;
 
@@ -57,7 +58,8 @@ public:
         float cloudRadius,
         uint32_t chunkCountAxis,
         uint32_t inputEventCountMax,
-        uint32_t collisionsBroadCountMax
+        uint32_t collisionsBroadCountMax,
+        uint32_t collisionsMediumCountMax
     )
     {
         chunkGrid.init(
@@ -75,14 +77,15 @@ public:
 
         inputEvents.allocate(inputEventCountMax);
 
-        collisionsBroad.a.allocate(collisionsBroadCountMax);
-        collisionsBroad.b.allocate(collisionsBroadCountMax);
-        appearedCollisions.allocate(collisionsBroadCountMax);
-        disappearedCollisions.allocate(collisionsBroadCountMax);
+        collisionsBroad.allocate(collisionsBroadCountMax);
+        collisionsMedium.a.allocate(collisionsMediumCountMax);
+        collisionsMedium.b.allocate(collisionsMediumCountMax);
+        appearedCollisions.allocate(collisionsMediumCountMax);
+        disappearedCollisions.allocate(collisionsMediumCountMax);
 
-        camiCubeUpdateAttributes.allocate(2 * collisionsBroadCountMax);
-        camiCubeUpdateIndexes.allocate(2 * collisionsBroadCountMax);
-        camiCubeUpdateData.allocate(collisionsBroadCountMax * sizeof(glm::vec3));
+        camiCubeUpdateAttributes.allocate(2 * collisionsMediumCountMax);
+        camiCubeUpdateIndexes.allocate(2 * collisionsMediumCountMax);
+        camiCubeUpdateData.allocate(collisionsMediumCountMax * sizeof(glm::vec3));
     }
 
     void shutdown(void)
@@ -93,8 +96,9 @@ public:
         camiCubeOrientations.a.deallocate();
         camiCubeOrientations.b.deallocate();
         inputEvents.deallocate();
-        collisionsBroad.a.deallocate();
-        collisionsBroad.b.deallocate();
+        collisionsBroad.deallocate();
+        collisionsMedium.a.deallocate();
+        collisionsMedium.b.deallocate();
         camiCubeUpdateAttributes.deallocate();
         camiCubeUpdateIndexes.deallocate();
         camiCubeUpdateData.deallocate();

@@ -8,6 +8,7 @@ camiCubeSystem.cpp \
 camiCubeVao.cpp \
 chunkingSystem.cpp \
 collisionBroadSystem.cpp \
+collisionMediumSystem.cpp \
 highlightSystem.cpp \
 meshSphere.cpp \
 inputSystem.cpp \
@@ -31,6 +32,7 @@ chunkGrid.hpp \
 chunkingSystem.hpp \
 collision.hpp \
 collisionBroadSystem.hpp \
+collisionMediumSystem.hpp \
 doubleBuffer.hpp \
 edgeDetectorSystem.hpp \
 fixedPackedArray.hpp \

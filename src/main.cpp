@@ -27,6 +27,7 @@ extern "C" {
 #include "chunkingSystem.hpp"
 #include "collision.hpp"
 #include "collisionBroadSystem.hpp"
+#include "collisionMediumSystem.hpp"
 #include "edgeDetectorSystem.hpp"
 #include "highlightSystem.hpp"
 #include "instanceAttributeSystem.hpp"
@@ -51,6 +52,7 @@ constexpr float throbPeriod = 1.0f;
 
 constexpr uint camiCubeCountMax = 10000;
 constexpr uint32_t collisionsBroadCountMax = 256;
+constexpr uint32_t collisionsMediumCountMax = 16;
 
 constexpr int randomSeed = 11141997;
 
@@ -92,6 +94,7 @@ int main(void)
     );
     InputSystem inputSystem;
     CollisionBroadSystem collisionBroadSystem;
+    CollisionMediumSystem collisionMediumSystem;
     EdgeDetectorSystem<Collision> collisionEdgeDetectorSystem;
     HighlightSystem highlightSystem(
         sizeof(CamiCubeVao::CamiCubeInstance),
@@ -105,7 +108,8 @@ int main(void)
         cloudRadius,
         chunkCountAxis,
         128,
-        collisionsBroadCountMax
+        collisionsBroadCountMax,
+        collisionsMediumCountMax
     );
     chunkingSystem.init(
         camiCubeCountMax,
@@ -220,15 +224,23 @@ int main(void)
             world.spherePosition,
             world.sphereOrientation
         );
-        world.collisionsBroad.swap();
         collisionBroadSystem.detectCollisions(
             world.spherePosition,
             world.chunkGrid,
             world.chunks,
-            world.collisionsBroad.now()
+            world.collisionsBroad
+        );
+        world.collisionsMedium.swap();
+        collisionMediumSystem.detectCollisions(
+            cbrt(0.5),
+            0.5f,
+            world.spherePosition,
+            world.camiCubePositions.now(),
+            world.collisionsBroad,
+            world.collisionsMedium.now()
         );
         collisionEdgeDetectorSystem.detectEdges(
-            world.collisionsBroad,
+            world.collisionsMedium,
             world.appearedCollisions,
             world.disappearedCollisions
         );
