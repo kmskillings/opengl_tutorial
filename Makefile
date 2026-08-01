@@ -8,8 +8,10 @@ camiCubeSystem.cpp \
 camiCubeVao.cpp \
 chunkingSystem.cpp \
 collisionBroadSystem.cpp \
+highlightSystem.cpp \
 meshSphere.cpp \
 inputSystem.cpp \
+instanceAttributeSystem.cpp \
 playerControlSystem.cpp \
 playerMovementSystem.cpp \
 randomGeneration.cpp \
@@ -32,9 +34,12 @@ collisionBroadSystem.hpp \
 doubleBuffer.hpp \
 edgeDetectorSystem.hpp \
 fixedPackedArray.hpp \
+highlightSystem.hpp \
 meshSphere.hpp \
 inputEvent.hpp \
 inputSystem.hpp \
+instanceAttribute.hpp \
+instanceAttributeSystem.hpp \
 playerControlState.hpp \
 playerControlSystem.hpp \
 playerMovementSystem.hpp \

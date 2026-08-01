@@ -19,6 +19,7 @@
 #include "camiCubeOrientation.hpp"
 #include "inputEvent.hpp"
 #include "collision.hpp"
+#include "instanceAttribute.hpp"
 
 // World
 //
@@ -47,6 +48,10 @@ public:
     FixedPackedArray<Collision> appearedCollisions;
     FixedPackedArray<Collision> disappearedCollisions;
 
+    FixedPackedArray<InstanceAttribute> camiCubeUpdateAttributes;
+    FixedPackedArray<GLuint> camiCubeUpdateIndexes;
+    FixedPackedArray<unsigned char> camiCubeUpdateData;
+
     void init(
         uint32_t camiCubeCount,
         float cloudRadius,
@@ -74,6 +79,10 @@ public:
         collisionsBroad.b.allocate(collisionsBroadCountMax);
         appearedCollisions.allocate(collisionsBroadCountMax);
         disappearedCollisions.allocate(collisionsBroadCountMax);
+
+        camiCubeUpdateAttributes.allocate(2 * collisionsBroadCountMax);
+        camiCubeUpdateIndexes.allocate(2 * collisionsBroadCountMax);
+        camiCubeUpdateData.allocate(collisionsBroadCountMax * sizeof(glm::vec3));
     }
 
     void shutdown(void)
@@ -84,6 +93,11 @@ public:
         camiCubeOrientations.a.deallocate();
         camiCubeOrientations.b.deallocate();
         inputEvents.deallocate();
+        collisionsBroad.a.deallocate();
+        collisionsBroad.b.deallocate();
+        camiCubeUpdateAttributes.deallocate();
+        camiCubeUpdateIndexes.deallocate();
+        camiCubeUpdateData.deallocate();
     }
 
 };

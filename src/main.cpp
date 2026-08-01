@@ -28,6 +28,8 @@ extern "C" {
 #include "collision.hpp"
 #include "collisionBroadSystem.hpp"
 #include "edgeDetectorSystem.hpp"
+#include "highlightSystem.hpp"
+#include "instanceAttributeSystem.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -91,6 +93,12 @@ int main(void)
     InputSystem inputSystem;
     CollisionBroadSystem collisionBroadSystem;
     EdgeDetectorSystem<Collision> collisionEdgeDetectorSystem;
+    HighlightSystem highlightSystem(
+        sizeof(CamiCubeVao::CamiCubeInstance),
+        offsetof(CamiCubeVao::CamiCubeInstance, color),
+        glm::vec3(0.5f, 1.0f, 0.5f)
+    );
+    InstanceAttributeSystem camiCubeAttributeSystem;
 
     world.init(
         camiCubeCountMax,
@@ -224,30 +232,23 @@ int main(void)
             world.appearedCollisions,
             world.disappearedCollisions
         );
-        if (world.appearedCollisions.count > 0)
-        {
-            printf(
-                "The following %i collisions appeared: ",
-                world.appearedCollisions.count
-            );
-            for (int i = 0; i < world.appearedCollisions.count; i++)
-            {
-                printf("%i, ", world.appearedCollisions[i].camiCubeIndex);
-            }
-            printf("\n");
-        }
-        if (world.disappearedCollisions.count > 0)
-        {
-            printf(
-                "The following %i collisions disappeared: ",
-                world.disappearedCollisions.count
-            );
-            for (int i = 0; i < world.disappearedCollisions.count; i++)
-            {
-                printf("%i, ", world.disappearedCollisions[i].camiCubeIndex);
-            }
-            printf("\n");
-        }
+        world.camiCubeUpdateAttributes.clear();
+        world.camiCubeUpdateIndexes.clear();
+        world.camiCubeUpdateData.clear();
+        highlightSystem.getColorUpdates(
+            world.appearedCollisions,
+            world.disappearedCollisions,
+            world.camiCubeUpdateAttributes,
+            world.camiCubeUpdateIndexes,
+            world.camiCubeUpdateData
+        );
+        camiCubeAttributeSystem.updateAttributes(
+            camiCubeVao.getVao(),
+            camiCubeVao.getInstanceVbo(),
+            world.camiCubeUpdateAttributes,
+            world.camiCubeUpdateIndexes,
+            world.camiCubeUpdateData
+        );
 
         // Calculate the view matrix
         glm::mat4 matrixRotate = glm::mat4_cast(world.sphereOrientation);
