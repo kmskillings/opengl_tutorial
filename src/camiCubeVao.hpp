@@ -57,6 +57,8 @@ public:
 
     GLuint getEbo(void) const;
 
+    GLuint getInstanceVbo(void) const;
+
     uint getTriangleCount(void) const;
 
     uint getInstanceCount(void) const;

@@ -208,6 +208,11 @@ GLuint CamiCubeVao::getEbo(void) const
     return ebo_;
 }
 
+GLuint CamiCubeVao::getInstanceVbo(void) const
+{
+    return vboInstances_;
+}
+
 GLuint CamiCubeVao::getTriangleCount(void) const
 {
     return triangleCount_;
