@@ -7,6 +7,8 @@
 
 #include "playerControlSystem.hpp"
 
+#include <variant>
+
 #include "fixedPackedArray.hpp"
 #include "inputEvent.hpp"
 #include "playerControlState.hpp"
@@ -24,8 +26,8 @@ void PlayerControlSystem::update(
     PlayerControlState& playerControlState
 )
 {
-    playerControlState.mouseXLast = playerControlState.mouseXNow;
-    playerControlState.mouseYLast = playerControlState.mouseYNow;
+    playerControlState.mouseXDelta = 0;
+    playerControlState.mouseYDelta = 0;
     for (int i = 0; i < inputEvents.count; i++)
     {
         const InputEvent& inputEvent = inputEvents[i];
@@ -48,16 +50,11 @@ void PlayerControlSystem::update(
             GLFW_KEY_LEFT_SHIFT
         );
 
-        if (inputEvent.kind == InputEvent::Kind::Mouse)
+        if (std::holds_alternative<MouseMotionEvent>(inputEvent))
         {
-            if (playerControlState.cursorInitialized == false)
-            {
-                playerControlState.cursorInitialized = true;
-                playerControlState.mouseXLast = inputEvent.mouseX;
-                playerControlState.mouseYLast = inputEvent.mouseY;
-            }
-            playerControlState.mouseXNow = inputEvent.mouseX;
-            playerControlState.mouseYNow = inputEvent.mouseY;
+            MouseMotionEvent mmEvent = std::get<MouseMotionEvent>(inputEvent);
+            playerControlState.mouseXDelta = mmEvent.toX - mmEvent.fromX;
+            playerControlState.mouseYDelta = mmEvent.toY - mmEvent.fromY;
         }
     }
     playerControlState.normalize();
@@ -70,29 +67,31 @@ void setAxis(
     const int& negativeKey
 )
 {
-    if (inputEvent.kind != InputEvent::Kind::Key)
+    if (!std::holds_alternative<KeyboardEvent>(inputEvent))
     {
         return;
     }
 
-    if (inputEvent.key == positiveKey)
+    KeyboardEvent kbEvent = std::get<KeyboardEvent>(inputEvent);
+
+    if (kbEvent.key == positiveKey)
     {
-        if (inputEvent.action == GLFW_PRESS)
+        if (kbEvent.action == GLFW_PRESS)
         {
             axis = axis + 1;
         }
-        else if (inputEvent.action == GLFW_RELEASE)
+        else if (kbEvent.action == GLFW_RELEASE)
         {
             axis = axis - 1;
         }
     }
-    else if (inputEvent.key == negativeKey)
+    else if (kbEvent.key == negativeKey)
     {
-        if (inputEvent.action == GLFW_PRESS)
+        if (kbEvent.action == GLFW_PRESS)
         {
             axis = axis - 1;
         }
-        else if (inputEvent.action == GLFW_RELEASE)
+        else if (kbEvent.action == GLFW_RELEASE)
         {
             axis = axis + 1;
         }

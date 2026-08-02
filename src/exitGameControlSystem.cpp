@@ -22,11 +22,13 @@ void ExitGameControlSystem::updateWindowShouldClose(
 {
     for (int i = 0; i < inputEvents.count; i++)
     {
-        if (
-            inputEvents[i].kind == InputEvent::Kind::Key &&
-            inputEvents[i].action == GLFW_PRESS &&
-            inputEvents[i].key == GLFW_KEY_ESCAPE
-        )
+        const InputEvent& inputEvent = inputEvents[i];
+        if (!std::holds_alternative<KeyboardEvent>(inputEvent))
+        {
+            continue;
+        }
+        KeyboardEvent kbEvent = std::get<KeyboardEvent>(inputEvent);
+        if (kbEvent.key == GLFW_KEY_ESCAPE && kbEvent.action == GLFW_PRESS)
         {
             glfwSetWindowShouldClose(window_, GLFW_TRUE);
             return;

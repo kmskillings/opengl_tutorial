@@ -8,9 +8,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "inputEvent.hpp"
+
 template<typename T>
 struct FixedPackedArray;
-struct InputEvent;
 struct PlayerControlState;
 
 class PlayerControlSystem

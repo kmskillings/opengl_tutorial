@@ -23,21 +23,15 @@ struct PlayerControlState
     int8_t up;
     int8_t right;
 
-    bool cursorInitialized;
-    double mouseXLast;
-    double mouseYLast;
-    double mouseXNow;
-    double mouseYNow;
+    double mouseXDelta;
+    double mouseYDelta;
 
     PlayerControlState(void) :
         forward(0),
         up(0),
         right(0),
-        cursorInitialized(false),
-        mouseXLast(0.0),
-        mouseYLast(0.0),
-        mouseXNow(0.0),
-        mouseYNow(0.0)
+        mouseXDelta(0.0),
+        mouseYDelta(0.0)
     {}
 
     void normalize(void)

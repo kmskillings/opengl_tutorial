@@ -53,8 +53,8 @@ void PlayerMovementSystem::update(
     glm::quat& playerOrientation
 )
 {
-    float mouseXDelta = static_cast<float>(playerControlState.mouseXNow - playerControlState.mouseXLast);
-    float mouseYDelta = static_cast<float>(playerControlState.mouseYNow - playerControlState.mouseYLast);
+    float mouseXDelta = static_cast<float>(playerControlState.mouseXDelta);
+    float mouseYDelta = static_cast<float>(playerControlState.mouseYDelta);
 
     float yaw = mouseXDelta * lookSensitivity_;
     float pitch = mouseYDelta * lookSensitivity_;

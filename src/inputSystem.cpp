@@ -18,10 +18,23 @@ void handleKeyEvent(
     int mods
 );
 
-void handleMouseEvent(
+void handleMouseMotionEvent(
     GLFWwindow* window,
     double x,
     double y
+);
+
+void handleMouseButtonEvent(
+    GLFWwindow* window,
+    int button,
+    int action,
+    int mods
+);
+
+void handleScrollwheelEvent(
+    GLFWwindow* window,
+    double xOffset,
+    double yOffset
 );
 
 void InputSystem::init(
@@ -30,7 +43,10 @@ void InputSystem::init(
 {
     window_ = window;
     glfwSetKeyCallback(window_, handleKeyEvent);
-    glfwSetCursorPosCallback(window_, handleMouseEvent);
+    glfwSetCursorPosCallback(window_, handleMouseMotionEvent);
+    glfwSetMouseButtonCallback(window_, handleMouseButtonEvent);
+    glfwSetScrollCallback(window_, handleScrollwheelEvent);
+    mouseLastPopulated_ = false;
 }
 
 void InputSystem::getInputs(
@@ -38,9 +54,10 @@ void InputSystem::getInputs(
 )
 {
     inputArray.clear();
+    inputArrayPtr_ = &inputArray;
     glfwSetWindowUserPointer(
         window_, 
-        static_cast<void*>(&inputArray)
+        static_cast<void*>(this)
     );
     glfwPollEvents();
 }
@@ -53,28 +70,69 @@ void handleKeyEvent(
     int mods
 )
 {
-    FixedPackedArray<InputEvent>& inputArray = 
-        *static_cast<FixedPackedArray<InputEvent>*>(glfwGetWindowUserPointer(window));
-    inputArray.push({
-        InputEvent::Kind::Key,
+    InputSystem* system = 
+        static_cast<InputSystem*>(glfwGetWindowUserPointer(window));
+    system->inputArrayPtr_->push(KeyboardEvent{
         key,
         action
     });
 }
 
-void handleMouseEvent(
+void handleMouseMotionEvent(
     GLFWwindow* window,
     double x,
     double y
 )
 {
-    FixedPackedArray<InputEvent>& inputArray = 
-        *static_cast<FixedPackedArray<InputEvent>*>(glfwGetWindowUserPointer(window));
-    inputArray.push({
-        InputEvent::Kind::Mouse,
-        0,
-        0,
+    InputSystem* system = 
+        static_cast<InputSystem*>(glfwGetWindowUserPointer(window));
+    double mouseXLast;
+    double mouseYLast;
+    if (system->mouseLastPopulated_)
+    {
+        mouseXLast = system->mouseXLast_;
+        mouseYLast = system->mouseYLast_;
+    }
+    else
+    {
+        mouseXLast = x;
+        mouseYLast = y;
+        system->mouseLastPopulated_ = true;
+    }
+    system->inputArrayPtr_->push(MouseMotionEvent{
+        mouseXLast,
+        mouseYLast,
         x,
         y
+    });
+    system->mouseXLast_ = x;
+    system->mouseYLast_ = y;
+}
+
+void handleMouseButtonEvent(
+    GLFWwindow* window,
+    int button,
+    int action,
+    int mods
+)
+{
+    InputSystem* system = 
+        static_cast<InputSystem*>(glfwGetWindowUserPointer(window));
+    system->inputArrayPtr_->push(MouseButtonEvent{
+        button,
+        action
+    });
+}
+
+void handleScrollwheelEvent(
+    GLFWwindow* window,
+    double xOffset,
+    double yOffset
+)
+{
+    InputSystem* system = 
+        static_cast<InputSystem*>(glfwGetWindowUserPointer(window));
+    system->inputArrayPtr_->push(ScrollwheelEvent{
+        yOffset
     });
 }

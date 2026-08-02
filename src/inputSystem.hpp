@@ -23,6 +23,10 @@ class InputSystem
 private:
 
     GLFWwindow* window_;
+    FixedPackedArray<InputEvent>* inputArrayPtr_;
+    double mouseXLast_;
+    double mouseYLast_;
+    bool mouseLastPopulated_;
 
 public:
 
@@ -32,6 +36,33 @@ public:
 
     void getInputs(
         FixedPackedArray<InputEvent>& inputArray
+    );
+
+    friend void handleKeyEvent(
+        GLFWwindow* window, 
+        int key, 
+        int scancode, 
+        int action, 
+        int mods
+    );
+
+    friend void handleMouseMotionEvent(
+        GLFWwindow* window,
+        double x,
+        double y
+    );
+
+    friend void handleMouseButtonEvent(
+        GLFWwindow* window,
+        int button,
+        int action,
+        int mods
+    );
+
+    friend void handleScrollwheelEvent(
+        GLFWwindow* window,
+        double xOffset,
+        double yOffset
     );
 
 };
