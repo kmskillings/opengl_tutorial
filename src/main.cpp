@@ -58,6 +58,10 @@ constexpr uint32_t collisionsBroadCountMax = 256;
 constexpr uint32_t collisionsMediumCountMax = 16;
 constexpr uint32_t collisionsNarrowCountMax = 8;
 
+constexpr glm::vec3 cubeHighlightColor = glm::vec3(0.8f, 1.0f, 0.8f);
+constexpr glm::vec3 cutoutHighlightColor = glm::vec3(0.5f, 1.0f, 0.5f);
+constexpr glm::vec3 sphereWireframeColor = glm::vec3(1.0f, 0.0f, 0.0f);
+
 constexpr int randomSeed = 11141997;
 
 GLFWwindow* setupGl(void);
@@ -106,7 +110,7 @@ int main(void)
     HighlightSystem highlightSystem(
         sizeof(CamiCubeVao::CamiCubeInstance),
         offsetof(CamiCubeVao::CamiCubeInstance, color),
-        glm::vec3(0.5f, 1.0f, 0.5f)
+        cubeHighlightColor
     );
     InstanceAttributeSystem camiCubeAttributeSystem;
 
@@ -312,7 +316,8 @@ int main(void)
         glClearColor(0.5f, 0.8f, 1.0f, 1.0f);
         glClear(
             GL_COLOR_BUFFER_BIT |
-            GL_DEPTH_BUFFER_BIT
+            GL_DEPTH_BUFFER_BIT |
+            GL_STENCIL_BUFFER_BIT
         );
 
         // Draw the Cami Cubes
@@ -333,10 +338,14 @@ int main(void)
             0
         );
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ZERO);
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
         glDisable(GL_STENCIL_TEST);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
         glBindVertexArray(camiCubeVao.getVao());
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, camiCubeVao.getEbo());
         glDrawElementsInstanced(
@@ -347,8 +356,7 @@ int main(void)
             camiCubeVao.getInstanceCount()
         );
 
-        // Draw the sphere
-
+        // Highlight any areas that are inside the sphere.
         glUseProgram(sphereShader);
         glUniformMatrix4fv(
             0,
@@ -357,7 +365,56 @@ int main(void)
             glm::value_ptr(matrixSphere)
         );
         glBindVertexArray(meshSphere.getVao());
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshSphere.getEboTriangles());
+        glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+        glDepthMask(GL_FALSE);
+        glEnable(GL_STENCIL_TEST);
+        glStencilFunc(GL_ALWAYS, 0, 0xFF);
+        glStencilOp(GL_KEEP, GL_INCR, GL_KEEP);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_FRONT);
+        glDrawElements(
+            GL_TRIANGLES,
+            3 * meshSphere.getCountTriangles(),
+            GL_UNSIGNED_INT,
+            (void*)0
+        );
+        glStencilOp(GL_KEEP, GL_DECR, GL_KEEP);
+        glCullFace(GL_BACK);
+        glDrawElements(
+            GL_TRIANGLES,
+            3 * meshSphere.getCountTriangles(),
+            GL_UNSIGNED_INT,
+            (void*)0
+        );
+        glUniform3fv(
+            1, 
+            1,
+            glm::value_ptr(cutoutHighlightColor)
+        );
+        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        glBlendFunc(GL_DST_COLOR, GL_ZERO);
+        glStencilFunc(GL_EQUAL, 1, 0xFF);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+        glCullFace(GL_BACK);
+        glDrawElements(
+            GL_TRIANGLES,
+            3 * meshSphere.getCountTriangles(),
+            GL_UNSIGNED_INT,
+            (void*)0
+        );
+
+        // Draw the sphere
+
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshSphere.getEboLines());
+        glUniform3fv(
+            1, 
+            1,
+            glm::value_ptr(sphereWireframeColor)
+        );
+        glBlendFunc(GL_ONE, GL_ZERO);
+        glDepthMask(GL_TRUE);
+        glDisable(GL_STENCIL_TEST);
         glDrawElements(
             GL_LINES,
             2 * meshSphere.getCountLines(),
