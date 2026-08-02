@@ -27,7 +27,9 @@ extern "C" {
 #include "chunkingSystem.hpp"
 #include "collision.hpp"
 #include "collisionBroadSystem.hpp"
+#include "camiCubeTransformSystem.hpp"
 #include "collisionMediumSystem.hpp"
+#include "collisionNarrowSystem.hpp"
 #include "edgeDetectorSystem.hpp"
 #include "highlightSystem.hpp"
 #include "instanceAttributeSystem.hpp"
@@ -53,6 +55,7 @@ constexpr float throbPeriod = 1.0f;
 constexpr uint camiCubeCountMax = 10000;
 constexpr uint32_t collisionsBroadCountMax = 256;
 constexpr uint32_t collisionsMediumCountMax = 16;
+constexpr uint32_t collisionsNarrowCountMax = 8;
 
 constexpr int randomSeed = 11141997;
 
@@ -95,6 +98,8 @@ int main(void)
     InputSystem inputSystem;
     CollisionBroadSystem collisionBroadSystem;
     CollisionMediumSystem collisionMediumSystem;
+    CamiCubeTransformSystem camiCubeTransformSystem;
+    CollisionNarrowSystem collisionNarrowSystem;
     EdgeDetectorSystem<Collision> collisionEdgeDetectorSystem;
     HighlightSystem highlightSystem(
         sizeof(CamiCubeVao::CamiCubeInstance),
@@ -109,7 +114,8 @@ int main(void)
         chunkCountAxis,
         128,
         collisionsBroadCountMax,
-        collisionsMediumCountMax
+        collisionsMediumCountMax,
+        collisionsNarrowCountMax
     );
     chunkingSystem.init(
         camiCubeCountMax,
@@ -230,17 +236,32 @@ int main(void)
             world.chunks,
             world.collisionsBroad
         );
-        world.collisionsMedium.swap();
         collisionMediumSystem.detectCollisions(
             cbrt(0.5),
             0.5f,
             world.spherePosition,
             world.camiCubePositions.now(),
             world.collisionsBroad,
-            world.collisionsMedium.now()
+            world.collisionsMedium
+        );
+        camiCubeTransformSystem.calculateTransforms(
+            secondsElapsed,
+            world.collisionsMedium,
+            world.camiCubePositions.now(),
+            world.camiCubeOrientations.now(),
+            world.camiCubeTransforms
+        );
+        world.collisionsNarrow.swap();
+        collisionNarrowSystem.detectCollisions(
+            1.0f,
+            0.5f,
+            world.spherePosition,
+            world.camiCubeTransforms,
+            world.collisionsMedium,
+            world.collisionsNarrow.now()
         );
         collisionEdgeDetectorSystem.detectEdges(
-            world.collisionsMedium,
+            world.collisionsNarrow,
             world.appearedCollisions,
             world.disappearedCollisions
         );
