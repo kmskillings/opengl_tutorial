@@ -6,9 +6,11 @@ src_dir := ./src
 src_cpp_names := \
 camiCubeSystem.cpp \
 camiCubeVao.cpp \
+camiCubeTransformSystem.cpp \
 chunkingSystem.cpp \
 collisionBroadSystem.cpp \
 collisionMediumSystem.cpp \
+collisionNarrowSystem.cpp \
 highlightSystem.cpp \
 meshSphere.cpp \
 inputSystem.cpp \
@@ -27,12 +29,14 @@ arraySlice.hpp \
 camiCubeSystem.hpp \
 camiCubeVao.hpp \
 camiCubeOrientation.hpp \
+camiCubeTransformSystem.hpp \
 chunk.hpp \
 chunkGrid.hpp \
 chunkingSystem.hpp \
 collision.hpp \
 collisionBroadSystem.hpp \
 collisionMediumSystem.hpp \
+collisionNarrowSystem.hpp \
 doubleBuffer.hpp \
 edgeDetectorSystem.hpp \
 fixedPackedArray.hpp \
