@@ -20,6 +20,7 @@ extern "C" {
 #include "chunkingStrategy.hpp"
 #include "inputEvent.hpp"
 #include "inputSystem.hpp"
+#include "exitGameControlSystem.hpp"
 #include "playerControlState.hpp"
 #include "playerControlSystem.hpp"
 #include "playerMovementSystem.hpp"
@@ -95,6 +96,7 @@ int main(void)
         cameraSpeedTranslation,
         cameraSensitivityPitch
     );
+    ExitGameControlSystem exitGameControlSystem(window);
     InputSystem inputSystem;
     CollisionBroadSystem collisionBroadSystem;
     CollisionMediumSystem collisionMediumSystem;
@@ -196,7 +198,7 @@ int main(void)
         10000.0f
     );
 
-    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSwapInterval(1);
 
     double mouseXNow;
@@ -224,6 +226,7 @@ int main(void)
             world.inputEvents,
             world.playerControlState
         );
+        exitGameControlSystem.updateWindowShouldClose(world.inputEvents);
         playerMovementSystem.update(
             secondsDelta,
             world.playerControlState,

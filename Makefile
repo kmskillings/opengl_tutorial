@@ -11,6 +11,7 @@ chunkingSystem.cpp \
 collisionBroadSystem.cpp \
 collisionMediumSystem.cpp \
 collisionNarrowSystem.cpp \
+exitGameControlSystem.cpp \
 highlightSystem.cpp \
 meshSphere.cpp \
 inputSystem.cpp \
@@ -39,6 +40,7 @@ collisionMediumSystem.hpp \
 collisionNarrowSystem.hpp \
 doubleBuffer.hpp \
 edgeDetectorSystem.hpp \
+exitGameControlSystem.hpp \
 fixedPackedArray.hpp \
 highlightSystem.hpp \
 meshSphere.hpp \
