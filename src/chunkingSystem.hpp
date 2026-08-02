@@ -46,6 +46,7 @@ public:
     )
     {
         array.swap();
+        array.now().count = array.last().count;
         for (int i = 0; i < permutationMap_.count; i++)
         {
             array.now()[permutationMap_[i]] = array.last()[i];
