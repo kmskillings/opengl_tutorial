@@ -98,7 +98,8 @@ int main(void)
     PlayerControlSystem playerControlSystem;
     PlayerMovementSystem playerMovementSystem(
         cameraSpeedTranslation,
-        cameraSensitivityPitch
+        cameraSensitivityPitch,
+        cameraSpeedRoll
     );
     ExitGameControlSystem exitGameControlSystem(window);
     InputSystem inputSystem;

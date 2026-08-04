@@ -49,6 +49,12 @@ void PlayerControlSystem::update(
             GLFW_KEY_SPACE,
             GLFW_KEY_LEFT_SHIFT
         );
+        setAxis(
+            playerControlState.roll,
+            inputEvent,
+            GLFW_KEY_Q,
+            GLFW_KEY_E
+        );
 
         if (std::holds_alternative<MouseMotionEvent>(inputEvent))
         {

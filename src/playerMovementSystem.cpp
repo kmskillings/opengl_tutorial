@@ -11,15 +11,18 @@
 
 PlayerMovementSystem::PlayerMovementSystem(void) :
     movementSpeed_(0.0f),
-    lookSensitivity_(0.0f)
+    lookSensitivity_(0.0f),
+    rollSpeed_(0.0f)
 {}
 
 PlayerMovementSystem::PlayerMovementSystem(
     const float& movementSpeed,
-    const float& lookSensitivity
+    const float& lookSensitivity,
+    const float& rollSpeed
 ) :
     movementSpeed_(movementSpeed),
-    lookSensitivity_(lookSensitivity)
+    lookSensitivity_(lookSensitivity),
+    rollSpeed_(rollSpeed)
 {}
 
 float PlayerMovementSystem::getMovementSpeed(void)
@@ -82,4 +85,8 @@ void PlayerMovementSystem::update(
     }
     glm::vec3 playerVelocity = playerOrientation * playerVelocityLocal;
     playerPosition = playerPosition + playerVelocity * secondsDelta;
+
+    float roll = playerControlState.roll * rollSpeed_ * secondsDelta;
+    glm::quat rollQuat = glm::angleAxis(roll, glm::vec3(0.0f, 0.0f, 1.0f));
+    playerOrientation = playerOrientation * rollQuat;
 }

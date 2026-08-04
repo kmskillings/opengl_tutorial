@@ -22,6 +22,7 @@ struct PlayerControlState
     int8_t forward;
     int8_t up;
     int8_t right;
+    int8_t roll;
 
     double mouseXDelta;
     double mouseYDelta;
@@ -39,6 +40,7 @@ struct PlayerControlState
         normalizeAxis(forward);
         normalizeAxis(up);
         normalizeAxis(right);
+        normalizeAxis(roll);
     }
 };
 

@@ -17,6 +17,7 @@ private:
 
     float movementSpeed_;
     float lookSensitivity_;
+    float rollSpeed_;
 
 public:
 
@@ -24,7 +25,8 @@ public:
     
     PlayerMovementSystem(
         const float& movementSpeed,
-        const float& lookSensitivity
+        const float& lookSensitivity,
+        const float& rollSpeed
     );
 
     float getMovementSpeed(void);
