@@ -244,7 +244,7 @@ int main(void)
             world.collisionsBroad
         );
         collisionMediumSystem.detectCollisions(
-            cbrt(0.5),
+            sqrt(1.5f),
             0.5f,
             world.spherePosition,
             world.camiCubePositions.now(),
