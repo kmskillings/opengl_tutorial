@@ -22,7 +22,7 @@ void CollisionMediumSystem::detectCollisions(
     mediumPhaseCollisions.clear();
 
     for (
-        int i;
+        int i = 0;
         i < broadPhaseCollisions.count && 
         mediumPhaseCollisions.count <= mediumPhaseCollisions.capacity - 1;
         i++
