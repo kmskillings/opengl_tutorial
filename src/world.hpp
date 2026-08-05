@@ -39,6 +39,7 @@ public:
 
     glm::vec3 spherePosition = glm::vec3(0.0f);
     glm::quat sphereOrientation = glm::quat(glm::vec3(0.0f));
+    float sphereRadius;
 
     FixedPackedArray<InputEvent> inputEvents;
 
@@ -59,6 +60,7 @@ public:
         uint32_t camiCubeCount,
         float cloudRadius,
         uint32_t chunkCountAxis,
+        float sphereRadius,
         uint32_t inputEventCountMax,
         uint32_t collisionsBroadCountMax,
         uint32_t collisionsMediumCountMax,
@@ -91,6 +93,8 @@ public:
         camiCubeUpdateAttributes.allocate(2 * collisionsNarrowCountMax);
         camiCubeUpdateIndexes.allocate(2 * collisionsNarrowCountMax);
         camiCubeUpdateData.allocate(collisionsNarrowCountMax * sizeof(glm::vec3));
+
+        this->sphereRadius = sphereRadius;
     }
 
     void shutdown(void)

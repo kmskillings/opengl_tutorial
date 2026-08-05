@@ -34,6 +34,7 @@ extern "C" {
 #include "edgeDetectorSystem.hpp"
 #include "highlightSystem.hpp"
 #include "instanceAttributeSystem.hpp"
+#include "sphereResizingSystem.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -51,12 +52,17 @@ constexpr float cameraSensitivityYaw = 0.005f;
 constexpr float cameraSpeedRoll = 1.0f;
 constexpr float cameraStandoff = 2.0f;
 
+constexpr float sphereRadiusInitial = 0.5f;
+constexpr float sphereResizeSensitivity = 0.2;
+constexpr float sphereRadiusMin = 0.01f;
+constexpr float sphereRadiusMax = 3.0f / 4.0f * chunkSideLength;
+
 constexpr float throbPeriod = 1.0f;
 
 constexpr uint camiCubeCountMax = 10000;
-constexpr uint32_t collisionsBroadCountMax = 256;
-constexpr uint32_t collisionsMediumCountMax = 16;
-constexpr uint32_t collisionsNarrowCountMax = 8;
+constexpr uint32_t collisionsBroadCountMax = 1024;
+constexpr uint32_t collisionsMediumCountMax = 1024;
+constexpr uint32_t collisionsNarrowCountMax = 1024;
 
 constexpr glm::vec3 cubeHighlightColor = glm::vec3(0.8f, 1.0f, 0.8f);
 constexpr glm::vec3 cutoutHighlightColor = glm::vec3(0.5f, 1.0f, 0.5f);
@@ -101,6 +107,11 @@ int main(void)
         cameraSensitivityPitch,
         cameraSpeedRoll
     );
+    SphereResizingSystem sphereResizingSystem(
+        sphereRadiusMin,
+        sphereRadiusMax,
+        sphereResizeSensitivity
+    );
     ExitGameControlSystem exitGameControlSystem(window);
     InputSystem inputSystem;
     CollisionBroadSystem collisionBroadSystem;
@@ -119,6 +130,7 @@ int main(void)
         camiCubeCountMax,
         cloudRadius,
         chunkCountAxis,
+        sphereRadiusInitial,
         128,
         collisionsBroadCountMax,
         collisionsMediumCountMax,
@@ -157,7 +169,7 @@ int main(void)
         world.camiCubeOrientations.now().data
     );
 
-    MeshSphere meshSphere(16, 32, 0.5f);
+    MeshSphere meshSphere(16, 32, 1.0f);
 
     GLuint camiCubeShader = compileShader(
         &camiCubeVertexSource, 1,
@@ -238,6 +250,10 @@ int main(void)
             world.spherePosition,
             world.sphereOrientation
         );
+        sphereResizingSystem.resizeSphere(
+            world.inputEvents,
+            world.sphereRadius
+        );
         collisionBroadSystem.detectCollisions(
             world.spherePosition,
             world.chunkGrid,
@@ -246,7 +262,7 @@ int main(void)
         );
         collisionMediumSystem.detectCollisions(
             sqrt(1.5f),
-            0.5f,
+            world.sphereRadius,
             world.spherePosition,
             world.camiCubePositions.now(),
             world.collisionsBroad,
@@ -262,7 +278,7 @@ int main(void)
         world.collisionsNarrow.swap();
         collisionNarrowSystem.detectCollisions(
             1.0f,
-            0.5f,
+            world.sphereRadius,
             world.spherePosition,
             world.camiCubeTransforms,
             world.collisionsMedium,
@@ -291,6 +307,22 @@ int main(void)
             world.camiCubeUpdateData
         );
 
+        for (int i = 0; i < world.inputEvents.count; i++)
+        {
+            const InputEvent& inputEvent = world.inputEvents[i];
+            if (std::holds_alternative<MouseButtonEvent>(inputEvent))
+            {
+                const MouseButtonEvent& mbEvent 
+                    = std::get<MouseButtonEvent>(inputEvent);
+
+                printf(
+                    "Mouse button event with button %i and action %i detected.\n",
+                    mbEvent.button,
+                    mbEvent.action
+                );
+            }
+        }
+
         // Calculate the view matrix
         glm::mat4 matrixRotate = glm::mat4_cast(world.sphereOrientation);
         glm::mat4 matrixStandoff = glm::translate(
@@ -309,8 +341,13 @@ int main(void)
 
         glm::mat4 matrixProjView = matrixProject * matrixView;
 
-        glm::mat4 matrixSpherePosition = glm::translate(glm::mat4(1.0f), world.spherePosition);
-        glm::mat4 matrixSphere = matrixProjView * matrixSpherePosition;
+        glm::mat4 matrixSphereModel = glm::mat4(1.0f);
+        matrixSphereModel = glm::translate(matrixSphereModel, world.spherePosition);
+        matrixSphereModel = glm::scale(
+            matrixSphereModel, 
+            glm::vec3(world.sphereRadius)
+        );
+        glm::mat4 matrixSphere = matrixProjView * matrixSphereModel;
 
         // Rendering
         // Clear the buffer

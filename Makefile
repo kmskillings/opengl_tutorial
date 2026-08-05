@@ -19,7 +19,8 @@ instanceAttributeSystem.cpp \
 playerControlSystem.cpp \
 playerMovementSystem.cpp \
 randomGeneration.cpp \
-main.cpp
+main.cpp \
+sphereResizingSystem.cpp
 
 srcs_cpp := ${src_cpp_names:%=${src_dir}/%}
 src_c_names := shaders.c tex_cami.c
@@ -53,6 +54,7 @@ playerControlSystem.hpp \
 playerMovementSystem.hpp \
 randomGeneration.hpp \
 shaders.h \
+sphereResizingSystem.hpp \
 textures.h \
 world.hpp
 
