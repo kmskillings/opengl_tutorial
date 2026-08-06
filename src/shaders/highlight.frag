@@ -2,7 +2,9 @@
 
 out vec4 outColor;
 
+layout(location = 0) uniform vec3 color;
+
 void main()
 {
-    outColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);
+    outColor = vec4(color, 1.0);
 }

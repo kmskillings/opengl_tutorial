@@ -43,6 +43,7 @@ doubleBuffer.hpp \
 edgeDetectorSystem.hpp \
 exitGameControlSystem.hpp \
 fixedPackedArray.hpp \
+fullscreenQuadVao.hpp \
 highlightSystem.hpp \
 meshSphere.hpp \
 inputEvent.hpp \

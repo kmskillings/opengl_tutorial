@@ -35,6 +35,7 @@ extern "C" {
 #include "highlightSystem.hpp"
 #include "instanceAttributeSystem.hpp"
 #include "sphereResizingSystem.hpp"
+#include "fullscreenQuadVao.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -171,6 +172,8 @@ int main(void)
 
     MeshSphere meshSphere(16, 32, 1.0f);
 
+    FullscreenQuadVao fullscreenQuadVao;
+
     GLuint camiCubeShader = compileShader(
         &camiCubeVertexSource, 1,
         &camiCubeFragmentSource, 1
@@ -179,6 +182,11 @@ int main(void)
     GLuint sphereShader = compileShader(
         &sphereVertexSource, 1,
         &sphereFragmentSource, 1
+    );
+
+    GLuint highlightShader = compileShader(
+        &highlightVertexSource, 1,
+        &highlightFragmentSource, 1
     );
     
     GLuint camiCubeTexture;
@@ -425,8 +433,9 @@ int main(void)
             GL_UNSIGNED_INT,
             (void*)0
         );
+        glUseProgram(highlightShader);
         glUniform3fv(
-            1, 
+            0, 
             1,
             glm::value_ptr(cutoutHighlightColor)
         );
@@ -435,16 +444,26 @@ int main(void)
         glStencilFunc(GL_EQUAL, 1, 0xFF);
         glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
         glCullFace(GL_BACK);
+        glBindVertexArray(fullscreenQuadVao.vao);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, fullscreenQuadVao.eboTriangles);
         glDrawElements(
             GL_TRIANGLES,
-            3 * meshSphere.getCountTriangles(),
+            6,
             GL_UNSIGNED_INT,
             (void*)0
         );
 
         // Draw the sphere
 
+        glBindVertexArray(meshSphere.getVao());
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshSphere.getEboLines());
+        glUseProgram(sphereShader);
+        glUniformMatrix4fv(
+            0,
+            1,
+            GL_FALSE,
+            glm::value_ptr(matrixSphere)
+        );
         glUniform3fv(
             1, 
             1,
