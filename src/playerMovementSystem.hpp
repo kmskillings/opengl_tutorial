@@ -38,6 +38,7 @@ public:
     void update(
         const float& secondsDelta,
         const PlayerControlState& playerControlState,
+        bool cameraOrientationActive,
         glm::vec3& playerPosition,
         glm::quat& playerOrientation
     );

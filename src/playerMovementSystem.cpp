@@ -52,6 +52,7 @@ void PlayerMovementSystem::setLookSensitivity(
 void PlayerMovementSystem::update(
     const float& secondsDelta,
     const PlayerControlState& playerControlState,
+    bool cameraOrientationActive,
     glm::vec3& playerPosition,
     glm::quat& playerOrientation
 )
@@ -62,9 +63,14 @@ void PlayerMovementSystem::update(
     float yaw = mouseXDelta * lookSensitivity_;
     float pitch = mouseYDelta * lookSensitivity_;
     
-    glm::quat yawQuat = glm::angleAxis(yaw, glm::vec3(0.0f, -1.0f, 0.0f));
-    glm::quat pitchQuat = glm::angleAxis(pitch, glm::vec3(-1.0f, 0.0f, 0.0f));
-    playerOrientation = playerOrientation * yawQuat * pitchQuat;
+    if (cameraOrientationActive)
+    {
+        glm::quat yawQuat = glm::angleAxis(yaw, glm::vec3(0.0f, -1.0f, 0.0f));
+        glm::quat pitchQuat = glm::angleAxis(pitch, glm::vec3(-1.0f, 0.0f, 0.0f));
+        float roll = playerControlState.roll * rollSpeed_ * secondsDelta;
+        glm::quat rollQuat = glm::angleAxis(roll, glm::vec3(0.0f, 0.0f, 1.0f));
+        playerOrientation = playerOrientation * yawQuat * pitchQuat * rollQuat;
+    }
 
     glm::vec3 playerVelocityLocal;
     if (
@@ -86,7 +92,4 @@ void PlayerMovementSystem::update(
     glm::vec3 playerVelocity = playerOrientation * playerVelocityLocal;
     playerPosition = playerPosition + playerVelocity * secondsDelta;
 
-    float roll = playerControlState.roll * rollSpeed_ * secondsDelta;
-    glm::quat rollQuat = glm::angleAxis(roll, glm::vec3(0.0f, 0.0f, 1.0f));
-    playerOrientation = playerOrientation * rollQuat;
 }

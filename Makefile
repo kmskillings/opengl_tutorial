@@ -14,6 +14,7 @@ collisionNarrowSystem.cpp \
 exitGameControlSystem.cpp \
 highlightSystem.cpp \
 meshSphere.cpp \
+mouseModeSwitchSystem.cpp \
 inputSystem.cpp \
 instanceAttributeSystem.cpp \
 playerControlSystem.cpp \
@@ -46,6 +47,7 @@ fixedPackedArray.hpp \
 fullscreenQuadVao.hpp \
 highlightSystem.hpp \
 meshSphere.hpp \
+mouseModeSwitchSystem.hpp \
 inputEvent.hpp \
 inputSystem.hpp \
 instanceAttribute.hpp \

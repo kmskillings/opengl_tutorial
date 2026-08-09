@@ -36,6 +36,7 @@ extern "C" {
 #include "instanceAttributeSystem.hpp"
 #include "sphereResizingSystem.hpp"
 #include "fullscreenQuadVao.hpp"
+#include "mouseModeSwitchSystem.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -107,6 +108,9 @@ int main(void)
         cameraSpeedTranslation,
         cameraSensitivityPitch,
         cameraSpeedRoll
+    );
+    MouseModeSwitchSystem MouseModeSwitchSystem(
+        GLFW_KEY_LEFT_CONTROL
     );
     SphereResizingSystem sphereResizingSystem(
         sphereRadiusMin,
@@ -252,9 +256,15 @@ int main(void)
             world.playerControlState
         );
         exitGameControlSystem.updateWindowShouldClose(world.inputEvents);
+        MouseModeSwitchSystem.setMouseMode(
+            world.inputEvents,
+            world.cameraOrientationActive,
+            world.sphereOrientationActive
+        );
         playerMovementSystem.update(
             secondsDelta,
             world.playerControlState,
+            world.cameraOrientationActive,
             world.spherePosition,
             world.cameraOrientation
         );
