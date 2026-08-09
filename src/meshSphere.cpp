@@ -7,6 +7,8 @@
 
 #include "meshSphere.hpp"
 
+constexpr uint vertexFloats = 5; 
+
 MeshSphere::MeshSphere(
     uint segmentsVertical,
     uint segmentsHorizontal,
@@ -19,7 +21,7 @@ MeshSphere::MeshSphere(
     glGenBuffers(1, &vbo_);
     glBindBuffer(GL_ARRAY_BUFFER, vbo_);
     uint vertexCount = (segmentsVertical + 1) * (segmentsHorizontal + 1);
-    float* vertices = new float[vertexCount * 3];
+    float* vertices = new float[vertexCount * vertexFloats];
     for (int i = 0; i < segmentsVertical + 1; i++)
     {
         float elevation = M_PI * i / segmentsVertical;
@@ -28,17 +30,17 @@ MeshSphere::MeshSphere(
         for (int j = 0; j < segmentsHorizontal + 1; j++)
         {
             float azimuth = 2 * M_PI * j / segmentsHorizontal;
-            float x = r * cos(azimuth);
-            float z = r * sin(azimuth);
+            float x = -r * sin(azimuth);
+            float z = -r * cos(azimuth);
             uint vertexIndex = (segmentsHorizontal + 1) * i + j; 
-            vertices[3 * vertexIndex + 0] = x;
-            vertices[3 * vertexIndex + 1] = y;
-            vertices[3 * vertexIndex + 2] = z;
+            vertices[vertexFloats * vertexIndex + 0] = x;
+            vertices[vertexFloats * vertexIndex + 1] = y;
+            vertices[vertexFloats * vertexIndex + 2] = z;
         }
     }
     glBufferData(
         GL_ARRAY_BUFFER,
-        3 * vertexCount * sizeof(float),
+        vertexFloats * vertexCount * sizeof(float),
         vertices,
         GL_STATIC_DRAW
     );
@@ -48,7 +50,7 @@ MeshSphere::MeshSphere(
         3,
         GL_FLOAT,
         GL_FALSE,
-        3 * sizeof(float),
+        vertexFloats * sizeof(float),
         (void*)0
     );
     glBindBuffer(GL_VERTEX_ARRAY, 0);
@@ -106,11 +108,11 @@ MeshSphere::MeshSphere(
         {
             uint quadIndex = segmentsHorizontal * i + j;
             triangles[6 * quadIndex + 0] = (segmentsHorizontal + 1) * (i + 0) + (j + 0);
-            triangles[6 * quadIndex + 1] = (segmentsHorizontal + 1) * (i + 1) + (j + 1);
-            triangles[6 * quadIndex + 2] = (segmentsHorizontal + 1) * (i + 1) + (j + 0);
+            triangles[6 * quadIndex + 1] = (segmentsHorizontal + 1) * (i + 1) + (j + 0);
+            triangles[6 * quadIndex + 2] = (segmentsHorizontal + 1) * (i + 1) + (j + 1);
             triangles[6 * quadIndex + 3] = (segmentsHorizontal + 1) * (i + 1) + (j + 1);
-            triangles[6 * quadIndex + 4] = (segmentsHorizontal + 1) * (i + 0) + (j + 0);
-            triangles[6 * quadIndex + 5] = (segmentsHorizontal + 1) * (i + 0) + (j + 1);
+            triangles[6 * quadIndex + 4] = (segmentsHorizontal + 1) * (i + 0) + (j + 1);
+            triangles[6 * quadIndex + 5] = (segmentsHorizontal + 1) * (i + 0) + (j + 0);
         }
     }
     glBufferData(
