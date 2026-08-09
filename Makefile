@@ -20,6 +20,7 @@ instanceAttributeSystem.cpp \
 playerControlSystem.cpp \
 playerMovementSystem.cpp \
 randomGeneration.cpp \
+sphereOrientationSystem.cpp \
 sphereResizingSystem.cpp \
 main.cpp
 
@@ -57,6 +58,7 @@ playerControlSystem.hpp \
 playerMovementSystem.hpp \
 randomGeneration.hpp \
 shaders.h \
+sphereOrientationSystem.hpp \
 sphereResizingSystem.hpp \
 textures.h \
 world.hpp
