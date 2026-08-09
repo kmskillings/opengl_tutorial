@@ -10,7 +10,6 @@
 #include <stdio.h>
 
 extern "C" {
-#include "textures.h"
 #include "shaders.h"
 }
 
@@ -38,6 +37,7 @@ extern "C" {
 #include "fullscreenQuadVao.hpp"
 #include "mouseModeSwitchSystem.hpp"
 #include "sphereOrientationSystem.hpp"
+#include "texture.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -198,26 +198,7 @@ int main(void)
         &highlightFragmentSource, 1
     );
     
-    GLuint camiCubeTexture;
-    glGenTextures(1, &camiCubeTexture);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, camiCubeTexture);
-    glTexImage2D(
-        GL_TEXTURE_2D, 
-        0, 
-        GL_BGRA, 
-        camiTextureWidth, 
-        camiTextureHeight, 
-        0, 
-        GL_BGRA, 
-        GL_UNSIGNED_BYTE, 
-        camiTextureBytes
-    );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    // glBindTexture(GL_TEXTURE_2D, 0);
+    Texture camiCubeTexture = Texture::load("resources/textures/cami.bmp");
 
     glm::quat cameraOrientation = glm::angleAxis(
         0.0f, 
@@ -390,7 +371,8 @@ int main(void)
         );
 
         // Draw the Cami Cubes
-
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, camiCubeTexture.id);
         glUseProgram(camiCubeShader);
         glUniformMatrix4fv(
             0,
