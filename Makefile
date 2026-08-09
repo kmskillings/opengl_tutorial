@@ -111,6 +111,10 @@ ${dir_build}/shaders.c.o: ${src_dir}/shaders.c ${shader_dumps}
 ${shader_dumps}: %.xxd: %
 	xxd -i < $< > $@
 
+# Copy over resources
+${dir_build}/resources/:
+	rsync -rupE ./resources ${dir_build} 
+
 .PHONY: clean
 clean:
 	rm -f ${dir_build}/*.o
