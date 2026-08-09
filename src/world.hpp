@@ -39,7 +39,11 @@ public:
 
     glm::vec3 spherePosition = glm::vec3(0.0f);
     glm::quat sphereOrientation = glm::quat(glm::vec3(0.0f));
+    bool sphereOrientationActive = false;
     float sphereRadius;
+
+    glm::quat cameraOrientation = glm::quat(glm::vec3(0.0f));
+    bool cameraOrientationActive = true;
 
     FixedPackedArray<InputEvent> inputEvents;
 

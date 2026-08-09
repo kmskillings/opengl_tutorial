@@ -256,7 +256,7 @@ int main(void)
             secondsDelta,
             world.playerControlState,
             world.spherePosition,
-            world.sphereOrientation
+            world.cameraOrientation
         );
         sphereResizingSystem.resizeSphere(
             world.inputEvents,
@@ -332,7 +332,7 @@ int main(void)
         }
 
         // Calculate the view matrix
-        glm::mat4 matrixRotate = glm::mat4_cast(world.sphereOrientation);
+        glm::mat4 matrixRotate = glm::mat4_cast(world.cameraOrientation);
         glm::mat4 matrixStandoff = glm::translate(
             glm::mat4(1.0f), 
             glm::vec3(0.0f, 0.0f, cameraStandoff)
@@ -351,6 +351,7 @@ int main(void)
 
         glm::mat4 matrixSphereModel = glm::mat4(1.0f);
         matrixSphereModel = glm::translate(matrixSphereModel, world.spherePosition);
+        matrixSphereModel = matrixSphereModel * glm::mat4_cast(world.sphereOrientation);
         matrixSphereModel = glm::scale(
             matrixSphereModel, 
             glm::vec3(world.sphereRadius)
