@@ -10,13 +10,35 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+#include <filesystem>
+
+extern "C" {
+#include "whereami.h"
+}
+
+std::filesystem::path Texture::texturesPath;
+
+void Texture::init(void)
+{
+    uint pathLength = wai_getExecutablePath(NULL, 0, NULL);
+    char* path = (char*)malloc(pathLength + 1);
+    wai_getExecutablePath(path, pathLength, NULL);
+    path[pathLength] = '\0';
+
+    std::filesystem::path pathExe(path);
+    std::filesystem::path pathContaining = pathExe.parent_path();
+    Texture::texturesPath = pathContaining / "resources" / "textures";
+
+}
+
 Texture Texture::load(
-    char const* path
+    char const* name
 )
 {
+    std::filesystem::path path = Texture::texturesPath / name;
     Texture texture;
     uint8_t* data = stbi_load(
-        path,
+        path.c_str(),
         &texture.width,
         &texture.height,
         NULL,

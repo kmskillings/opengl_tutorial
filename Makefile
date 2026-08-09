@@ -26,7 +26,7 @@ texture.cpp \
 main.cpp
 
 srcs_cpp := ${src_cpp_names:%=${src_dir}/%}
-src_c_names := shaders.c
+src_c_names := shaders.c whereami.c
 srcs_c := ${src_c_names:%=${src_dir}/%}
 
 header_names := \
@@ -62,6 +62,7 @@ shaders.h \
 sphereOrientationSystem.hpp \
 sphereResizingSystem.hpp \
 texture.hpp \
+whereami.h \
 world.hpp
 
 headers := ${header_names:%=${src_dir}/%}
@@ -91,7 +92,8 @@ lib_names := glfw3 GLEW GL m
 libs := ${lib_names:%=-l%}
 lib_options := -L${lib_dir} ${libs}
 
-
+.PHONY: all
+all: ${dir_build}/${program_name} ${dir_build}/resources
 
 ${dir_build}/${program_name}: ${objects}
 	g++ -o ${dir_build}/${program_name} ${objects} ${lib_options}
@@ -112,7 +114,8 @@ ${shader_dumps}: %.xxd: %
 	xxd -i < $< > $@
 
 # Copy over resources
-${dir_build}/resources/:
+.PHONY: ${dir_build}/resources
+${dir_build}/resources:
 	rsync -rupE ./resources ${dir_build} 
 
 .PHONY: clean

@@ -101,6 +101,8 @@ int main(void)
     glfwMakeContextCurrent(window);
     glewInit();
 
+    Texture::init();
+
     World world;
     ChunkingSystem chunkingSystem;
     CamiCubeSystem camiCubeSystem;
@@ -198,7 +200,7 @@ int main(void)
         &highlightFragmentSource, 1
     );
     
-    Texture camiCubeTexture = Texture::load("resources/textures/cami.bmp");
+    Texture camiCubeTexture = Texture::load("gracie.bmp");
 
     glm::quat cameraOrientation = glm::angleAxis(
         0.0f, 

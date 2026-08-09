@@ -8,8 +8,12 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <filesystem>
+
 struct Texture
 {
+
+    static std::filesystem::path texturesPath;
 
     GLuint id;
     int width;
@@ -21,8 +25,10 @@ struct Texture
         height(0)
     {}
 
+    static void init(void);
+
     static Texture load(
-        char const* path
+        char const* name
     );
 
 };
