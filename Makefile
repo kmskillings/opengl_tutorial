@@ -22,10 +22,11 @@ playerMovementSystem.cpp \
 randomGeneration.cpp \
 sphereOrientationSystem.cpp \
 sphereResizingSystem.cpp \
+texture.cpp \
 main.cpp
 
 srcs_cpp := ${src_cpp_names:%=${src_dir}/%}
-src_c_names := shaders.c tex_cami.c
+src_c_names := shaders.c
 srcs_c := ${src_c_names:%=${src_dir}/%}
 
 header_names := \
@@ -60,7 +61,7 @@ randomGeneration.hpp \
 shaders.h \
 sphereOrientationSystem.hpp \
 sphereResizingSystem.hpp \
-textures.h \
+texture.hpp \
 world.hpp
 
 headers := ${header_names:%=${src_dir}/%}
