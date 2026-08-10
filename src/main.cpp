@@ -9,10 +9,6 @@
 #include <chrono>
 #include <stdio.h>
 
-extern "C" {
-#include "shaders.h"
-}
-
 #include "world.hpp"
 #include "camiCubeVao.hpp"
 #include "meshSphere.hpp"
@@ -38,6 +34,7 @@ extern "C" {
 #include "mouseModeSwitchSystem.hpp"
 #include "sphereOrientationSystem.hpp"
 #include "texture.hpp"
+#include "shaderManager.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -185,24 +182,35 @@ int main(void)
 
     FullscreenQuadVao fullscreenQuadVao;
 
-    GLuint camiCubeShader = compileShader(
-        &camiCubeVertexSource, 1,
-        &camiCubeFragmentSource, 1
+    ShaderManager shaderManager;
+    shaderManager.init("resources/shaders");
+
+    GLuint camiCubeVert = shaderManager.loadGlslSource("camiCube.vert");
+    GLuint camiCubeFrag = shaderManager.loadGlslSource("camiCube.frag");
+    GLuint sphereVert = shaderManager.loadGlslSource("sphere.vert");
+    GLuint sphereLinesFrag = shaderManager.loadGlslSource("sphereLines.frag");
+    GLuint sphereTrianglesFrag = shaderManager.loadGlslSource("sphereTriangles.frag");
+    GLuint highlightVert = shaderManager.loadGlslSource("highlight.vert");
+    GLuint highlightFrag = shaderManager.loadGlslSource("highlight.frag");
+
+    GLuint camiCubeShader = shaderManager.compileShader(
+        &camiCubeVert, 1,
+        &camiCubeFrag, 1
     );
 
-    GLuint sphereTrianglesShader = compileShader(
-        &sphereVertexSource, 1,
-        &sphereTrianglesFragmentSource, 1
+    GLuint sphereTrianglesShader = shaderManager.compileShader(
+        &sphereVert, 1,
+        &sphereTrianglesFrag, 1
     );
 
-    GLuint sphereLinesShader = compileShader(
-        &sphereVertexSource, 1,
-        &sphereLinesFragmentSource, 1
+    GLuint sphereLinesShader = shaderManager.compileShader(
+        &sphereVert, 1,
+        &sphereLinesFrag, 1
     );
 
-    GLuint highlightShader = compileShader(
-        &highlightVertexSource, 1,
-        &highlightFragmentSource, 1
+    GLuint highlightShader = shaderManager.compileShader(
+        &highlightVert, 1,
+        &highlightFrag, 1
     );
     
     Texture camiCubeTexture = Texture::load("cami.bmp");

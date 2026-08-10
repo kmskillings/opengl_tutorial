@@ -20,13 +20,14 @@ instanceAttributeSystem.cpp \
 playerControlSystem.cpp \
 playerMovementSystem.cpp \
 randomGeneration.cpp \
+shaderManager.cpp \
 sphereOrientationSystem.cpp \
 sphereResizingSystem.cpp \
 texture.cpp \
 main.cpp
 
 srcs_cpp := ${src_cpp_names:%=${src_dir}/%}
-src_c_names := shaders.c whereami.c
+src_c_names := whereami.c
 srcs_c := ${src_c_names:%=${src_dir}/%}
 
 header_names := \
@@ -58,7 +59,7 @@ playerControlState.hpp \
 playerControlSystem.hpp \
 playerMovementSystem.hpp \
 randomGeneration.hpp \
-shaders.h \
+shaderManager.hpp \
 sphereOrientationSystem.hpp \
 sphereResizingSystem.hpp \
 texture.hpp \
@@ -107,9 +108,6 @@ ${filter %.cpp.o,${objects}}: ${dir_build}/%.cpp.o: ${src_dir}/%.cpp ${headers}
 ${filter %.c.o,${objects}}: ${dir_build}/%.c.o: ${src_dir}/%.c
 	gcc ${compile_options} -o $@ $<
 
-# Compile shaders.c depends on shader dumps
-${dir_build}/shaders.c.o: ${src_dir}/shaders.c ${shader_dumps}
-
 # Create shader dumps
 ${shader_dumps}: %.xxd: %
 	xxd -i < $< > $@
@@ -123,7 +121,7 @@ ${dir_build}/resources:
 clean:
 	rm -f ${dir_build}/*.o
 	rm -f ${dir_build}/${program_name}
-	rm -f ${shader_dir}/*.xxd
+	rm -rf ${dir_build}/resources
 
 .PHONY: wc
 wc:
