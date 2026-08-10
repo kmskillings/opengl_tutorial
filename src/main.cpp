@@ -192,7 +192,7 @@ int main(void)
 
     GLuint sphereShader = compileShader(
         &sphereVertexSource, 1,
-        &sphereFragmentSource, 1
+        &sphereTrianglesFragmentSource, 1
     );
 
     GLuint highlightShader = compileShader(
@@ -200,7 +200,8 @@ int main(void)
         &highlightFragmentSource, 1
     );
     
-    Texture camiCubeTexture = Texture::load("gracie.bmp");
+    Texture camiCubeTexture = Texture::load("cami.bmp");
+    Texture sphereTexture = Texture::load("gracie.bmp");
 
     glm::quat cameraOrientation = glm::angleAxis(
         0.0f, 
@@ -463,25 +464,25 @@ int main(void)
         // Draw the sphere
 
         glBindVertexArray(meshSphere.getVao());
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshSphere.getEboLines());
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshSphere.getEboTriangles());
         glUseProgram(sphereShader);
+        glBindTexture(GL_TEXTURE_2D, sphereTexture.id);
         glUniformMatrix4fv(
             0,
             1,
             GL_FALSE,
             glm::value_ptr(matrixSphere)
         );
-        glUniform3fv(
+        glUniform1i(
             1, 
-            1,
-            glm::value_ptr(sphereWireframeColor)
+            0
         );
         glBlendFunc(GL_ONE, GL_ZERO);
         glDepthMask(GL_TRUE);
         glDisable(GL_STENCIL_TEST);
         glDrawElements(
-            GL_LINES,
-            2 * meshSphere.getCountLines(),
+            GL_TRIANGLES,
+            3 * meshSphere.getCountTriangles(),
             GL_UNSIGNED_INT,
             (void*)0
         );

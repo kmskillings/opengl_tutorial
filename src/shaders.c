@@ -22,11 +22,17 @@ const char sphereVertexSourceArray[] = {
 };
 const char* sphereVertexSource = sphereVertexSourceArray;
 
-const char sphereFragmentSourceArray[] = {
-    #include "shaders/sphere.frag.xxd"
+const char sphereTrianglesFragmentSourceArray[] = {
+    #include "shaders/sphereTriangles.frag.xxd"
     , 0x00
 };
-const char* sphereFragmentSource = sphereFragmentSourceArray;
+const char* sphereTrianglesFragmentSource = sphereTrianglesFragmentSourceArray;
+
+const char sphereLinesFragmentSourceArray[] = {
+    #include "shaders/sphereLines.frag.xxd"
+    , 0x00
+};
+const char* sphereTrianlgesFragmentSource = sphereLinesFragmentSourceArray;
 
 const char highlightVertexSourceArray[] = {
     #include "shaders/highlight.vert.xxd"

@@ -71,7 +71,8 @@ shader_dir := ./src/shaders
 shader_names := \
 camiCube.frag \
 camiCube.vert \
-sphere.frag \
+sphereLines.frag \
+sphereTriangles.frag \
 sphere.vert \
 highlight.frag \
 highlight.vert

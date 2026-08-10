@@ -8,7 +8,8 @@
 extern const char* camiCubeVertexSource;
 extern const char* camiCubeFragmentSource;
 extern const char* sphereVertexSource;
-extern const char* sphereFragmentSource;
+extern const char* sphereTrianglesFragmentSource;
+extern const char* sphereLinesFragmentSource;
 extern const char* highlightVertexSource;
 extern const char* highlightFragmentSource;
 

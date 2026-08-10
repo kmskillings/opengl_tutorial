@@ -24,11 +24,13 @@ MeshSphere::MeshSphere(
     float* vertices = new float[vertexCount * vertexFloats];
     for (int i = 0; i < segmentsVertical + 1; i++)
     {
+        float v = (float)i / (float)segmentsVertical;
         float elevation = M_PI * i / segmentsVertical;
         float y = radius * cos(elevation);
         float r = radius * sin(elevation);
         for (int j = 0; j < segmentsHorizontal + 1; j++)
         {
+            float u = (float)j / (float)segmentsHorizontal;
             float azimuth = 2 * M_PI * j / segmentsHorizontal;
             float x = -r * sin(azimuth);
             float z = -r * cos(azimuth);
@@ -36,6 +38,8 @@ MeshSphere::MeshSphere(
             vertices[vertexFloats * vertexIndex + 0] = x;
             vertices[vertexFloats * vertexIndex + 1] = y;
             vertices[vertexFloats * vertexIndex + 2] = z;
+            vertices[vertexFloats * vertexIndex + 3] = u;
+            vertices[vertexFloats * vertexIndex + 4] = v;
         }
     }
     glBufferData(
@@ -52,6 +56,15 @@ MeshSphere::MeshSphere(
         GL_FALSE,
         vertexFloats * sizeof(float),
         (void*)0
+    );
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        vertexFloats * sizeof(float),
+        (void*)(3 * sizeof(float))
     );
     glBindBuffer(GL_VERTEX_ARRAY, 0);
 
