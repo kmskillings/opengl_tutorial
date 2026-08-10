@@ -68,19 +68,6 @@ world.hpp
 
 headers := ${header_names:%=${src_dir}/%}
 
-shader_dir := ./src/shaders
-shader_names := \
-camiCube.frag \
-camiCube.vert \
-sphereLines.frag \
-sphereTriangles.frag \
-sphere.vert \
-highlight.frag \
-highlight.vert
-shaders := ${shader_names:%=${shader_dir}/%}
-
-shader_dumps := ${shaders:%=%.xxd}
-
 object_names := ${src_cpp_names:%.cpp=%.cpp.o} ${src_c_names:%.c=%.c.o}
 objects := ${object_names:%=${dir_build}/%}
 
@@ -125,4 +112,4 @@ clean:
 
 .PHONY: wc
 wc:
-	wc -l ${srcs_cpp} ${srcs_c} ${headers} ${shaders}
+	wc -l ${srcs_cpp} ${srcs_c} ${headers} ${dir_build}/resources/shaders/*
