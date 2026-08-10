@@ -101,7 +101,7 @@ GLuint ShaderManager::compileShader(
         );
     for (int i = 0; i < vertexSourcesCount; i++)
     {
-        vertexSources[i] = sources_[i];
+        vertexSources[i] = getGlslSource(vertexSourceIds[i]);
     }
     glShaderSource(vertexShader, vertexSourcesCount, vertexSources, NULL);
     glCompileShader(vertexShader);
@@ -114,7 +114,7 @@ GLuint ShaderManager::compileShader(
         );
     for (int i = 0; i < fragmentSourcesCount; i++)
     {
-        fragmentSources[i] = sources_[i];
+        fragmentSources[i] = getGlslSource(fragmentSourceIds[i]);
     }
     glShaderSource(fragmentShader, fragmentSourcesCount, fragmentSources, NULL);
     glCompileShader(fragmentShader);
