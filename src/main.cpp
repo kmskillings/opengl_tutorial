@@ -190,9 +190,14 @@ int main(void)
         &camiCubeFragmentSource, 1
     );
 
-    GLuint sphereShader = compileShader(
+    GLuint sphereTrianglesShader = compileShader(
         &sphereVertexSource, 1,
         &sphereTrianglesFragmentSource, 1
+    );
+
+    GLuint sphereLinesShader = compileShader(
+        &sphereVertexSource, 1,
+        &sphereLinesFragmentSource, 1
     );
 
     GLuint highlightShader = compileShader(
@@ -411,7 +416,7 @@ int main(void)
         );
 
         // Highlight any areas that are inside the sphere.
-        glUseProgram(sphereShader);
+        glUseProgram(sphereTrianglesShader);
         glUniformMatrix4fv(
             0,
             1,
@@ -464,28 +469,53 @@ int main(void)
         // Draw the sphere
 
         glBindVertexArray(meshSphere.getVao());
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshSphere.getEboTriangles());
-        glUseProgram(sphereShader);
-        glBindTexture(GL_TEXTURE_2D, sphereTexture.id);
-        glUniformMatrix4fv(
-            0,
-            1,
-            GL_FALSE,
-            glm::value_ptr(matrixSphere)
-        );
-        glUniform1i(
-            1, 
-            0
-        );
         glBlendFunc(GL_ONE, GL_ZERO);
         glDepthMask(GL_TRUE);
         glDisable(GL_STENCIL_TEST);
-        glDrawElements(
-            GL_TRIANGLES,
-            3 * meshSphere.getCountTriangles(),
-            GL_UNSIGNED_INT,
-            (void*)0
-        );
+        if (world.sphereOrientationActive)
+        {
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshSphere.getEboTriangles());
+            glBindTexture(GL_TEXTURE_2D, sphereTexture.id);
+            glUseProgram(sphereTrianglesShader);
+            glUniformMatrix4fv(
+                0,
+                1,
+                GL_FALSE,
+                glm::value_ptr(matrixSphere)
+            );
+            glUniform1i(
+                1,
+                0
+            );
+            glDrawElements(
+                GL_TRIANGLES,
+                3 * meshSphere.getCountTriangles(),
+                GL_UNSIGNED_INT,
+                (void*)0
+            );
+        }
+        else
+        {
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshSphere.getEboLines());
+            glUseProgram(sphereLinesShader);
+            glUniformMatrix4fv(
+                0,
+                1,
+                GL_FALSE,
+                glm::value_ptr(matrixSphere)
+            );
+            glUniform3fv(
+                1,
+                1,
+                glm::value_ptr(sphereWireframeColor)
+            );
+            glDrawElements(
+                GL_LINES,
+                2 * meshSphere.getCountLines(),
+                GL_UNSIGNED_INT,
+                (void*)0
+            );
+        }
 
         glfwSwapBuffers(window);
     }
