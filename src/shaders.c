@@ -32,7 +32,7 @@ const char sphereLinesFragmentSourceArray[] = {
     #include "shaders/sphereLines.frag.xxd"
     , 0x00
 };
-const char* sphereTrianlgesFragmentSource = sphereLinesFragmentSourceArray;
+const char* sphereLinesFragmentSource = sphereLinesFragmentSourceArray;
 
 const char highlightVertexSourceArray[] = {
     #include "shaders/highlight.vert.xxd"
