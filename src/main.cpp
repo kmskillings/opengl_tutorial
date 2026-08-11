@@ -187,6 +187,7 @@ int main(void)
 
     GLuint camiCubeVert = shaderManager.loadGlslSource("camiCube.vert");
     GLuint camiCubeFrontFrag = shaderManager.loadGlslSource("camiCubeFront.frag");
+    GLuint camiCubeBackFrag = shaderManager.loadGlslSource("camiCubeBack.frag");
     GLuint sphereVert = shaderManager.loadGlslSource("sphere.vert");
     GLuint sphereLinesFrag = shaderManager.loadGlslSource("sphereLines.frag");
     GLuint sphereTrianglesFrag = shaderManager.loadGlslSource("sphereTriangles.frag");
@@ -196,6 +197,11 @@ int main(void)
     GLuint camiCubeFrontShader = shaderManager.compileShader(
         &camiCubeVert, 1,
         &camiCubeFrontFrag, 1
+    );
+
+    GLuint camiCubeBackShader = shaderManager.compileShader(
+        &camiCubeVert, 1,
+        &camiCubeBackFrag, 1
     );
 
     GLuint sphereTrianglesShader = shaderManager.compileShader(
@@ -415,6 +421,29 @@ int main(void)
         glCullFace(GL_BACK);
         glBindVertexArray(camiCubeVao.getVao());
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, camiCubeVao.getEbo());
+        glDrawElementsInstanced(
+            GL_TRIANGLES,
+            3 * camiCubeVao.getTriangleCount(),
+            GL_UNSIGNED_INT,
+            (void*)0,
+            camiCubeVao.getInstanceCount()
+        );
+        glUseProgram(camiCubeBackShader);
+        glUniformMatrix4fv(
+            0,
+            1,
+            GL_FALSE,
+            glm::value_ptr(matrixProjView)
+        );
+        glUniform1f(
+            1,
+            secondsElapsed
+        );
+        glUniform1i(
+            2,
+            0
+        );
+        glCullFace(GL_FRONT);
         glDrawElementsInstanced(
             GL_TRIANGLES,
             3 * camiCubeVao.getTriangleCount(),
