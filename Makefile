@@ -102,7 +102,7 @@ ${shader_dumps}: %.xxd: %
 # Copy over resources
 .PHONY: ${dir_build}/resources
 ${dir_build}/resources:
-	rsync -rupE ./resources ${dir_build} 
+	rsync -rupE --delete ./resources ${dir_build} 
 
 .PHONY: clean
 clean:
