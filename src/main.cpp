@@ -186,16 +186,16 @@ int main(void)
     shaderManager.init("resources/shaders");
 
     GLuint camiCubeVert = shaderManager.loadGlslSource("camiCube.vert");
-    GLuint camiCubeFrag = shaderManager.loadGlslSource("camiCube.frag");
+    GLuint camiCubeFrontFrag = shaderManager.loadGlslSource("camiCubeFront.frag");
     GLuint sphereVert = shaderManager.loadGlslSource("sphere.vert");
     GLuint sphereLinesFrag = shaderManager.loadGlslSource("sphereLines.frag");
     GLuint sphereTrianglesFrag = shaderManager.loadGlslSource("sphereTriangles.frag");
     GLuint highlightVert = shaderManager.loadGlslSource("highlight.vert");
     GLuint highlightFrag = shaderManager.loadGlslSource("highlight.frag");
 
-    GLuint camiCubeShader = shaderManager.compileShader(
+    GLuint camiCubeFrontShader = shaderManager.compileShader(
         &camiCubeVert, 1,
-        &camiCubeFrag, 1
+        &camiCubeFrontFrag, 1
     );
 
     GLuint sphereTrianglesShader = shaderManager.compileShader(
@@ -389,7 +389,7 @@ int main(void)
         // Draw the Cami Cubes
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, camiCubeTexture.id);
-        glUseProgram(camiCubeShader);
+        glUseProgram(camiCubeFrontShader);
         glUniformMatrix4fv(
             0,
             1,
