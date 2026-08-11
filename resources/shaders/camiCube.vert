@@ -12,6 +12,7 @@ layout(location = 8) in vec3 color;
 
 out vec2 TextureCoords;
 out vec3 Color;
+out vec3 PositionVertexModel;
 
 layout(location = 0) uniform mat4 matrixProjView;
 layout(location = 1) uniform float secondsElapsed;
@@ -46,4 +47,5 @@ void main()
     gl_Position = matrixProjView * vec4(worldPos, 1.0f);
     TextureCoords = textureCoords;
     Color = color;
+    PositionVertexModel = position;
 }
