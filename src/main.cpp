@@ -400,14 +400,20 @@ int main(void)
             0,
             1,
             GL_FALSE,
-            glm::value_ptr(matrixProjView)
+            glm::value_ptr(matrixProject)
+        );
+        glUniformMatrix4fv(
+            1,
+            1,
+            GL_FALSE,
+            glm::value_ptr(matrixView)
         );
         glUniform1f(
-            1,
+            2,
             secondsElapsed
         );
         glUniform1i(
-            2,
+            3,
             0
         );
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -433,14 +439,20 @@ int main(void)
             0,
             1,
             GL_FALSE,
-            glm::value_ptr(matrixProjView)
+            glm::value_ptr(matrixProject)
+        );
+        glUniformMatrix4fv(
+            1,
+            1,
+            GL_FALSE,
+            glm::value_ptr(matrixView)
         );
         glUniform1f(
-            1,
+            2,
             secondsElapsed
         );
         glUniform1i(
-            2,
+            3,
             0
         );
         glCullFace(GL_FRONT);

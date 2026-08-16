@@ -11,11 +11,13 @@ layout(location = 7) in vec3 modelPosition;
 layout(location = 8) in vec3 color;
 
 out vec2 TextureCoords;
+out vec3 FragmentPositionView;
+out vec3 SpherePositionView;
 out vec3 Color;
-out vec3 PositionVertexModel;
 
-layout(location = 0) uniform mat4 matrixProjView;
-layout(location = 1) uniform float secondsElapsed;
+layout(location = 0) uniform mat4 matrixProj;
+layout(location = 1) uniform mat4 matrixView;
+layout(location = 2) uniform float secondsElapsed;
 
 vec3 rotateAngleAxis(vec3 v, float th, vec3 k)
 {
@@ -28,24 +30,32 @@ vec3 rotateAngleAxis(vec3 v, float th, vec3 k)
     ;
 }
 
-void main()
+vec3 modelToWorld(vec3 v)
 {
-    float modelRotationAngle = modelRotationRate * secondsElapsed;
-    vec3 worldPos = position * modelScale;
-    worldPos = rotateAngleAxis(
-        worldPos,
-        modelOrientationAngle,
+    vec3 result = v * modelScale;
+    result = rotateAngleAxis(
+        result, 
+        modelOrientationAngle, 
         modelOrientationAxis
     );
-    worldPos = rotateAngleAxis(
-        worldPos,
-        modelRotationAngle,
+    result = rotateAngleAxis(
+        result,
+        modelRotationRate * secondsElapsed,
         modelRotationAxis
     );
-    worldPos = worldPos + modelPosition;
+    result = result + modelPosition;
+    return result;
+}
 
-    gl_Position = matrixProjView * vec4(worldPos, 1.0f);
+void main()
+{
+    vec3 worldPos = modelToWorld(position);
+    vec3 spherePositionWorld = modelToWorld(vec3(0.5, 0.5, 0.5));
+
+    vec3 viewPos = vec3(matrixView * vec4(worldPos, 1.0));
+    FragmentPositionView = viewPos;
+    gl_Position = matrixProj * vec4(viewPos, 1.0);
     TextureCoords = textureCoords;
+    SpherePositionView = vec3(matrixView * vec4(spherePositionWorld, 1.0));
     Color = color;
-    PositionVertexModel = position;
 }

@@ -2,20 +2,20 @@
 
 in vec2 TextureCoords;
 in vec3 Color;
-in vec3 PositionVertexModel;
+in vec3 FragmentPositionView;
+in vec3 SpherePositionView;
 
 out vec4 outColor;
 
-layout(location = 2) uniform sampler2D textureMain;
+layout(location = 3) uniform sampler2D textureMain;
 
-vec3 spherePosition = vec3(0.5, 0.5, 0.5);
 float sphereRadius = 0.5;
 
 void main()
 {
-    vec3 diff = spherePosition - PositionVertexModel;
+    vec3 diff = SpherePositionView - FragmentPositionView;
     float sdf = dot(diff, diff) - (sphereRadius * sphereRadius);
-    if (sdf < 1.0)
+    if (sdf < 0.0)
     {
         discard;
     }
